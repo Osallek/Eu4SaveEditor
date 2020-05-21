@@ -1,0 +1,32 @@
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
+<GridPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.osallek.eu4saveeditor.controller.HomeController"
+          alignment="center">
+  <VBox alignment="CENTER">
+    <VBox alignment="CENTER">
+      <Button onAction="#handleOpenGameDirectoryChoose" alignment="center">
+        Select EuIV installation folder
+      </Button>
+    </VBox>
+    <VBox alignment="CENTER">
+      <Text fx:id="selectedGameDirectory">
+      </Text>
+    </VBox>
+    <VBox alignment="CENTER">
+      <Button onAction="#handleOpenSaveFileChoose" alignment="center">
+        Select save file
+      </Button>
+    </VBox>
+    <VBox alignment="CENTER">
+      <Text fx:id="selectedSaveFile">
+      </Text>
+    </VBox>
+    <VBox alignment="CENTER">
+      <Button fx:id="startExtractButton" onAction="#handleStartExtract" alignment="center">
+        Start extract
+      </Button>
+    </VBox>
+  </VBox>
+</GridPane>
