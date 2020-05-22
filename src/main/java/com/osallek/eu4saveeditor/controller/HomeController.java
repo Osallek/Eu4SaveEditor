@@ -3,11 +3,16 @@ package com.osallek.eu4saveeditor.controller;
 import com.osallek.eu4parser.Eu4Parser;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4saveeditor.common.Constants;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
@@ -20,6 +25,8 @@ import java.util.ResourceBundle;
 
 public class HomeController implements Initializable {
 
+    private final FXMLLoader editorLoader = new FXMLLoader(getClass().getResource(Constants.TEMPLATE_EDITOR));
+
     private final DirectoryChooser gameDirectoryChooser = new DirectoryChooser();
 
     private final FileChooser saveFileChooser = new FileChooser();
@@ -28,18 +35,24 @@ public class HomeController implements Initializable {
 
     private File saveFile;
 
+    private boolean canOpenGameDirectoryChoose = true;
+
+    private boolean canOpenSaveFileChooser = true;
+
     @FXML
     private Button startExtractButton;
 
     @FXML
-    private Text selectedGameDirectory;
+    private TextField selectedGameDirectory;
 
     @FXML
-    private Text selectedSaveFile;
+    private TextField selectedSaveFile;
+
+    @FXML
+    private Text infoText;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        this.startExtractButton.setDisable(true);
         this.gameDirectoryChooser.setTitle("EuIV game folder");
 
         if (Constants.DEFAULT_INSTALLATION_FILE.exists()) {
@@ -53,41 +66,74 @@ public class HomeController implements Initializable {
 
     @FXML
     private void handleOpenGameDirectoryChoose(ActionEvent event) {
-        Node eventSource = (Node) event.getSource();
-        Window actionStage = eventSource.getScene().getWindow();
+        if (this.canOpenGameDirectoryChoose) {
+            Node eventSource = (Node) event.getSource();
+            Window actionStage = eventSource.getScene().getWindow();
 
-        this.gameDirectory = this.gameDirectoryChooser.showDialog(actionStage);
+            this.gameDirectory = this.gameDirectoryChooser.showDialog(actionStage);
 
-        if (this.gameDirectory == null) {
-            this.startExtractButton.setDisable(true);
-            this.selectedGameDirectory.setText(null);
-        } else {
-            enableStartExtractButton();
-            this.selectedGameDirectory.setText("Selected folder: " + this.gameDirectory);
+            if (this.gameDirectory == null) {
+                this.startExtractButton.setDisable(true);
+                this.selectedGameDirectory.setText(null);
+            } else {
+                enableStartExtractButton();
+                this.selectedGameDirectory.setText(this.gameDirectory.getPath());
+            }
         }
     }
 
     @FXML
     private void handleOpenSaveFileChoose(ActionEvent event) {
-        Node eventSource = (Node) event.getSource();
-        Window actionStage = eventSource.getScene().getWindow();
+        if (canOpenSaveFileChooser) {
+            Node eventSource = (Node) event.getSource();
+            Window actionStage = eventSource.getScene().getWindow();
 
-        this.saveFile = this.saveFileChooser.showOpenDialog(actionStage);
+            this.saveFile = this.saveFileChooser.showOpenDialog(actionStage);
 
-        if (this.saveFile == null) {
-            this.startExtractButton.setDisable(true);
-            this.selectedSaveFile.setText(null);
-        } else {
-            enableStartExtractButton();
-            this.selectedSaveFile.setText("Selected save file: " + this.saveFile);
+            if (this.saveFile == null) {
+                this.startExtractButton.setDisable(true);
+                this.selectedSaveFile.setText(null);
+            } else {
+                enableStartExtractButton();
+                this.selectedSaveFile.setText(this.saveFile.getPath());
+            }
         }
     }
 
     @FXML
-    private void handleStartExtract(ActionEvent event) throws IOException {
+    private void handleStartExtract(ActionEvent event) {
         this.startExtractButton.setDisable(true);
-        Save save = Eu4Parser.loadSave(this.gameDirectory.getAbsolutePath(), this.saveFile.getAbsolutePath());
-        this.startExtractButton.setDisable(false);
+        this.canOpenGameDirectoryChoose = false;
+        this.canOpenSaveFileChooser = false;
+        this.infoText.setVisible(true);
+        this.infoText.setText("Extracting...");
+        new Thread(() -> {
+            Save save;
+
+            try {
+                save = Eu4Parser.loadSave(this.gameDirectory.getAbsolutePath(), this.saveFile.getAbsolutePath());
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    this.infoText.setFill(Paint.valueOf(Color.RED.toString()));
+                    this.infoText.setText("An error occurred while extracting the save: " + e.getMessage());
+                    this.canOpenGameDirectoryChoose = true;
+                    this.canOpenSaveFileChooser = true;
+                });
+                return;
+            }
+
+            Platform.runLater(() -> {
+                try {
+                    this.startExtractButton.getScene().setRoot(this.editorLoader.load());
+                    ((EditorController) this.editorLoader.getController()).setSave(save);
+                } catch (IOException e) {
+                    this.infoText.setFill(Paint.valueOf(Color.RED.toString()));
+                    this.infoText.setText("An error occurred while extracting the save: " + e.getMessage());
+                    this.canOpenGameDirectoryChoose = true;
+                    this.canOpenSaveFileChooser = true;
+                }
+            });
+        }).start();
     }
 
     private void enableStartExtractButton() {

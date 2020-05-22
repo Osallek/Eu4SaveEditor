@@ -15,10 +15,9 @@ public class Eu4SaveEditor extends Application {
     public void start(Stage stage) throws IOException {
         FXMLLoader homeLoader = new FXMLLoader(getClass().getResource(Constants.TEMPLATE_HOME));
 
-        getClass().getPackage().getImplementationTitle();
         stage.setWidth(1000);
         stage.setHeight(480);
-        stage.setTitle("WhatIsEuIV Extractor");
+        stage.setTitle("Eu4SaveEditor");
         stage.setScene(new Scene(homeLoader.load()));
         stage.getIcons().addAll(new Image(Constants.IMAGE_ICON));
         stage.show();

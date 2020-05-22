@@ -1,0 +1,14 @@
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
+<GridPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.osallek.eu4saveeditor.controller.EditorController"
+          alignment="center">
+  <VBox alignment="CENTER">
+    <VBox alignment="CENTER">
+      <Text fx:id="title">
+        EDITOR SCENE
+      </Text>
+    </VBox>
+  </VBox>
+</GridPane>

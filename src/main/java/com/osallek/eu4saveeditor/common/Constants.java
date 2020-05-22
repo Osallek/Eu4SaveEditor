@@ -10,6 +10,7 @@ public final class Constants {
     //Templates
     public static final String TEMPLATES_PATH = "/templates/";
     public static final String TEMPLATE_HOME = TEMPLATES_PATH + "home.fxml";
+    public static final String TEMPLATE_EDITOR = TEMPLATES_PATH + "editor.fxml";
 
     //Images
     public static final String IMAGES_PATH = "/images/";
