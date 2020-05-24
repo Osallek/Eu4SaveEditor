@@ -9,6 +9,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
@@ -54,6 +55,8 @@ public class HomeController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         this.gameDirectoryChooser.setTitle("EuIV game folder");
+        this.saveFileChooser.setTitle("Select save file");
+        this.saveFileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Eu4 save file", "*.eu4"));
 
         if (Constants.DEFAULT_INSTALLATION_FILE.exists()) {
             this.gameDirectoryChooser.setInitialDirectory(Constants.DEFAULT_INSTALLATION_FILE);
@@ -113,6 +116,7 @@ public class HomeController implements Initializable {
             try {
                 save = Eu4Parser.loadSave(this.gameDirectory.getAbsolutePath(), this.saveFile.getAbsolutePath());
             } catch (Exception e) {
+                e.printStackTrace();
                 Platform.runLater(() -> {
                     this.infoText.setFill(Paint.valueOf(Color.RED.toString()));
                     this.infoText.setText("An error occurred while extracting the save: " + e.getMessage());
@@ -124,8 +128,10 @@ public class HomeController implements Initializable {
 
             Platform.runLater(() -> {
                 try {
-                    this.startExtractButton.getScene().setRoot(this.editorLoader.load());
-                    ((EditorController) this.editorLoader.getController()).setSave(save);
+                    Parent editorNode = this.editorLoader.load();
+                    ((EditorController) this.editorLoader.getController()).load(save);
+                    this.startExtractButton.getScene().setRoot(editorNode);
+                    ((EditorController) this.editorLoader.getController()).maximize();
                 } catch (IOException e) {
                     this.infoText.setFill(Paint.valueOf(Color.RED.toString()));
                     this.infoText.setText("An error occurred while extracting the save: " + e.getMessage());

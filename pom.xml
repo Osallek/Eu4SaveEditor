@@ -15,6 +15,7 @@
     <maven.compiler.target>${java.version}</maven.compiler.target>
     <main.class>com.osallek.eu4saveeditor.Main</main.class>
     <eu4-parser.version>1.0.0</eu4-parser.version>
+    <controlsfx.version>8.40.16</controlsfx.version>
   </properties>
 
   <dependencies>
@@ -23,6 +24,12 @@
       <artifactId>eu4-parser</artifactId>
       <version>${eu4-parser.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.controlsfx</groupId>
+      <artifactId>controlsfx</artifactId>
+      <version>${controlsfx.version}</version>
+    </dependency>
+
   </dependencies>
 
   <build>
@@ -31,6 +38,7 @@
         <plugin>
           <artifactId>maven-assembly-plugin</artifactId>
           <configuration>
+            <appendAssemblyId>false</appendAssemblyId>
             <archive>
               <manifest>
                 <mainClass>${main.class}</mainClass>
