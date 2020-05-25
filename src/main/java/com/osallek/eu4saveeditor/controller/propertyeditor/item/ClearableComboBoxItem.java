@@ -1,5 +1,8 @@
 package com.osallek.eu4saveeditor.controller.propertyeditor.item;
 
+import com.osallek.eu4saveeditor.controller.item.ClearableComboBox;
+import com.osallek.eu4saveeditor.controller.mapview.SheetCategory;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -8,11 +11,10 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
-import org.controlsfx.control.CheckComboBox;
 
 import java.util.Optional;
 
-public class CheckComboBoxItem<U> implements CustomItem<U> {
+public class ClearableComboBoxItem<U> implements CustomItem<U> {
 
     private final String category;
 
@@ -20,9 +22,9 @@ public class CheckComboBoxItem<U> implements CustomItem<U> {
 
     private final ObservableList<U> values;
 
-    private ObservableList<U> selectedValues;
+    private U value;
 
-    private final CheckComboBox<U> checkComboBox;
+    private final ClearableComboBox<U> comboBox;
 
     private final boolean editable;
 
@@ -32,22 +34,22 @@ public class CheckComboBoxItem<U> implements CustomItem<U> {
 
     private Callback<ListView<U>, ListCell<U>> cellFactory;
 
-    public CheckComboBoxItem(String category, String name, ObservableList<U> values, ObservableList<U> selectedValues, CheckComboBox<U> checkComboBox) {
-        this(category, name, values, selectedValues, checkComboBox, true);
+    public ClearableComboBoxItem(SheetCategory category, String name, ObservableList<U> values, U value, ClearableComboBox<U> comboBox) {
+        this(category, name, values, value, comboBox, true);
     }
 
-    public CheckComboBoxItem(String category, String name, ObservableList<U> values, ObservableList<U> selectedValues, CheckComboBox<U> checkComboBox, boolean editable) {
-        this.category = category;
+    public ClearableComboBoxItem(SheetCategory category, String name, ObservableList<U> values, U value, ClearableComboBox<U> comboBox, boolean editable) {
+        this.category = category.getForDefaultLocale();
         this.name = name;
         this.values = values;
-        this.selectedValues = selectedValues;
-        this.checkComboBox = checkComboBox;
+        this.value = value;
+        this.comboBox = comboBox;
         this.editable = editable;
     }
 
     @Override
     public Class<?> getType() {
-        return CheckComboBoxItem.class;
+        return ClearableComboBoxItem.class;
     }
 
     @Override
@@ -67,12 +69,12 @@ public class CheckComboBoxItem<U> implements CustomItem<U> {
 
     @Override
     public Object getValue() {
-        return this.selectedValues;
+        return this.value;
     }
 
     @Override
     public void setValue(Object value) {
-        this.selectedValues = ((ObservableList<U>) value);
+        this.value = ((U) value);
     }
 
     @Override
@@ -90,20 +92,16 @@ public class CheckComboBoxItem<U> implements CustomItem<U> {
         return this.editable;
     }
 
-    public CheckComboBox<U> getCheckComboBox() {
-        return checkComboBox;
+    public ClearableComboBox<U> getComboBox() {
+        return this.comboBox;
     }
 
-    public ObservableList<U> getSelectedValues() {
-        return this.selectedValues;
+    public U getSelectedValue() {
+        return this.value;
     }
 
-    public void check(U u) {
-        this.checkComboBox.getCheckModel().check(u);
-    }
-
-    public void clearCheck(U u) {
-        this.checkComboBox.getCheckModel().clearCheck(this.checkComboBox.getCheckModel().getItemIndex(u));
+    public void select(U u) {
+        this.comboBox.getComboBox().getSelectionModel().select(u);
     }
 
     public EventHandler<ActionEvent> getOnAction() {
@@ -112,6 +110,10 @@ public class CheckComboBoxItem<U> implements CustomItem<U> {
 
     public void setOnAction(EventHandler<ActionEvent> onAction) {
         this.onAction = onAction;
+    }
+
+    public ObjectProperty<U> valueProperty() {
+        return this.comboBox.getComboBox().valueProperty();
     }
 
     public void setConverter(StringConverter<U> converter) {

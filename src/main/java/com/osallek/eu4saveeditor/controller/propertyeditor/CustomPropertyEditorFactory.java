@@ -1,6 +1,10 @@
 package com.osallek.eu4saveeditor.controller.propertyeditor;
 
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.CheckComboBoxItem;
+import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableCheckComboBoxItem;
+import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableComboBoxItem;
+import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderItem;
+import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSpinnerItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableTextItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ComboBoxItem;
 import org.controlsfx.control.PropertySheet;
@@ -21,8 +25,24 @@ public class CustomPropertyEditorFactory extends DefaultPropertyEditorFactory {
             return CustomEditors.createCustomChoiceEditor((ComboBoxItem<?>) item);
         }
 
+        if (type == ClearableComboBoxItem.class) {
+            return CustomEditors.createClearableComboBoxEditor((ClearableComboBoxItem<?>) item);
+        }
+
         if (type == CheckComboBoxItem.class) {
             return CustomEditors.createCheckComboBoxEditor((CheckComboBoxItem<?>) item);
+        }
+
+        if (type == ClearableCheckComboBoxItem.class) {
+            return CustomEditors.createClearableCheckComboBoxEditor((ClearableCheckComboBoxItem<?>) item);
+        }
+
+        if (type == ClearableSpinnerItem.class) {
+            return CustomEditors.createClearableSpinnerEditor((ClearableSpinnerItem) item);
+        }
+
+        if (type == ClearableSliderItem.class) {
+            return CustomEditors.createClearableSliderEditor((ClearableSliderItem) item);
         }
 
         return super.call(item);

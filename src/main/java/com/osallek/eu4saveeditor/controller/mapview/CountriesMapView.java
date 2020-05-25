@@ -1,6 +1,5 @@
 package com.osallek.eu4saveeditor.controller.mapview;
 
-import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.province.Province;

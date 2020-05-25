@@ -1,15 +1,29 @@
 package com.osallek.eu4saveeditor.controller.mapview;
 
+import com.osallek.eu4parser.model.game.culture.Culture;
+import com.osallek.eu4parser.model.game.religion.Religion;
 import com.osallek.eu4parser.model.save.Save;
+import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.province.Province;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
 
 public class ProvincesMapView extends AbstractMapView {
 
+    private final ObservableList<Country> playableCountries;
+
+    private final ObservableList<Culture> cultures;
+
+    private final ObservableList<Religion> religions;
+
     public ProvincesMapView(Province[][] provincesMap, Canvas canvas, Save save) {
         super(provincesMap, canvas, save, MapViewType.PROVINCES_MAP_VIEW);
+        this.playableCountries = FXCollections.observableArrayList(provincesMap[0][0].getSave().getPlayableCountries());
+        this.cultures = FXCollections.observableArrayList(provincesMap[0][0].getSave().getGame().getCultures());
+        this.religions = FXCollections.observableArrayList(provincesMap[0][0].getSave().getGame().getReligions());
     }
 
     @Override
@@ -25,6 +39,7 @@ public class ProvincesMapView extends AbstractMapView {
         editPane.setPrefWidth(450);
         editPane.setMaxWidth(600);
         editPane.getChildren().clear();
-        editPane.getChildren().add(new ProvincePropertySheet(editPane, province));
+        editPane.getChildren()
+                .add(new ProvincePropertySheet(editPane, province, this.playableCountries, this.cultures, this.religions));
     }
 }

@@ -1,35 +1,41 @@
 package com.osallek.eu4saveeditor.controller.propertyeditor.item;
 
+import com.osallek.eu4saveeditor.controller.item.ClearableSlider;
 import com.osallek.eu4saveeditor.controller.mapview.SheetCategory;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
 import java.util.Optional;
+import java.util.function.DoubleSupplier;
 
-public class CheckBoxItem implements CustomItem<Void> {
+public class ClearableSliderItem implements CustomItem<Integer> {
 
     private final String category;
 
     private final String name;
 
-    private boolean value;
+    private final ClearableSlider slider;
 
     private final boolean editable;
 
-    public CheckBoxItem(SheetCategory category, String name, boolean value) {
-        this(category, name, value, true);
+    public ClearableSliderItem(SheetCategory category, String name, double min, double max, double value, DoubleSupplier supplier) {
+        this(category, name, new ClearableSlider(min, max, value, supplier), true);
     }
 
-    public CheckBoxItem(SheetCategory category, String name, boolean value, boolean editable) {
+    public ClearableSliderItem(SheetCategory category, String name, ClearableSlider slider) {
+        this(category, name, slider, true);
+    }
+
+    public ClearableSliderItem(SheetCategory category, String name, ClearableSlider slider, boolean editable) {
         this.category = category.getForDefaultLocale();
         this.name = name;
-        this.value = value;
+        this.slider = slider;
         this.editable = editable;
     }
 
     @Override
     public Class<?> getType() {
-        return boolean.class;
+        return ClearableSliderItem.class;
     }
 
     @Override
@@ -49,16 +55,16 @@ public class CheckBoxItem implements CustomItem<Void> {
 
     @Override
     public Object getValue() {
-        return this.value;
+        return this.slider.getValue();
     }
 
     @Override
     public void setValue(Object value) {
-        this.value = ((boolean) value);
+        this.slider.setValue((int) value);
     }
 
     @Override
-    public ObservableList<Void> getChoices() {
+    public ObservableList<Integer> getChoices() {
         return null;
     }
 
@@ -72,19 +78,13 @@ public class CheckBoxItem implements CustomItem<Void> {
         return this.editable;
     }
 
-    public boolean isSelected() {
-        return this.value;
+    public ClearableSlider getSlider() {
+        return this.slider;
     }
 
-    /*    public final ObjectProperty<EventHandler<ActionEvent>> onActionProperty() {
-        return this.textField.onActionProperty();
+    public double getDoubleValue() {
+        return this.slider.getValue();
     }
 
-    public final EventHandler<ActionEvent> getOnAction() {
-        return onActionProperty().get();
-    }
 
-    public final void setOnAction(EventHandler<ActionEvent> value) {
-        onActionProperty().set(value);
-    }*/
 }

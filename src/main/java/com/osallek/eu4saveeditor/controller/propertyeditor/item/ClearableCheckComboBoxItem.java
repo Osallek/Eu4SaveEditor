@@ -1,5 +1,7 @@
 package com.osallek.eu4saveeditor.controller.propertyeditor.item;
 
+import com.osallek.eu4saveeditor.controller.item.ClearableCheckComboBox;
+import com.osallek.eu4saveeditor.controller.mapview.SheetCategory;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -8,11 +10,10 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
-import org.controlsfx.control.CheckComboBox;
 
 import java.util.Optional;
 
-public class CheckComboBoxItem<U> implements CustomItem<U> {
+public class ClearableCheckComboBoxItem<U> implements CustomItem<U> {
 
     private final String category;
 
@@ -22,7 +23,7 @@ public class CheckComboBoxItem<U> implements CustomItem<U> {
 
     private ObservableList<U> selectedValues;
 
-    private final CheckComboBox<U> checkComboBox;
+    private final ClearableCheckComboBox<U> checkComboBox;
 
     private final boolean editable;
 
@@ -32,12 +33,12 @@ public class CheckComboBoxItem<U> implements CustomItem<U> {
 
     private Callback<ListView<U>, ListCell<U>> cellFactory;
 
-    public CheckComboBoxItem(String category, String name, ObservableList<U> values, ObservableList<U> selectedValues, CheckComboBox<U> checkComboBox) {
+    public ClearableCheckComboBoxItem(SheetCategory category, String name, ObservableList<U> values, ObservableList<U> selectedValues, ClearableCheckComboBox<U> checkComboBox) {
         this(category, name, values, selectedValues, checkComboBox, true);
     }
 
-    public CheckComboBoxItem(String category, String name, ObservableList<U> values, ObservableList<U> selectedValues, CheckComboBox<U> checkComboBox, boolean editable) {
-        this.category = category;
+    public ClearableCheckComboBoxItem(SheetCategory category, String name, ObservableList<U> values, ObservableList<U> selectedValues, ClearableCheckComboBox<U> checkComboBox, boolean editable) {
+        this.category = category.getForDefaultLocale();
         this.name = name;
         this.values = values;
         this.selectedValues = selectedValues;
@@ -47,7 +48,7 @@ public class CheckComboBoxItem<U> implements CustomItem<U> {
 
     @Override
     public Class<?> getType() {
-        return CheckComboBoxItem.class;
+        return ClearableCheckComboBoxItem.class;
     }
 
     @Override
@@ -90,8 +91,8 @@ public class CheckComboBoxItem<U> implements CustomItem<U> {
         return this.editable;
     }
 
-    public CheckComboBox<U> getCheckComboBox() {
-        return checkComboBox;
+    public ClearableCheckComboBox<U> getCheckComboBox() {
+        return this.checkComboBox;
     }
 
     public ObservableList<U> getSelectedValues() {
@@ -99,11 +100,11 @@ public class CheckComboBoxItem<U> implements CustomItem<U> {
     }
 
     public void check(U u) {
-        this.checkComboBox.getCheckModel().check(u);
+        this.checkComboBox.check(u);
     }
 
     public void clearCheck(U u) {
-        this.checkComboBox.getCheckModel().clearCheck(this.checkComboBox.getCheckModel().getItemIndex(u));
+        this.checkComboBox.clearCheck(u);
     }
 
     public EventHandler<ActionEvent> getOnAction() {

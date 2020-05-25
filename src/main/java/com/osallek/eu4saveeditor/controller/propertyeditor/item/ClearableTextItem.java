@@ -1,5 +1,6 @@
 package com.osallek.eu4saveeditor.controller.propertyeditor.item;
 
+import com.osallek.eu4saveeditor.controller.mapview.SheetCategory;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
@@ -18,8 +19,12 @@ public class ClearableTextItem implements CustomItem<Void> {
 
     private final boolean editable;
 
-    public ClearableTextItem(String category, String name, String value, Supplier<String> clearSupplier, boolean editable) {
-        this.category = category;
+    public ClearableTextItem(SheetCategory category, String name, String value, Supplier<String> clearSupplier) {
+        this(category, name, value, clearSupplier, true);
+    }
+
+    public ClearableTextItem(SheetCategory category, String name, String value, Supplier<String> clearSupplier, boolean editable) {
+        this.category = category.getForDefaultLocale();
         this.name = name;
         this.value = value;
         this.supplier = clearSupplier;
