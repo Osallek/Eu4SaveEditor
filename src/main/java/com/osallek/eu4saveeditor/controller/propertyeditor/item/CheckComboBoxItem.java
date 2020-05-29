@@ -62,7 +62,7 @@ public class CheckComboBoxItem<U> implements CustomItem<U> {
 
     @Override
     public String getDescription() {
-        return null;
+        return this.name;
     }
 
     @Override

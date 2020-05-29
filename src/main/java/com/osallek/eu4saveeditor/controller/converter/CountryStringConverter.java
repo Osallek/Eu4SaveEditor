@@ -7,7 +7,7 @@ public class CountryStringConverter extends StringConverter<Country> {
 
     @Override
     public String toString(Country country) {
-        return country.getTag();
+        return country.getLocalizedName();
     }
 
     @Override

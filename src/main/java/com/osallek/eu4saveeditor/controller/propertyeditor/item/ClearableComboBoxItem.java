@@ -1,6 +1,6 @@
 package com.osallek.eu4saveeditor.controller.propertyeditor.item;
 
-import com.osallek.eu4saveeditor.controller.item.ClearableComboBox;
+import com.osallek.eu4saveeditor.controller.control.ClearableComboBox;
 import com.osallek.eu4saveeditor.controller.mapview.SheetCategory;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -64,7 +64,7 @@ public class ClearableComboBoxItem<U> implements CustomItem<U> {
 
     @Override
     public String getDescription() {
-        return null;
+        return this.name;
     }
 
     @Override

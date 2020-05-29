@@ -14,7 +14,7 @@ public class CountryStringCellFactory implements Callback<ListView<Country>, Lis
             @Override
             protected void updateItem(Country value, boolean empty) {
                 super.updateItem(value, empty);
-                setText(value == null ? null : value.getTag());
+                setText(value == null ? null : value.getLocalizedName());
             }
         };
     }

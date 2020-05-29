@@ -63,7 +63,7 @@ public class ComboBoxItem<U> implements CustomItem<U> {
 
     @Override
     public String getDescription() {
-        return null;
+        return this.name;
     }
 
     @Override

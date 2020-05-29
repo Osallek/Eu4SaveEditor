@@ -1,6 +1,6 @@
 package com.osallek.eu4saveeditor.controller.converter;
 
-import com.osallek.eu4parser.model.game.religion.Religion;
+import com.osallek.eu4parser.model.game.Religion;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.util.Callback;
@@ -14,7 +14,7 @@ public class ReligionStringCellFactory implements Callback<ListView<Religion>, L
             @Override
             protected void updateItem(Religion value, boolean empty) {
                 super.updateItem(value, empty);
-                setText(value == null ? null : value.getName());
+                setText(value == null ? null : value.getLocalizedName());
             }
         };
     }

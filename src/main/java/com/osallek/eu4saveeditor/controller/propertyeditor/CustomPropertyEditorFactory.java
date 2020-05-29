@@ -7,6 +7,8 @@ import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderI
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSpinnerItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableTextItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ComboBoxItem;
+import com.osallek.eu4saveeditor.controller.propertyeditor.item.HBoxItem;
+import com.osallek.eu4saveeditor.controller.propertyeditor.item.SelectableGridViewItem;
 import org.controlsfx.control.PropertySheet;
 import org.controlsfx.property.editor.DefaultPropertyEditorFactory;
 import org.controlsfx.property.editor.PropertyEditor;
@@ -43,6 +45,14 @@ public class CustomPropertyEditorFactory extends DefaultPropertyEditorFactory {
 
         if (type == ClearableSliderItem.class) {
             return CustomEditors.createClearableSliderEditor((ClearableSliderItem) item);
+        }
+
+        if (type == SelectableGridViewItem.class) {
+            return CustomEditors.createSelectableGridViewEditor((SelectableGridViewItem<?>) item);
+        }
+
+        if (type == HBoxItem.class) {
+            return CustomEditors.createHBox((HBoxItem<?>) item);
         }
 
         return super.call(item);

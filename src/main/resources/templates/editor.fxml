@@ -13,8 +13,8 @@
   </top>
   <center>
     <ScrollPane fx:id="provincesPane" onKeyPressed="#onKeyPressedProvinceImageView" focusTraversable="true">
-      <Canvas fx:id="provincesCanvas" onMouseClicked="#onMouseClickedProvinceImageView"
-              onMouseMoved="#onMouseMovedProvinceImageView"/>
+      <Canvas fx:id="provincesCanvas" onMouseReleased="#onMouseReleasedProvinceImageView"
+              onMouseMoved="#onMouseMovedProvinceImageView" onDragDetected="#onDragDetected"/>
     </ScrollPane>
   </center>
   <right>

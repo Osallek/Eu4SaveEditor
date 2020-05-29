@@ -1,6 +1,6 @@
 package com.osallek.eu4saveeditor.controller.propertyeditor.item;
 
-import com.osallek.eu4saveeditor.controller.item.ClearableSlider;
+import com.osallek.eu4saveeditor.controller.control.ClearableSlider;
 import com.osallek.eu4saveeditor.controller.mapview.SheetCategory;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -18,7 +18,7 @@ public class ClearableSliderItem implements CustomItem<Integer> {
 
     private final boolean editable;
 
-    public ClearableSliderItem(SheetCategory category, String name, double min, double max, double value, DoubleSupplier supplier) {
+    public ClearableSliderItem(SheetCategory category, String name, double min, double max, Double value, DoubleSupplier supplier) {
         this(category, name, new ClearableSlider(min, max, value, supplier), true);
     }
 
@@ -50,7 +50,7 @@ public class ClearableSliderItem implements CustomItem<Integer> {
 
     @Override
     public String getDescription() {
-        return null;
+        return this.name;
     }
 
     @Override

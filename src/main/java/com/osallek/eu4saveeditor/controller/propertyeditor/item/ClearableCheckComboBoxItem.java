@@ -1,6 +1,6 @@
 package com.osallek.eu4saveeditor.controller.propertyeditor.item;
 
-import com.osallek.eu4saveeditor.controller.item.ClearableCheckComboBox;
+import com.osallek.eu4saveeditor.controller.control.ClearableCheckComboBox;
 import com.osallek.eu4saveeditor.controller.mapview.SheetCategory;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -63,7 +63,7 @@ public class ClearableCheckComboBoxItem<U> implements CustomItem<U> {
 
     @Override
     public String getDescription() {
-        return null;
+        return this.name;
     }
 
     @Override

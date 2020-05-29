@@ -1,4 +1,4 @@
-package com.osallek.eu4saveeditor.controller.item;
+package com.osallek.eu4saveeditor.controller.control;
 
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
@@ -71,10 +71,5 @@ public class ClearableCheckComboBox<U> extends HBox {
 
     public final ObservableList<U> getItems() {
         return this.checkComboBox.getItems();
-    }
-
-    @Override
-    public String getUserAgentStylesheet() {
-        return ClearableCheckComboBox.class.getResource("/style/clearablecheckcombobox.css").toExternalForm();
     }
 }

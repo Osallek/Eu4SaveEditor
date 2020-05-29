@@ -48,7 +48,7 @@ public class ClearableTextItem implements CustomItem<Void> {
 
     @Override
     public String getDescription() {
-        return null;
+        return this.name;
     }
 
     @Override
@@ -83,16 +83,4 @@ public class ClearableTextItem implements CustomItem<Void> {
     public String getText() {
         return this.value;
     }
-
-    /*    public final ObjectProperty<EventHandler<ActionEvent>> onActionProperty() {
-        return this.textField.onActionProperty();
-    }
-
-    public final EventHandler<ActionEvent> getOnAction() {
-        return onActionProperty().get();
-    }
-
-    public final void setOnAction(EventHandler<ActionEvent> value) {
-        onActionProperty().set(value);
-    }*/
 }

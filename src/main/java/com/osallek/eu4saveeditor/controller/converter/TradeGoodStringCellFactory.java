@@ -1,18 +1,18 @@
 package com.osallek.eu4saveeditor.controller.converter;
 
-import com.osallek.eu4parser.model.game.Culture;
+import com.osallek.eu4parser.model.game.TradeGood;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.util.Callback;
 
-public class CultureStringCellFactory implements Callback<ListView<Culture>, ListCell<Culture>> {
+public class TradeGoodStringCellFactory implements Callback<ListView<TradeGood>, ListCell<TradeGood>> {
 
     @Override
-    public ListCell<Culture> call(ListView<Culture> param) {
-        return new ListCell<Culture>() {
+    public ListCell<TradeGood> call(ListView<TradeGood> param) {
+        return new ListCell<TradeGood>() {
 
             @Override
-            protected void updateItem(Culture value, boolean empty) {
+            protected void updateItem(TradeGood value, boolean empty) {
                 super.updateItem(value, empty);
                 setText(value == null ? null : value.getLocalizedName());
             }

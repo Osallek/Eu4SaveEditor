@@ -1,33 +1,31 @@
 package com.osallek.eu4saveeditor.controller.propertyeditor.item;
 
-import com.osallek.eu4saveeditor.controller.item.ClearableSpinner;
+import com.osallek.eu4saveeditor.controller.control.ClearableSpinner;
+import com.osallek.eu4saveeditor.controller.control.ClearableSpinnerDouble;
+import com.osallek.eu4saveeditor.controller.control.ClearableSpinnerInt;
 import com.osallek.eu4saveeditor.controller.mapview.SheetCategory;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
 import java.util.Optional;
-import java.util.function.IntSupplier;
+import java.util.function.Supplier;
 
-public class ClearableSpinnerItem implements CustomItem<Integer> {
+public class ClearableSpinnerItem<T> implements CustomItem<Integer> {
 
     private final String category;
 
     private final String name;
 
-    private final ClearableSpinner spinner;
+    private final ClearableSpinner<T> spinner;
 
     private final boolean editable;
 
-    public ClearableSpinnerItem(SheetCategory category, String name, int min, int max, int value, IntSupplier supplier) {
-        this(category, name, new ClearableSpinner(min, max, value, 1, supplier), true);
-    }
-
-    public ClearableSpinnerItem(SheetCategory category, String name, ClearableSpinner spinner) {
+    public ClearableSpinnerItem(SheetCategory category, String name, ClearableSpinner<T> spinner) {
         this(category, name, spinner, true);
     }
 
-    public ClearableSpinnerItem(SheetCategory category, String name, ClearableSpinner spinner, boolean editable) {
+    public ClearableSpinnerItem(SheetCategory category, String name, ClearableSpinner<T> spinner, boolean editable) {
         this.category = category.getForDefaultLocale();
         this.name = name;
         this.spinner = spinner;
@@ -51,7 +49,7 @@ public class ClearableSpinnerItem implements CustomItem<Integer> {
 
     @Override
     public String getDescription() {
-        return null;
+        return this.name;
     }
 
     @Override
@@ -61,7 +59,7 @@ public class ClearableSpinnerItem implements CustomItem<Integer> {
 
     @Override
     public void setValue(Object value) {
-        this.spinner.setValue((int) value);
+        this.spinner.setValue((T) value);
     }
 
     @Override
@@ -79,15 +77,15 @@ public class ClearableSpinnerItem implements CustomItem<Integer> {
         return this.editable;
     }
 
-    public ClearableSpinner getSpinner() {
+    public ClearableSpinner<T> getSpinner() {
         return this.spinner;
     }
 
-    public int getIntValue() {
+    public T getTrueValue() {
         return this.spinner.getValue();
     }
 
-    public ObjectProperty<Integer> valueProperty() {
+    public ObjectProperty<T> valueProperty() {
         return this.spinner.getSpinner().getValueFactory().valueProperty();
     }
 }

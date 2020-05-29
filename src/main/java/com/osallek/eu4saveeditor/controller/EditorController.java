@@ -1,7 +1,7 @@
 package com.osallek.eu4saveeditor.controller;
 
 import com.osallek.eu4parser.model.save.Save;
-import com.osallek.eu4parser.model.save.province.Province;
+import com.osallek.eu4parser.model.save.province.SaveProvince;
 import com.osallek.eu4saveeditor.controller.mapview.AbstractMapView;
 import com.osallek.eu4saveeditor.controller.mapview.CountriesMapView;
 import com.osallek.eu4saveeditor.controller.mapview.MapViewType;
@@ -18,6 +18,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -42,13 +43,11 @@ public class EditorController implements Initializable {
 
     private Save save;
 
-    private Province selectedProvince;
-
-    private Province hoverProvince;
+    private SaveProvince selectedProvince;
 
     private final Tooltip tooltip = new Tooltip();
 
-    private Province[][] provincesMap;
+    private SaveProvince[][] provincesMap;
 
     private final BooleanProperty mouseMoving = new SimpleBooleanProperty();
 
@@ -62,9 +61,13 @@ public class EditorController implements Initializable {
 
     private double mouseSceneY;
 
+    private boolean wasDragging;
+
     private Map<MapViewType, AbstractMapView> mapViews = new EnumMap<>(MapViewType.class);
 
     private AbstractMapView selectedMapView;
+
+    private ImageCursor imageCursor;
 
     @FXML
     private Text title;
@@ -81,26 +84,35 @@ public class EditorController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         this.provincesPane.setTooltip(this.tooltip);
+        this.provincesPane.setPannable(true);
 
         this.mousePauseTransition.setOnFinished(e -> this.mouseMoving.set(false));
         this.mouseMoving.addListener((obs, wasMoving, isNowMoving) -> {
             if (Boolean.FALSE.equals(isNowMoving)) {
-                Province province = this.provincesMap[(int) this.mouseProvinceImageX][(int) this.mouseProvinceImageY];
+                SaveProvince province = this.provincesMap[(int) this.mouseProvinceImageX][(int) this.mouseProvinceImageY];
 
-                if (province != this.hoverProvince) {
-                    this.tooltip.setText(province.getName() + " (" + province.getId() + ")");
-                    this.tooltip.setAnchorX(this.mouseSceneX + 20);
-                    this.tooltip.setAnchorY(this.mouseSceneY);
-                    this.hoverProvince = province;
-                }
+                this.tooltip.setText(province.getName() + " (" + province.getId() + ")");
+                this.tooltip.setAnchorX(this.mouseSceneX + 20);
+                this.tooltip.setAnchorY(this.mouseSceneY - 20);
             }
         });
     }
 
     @FXML
-    public void onMouseClickedProvinceImageView(MouseEvent event) {
-        this.selectedProvince = this.provincesMap[(int) event.getX()][(int) event.getY()];
-        this.selectedMapView.onProvinceSelected(this.selectedProvince, this.editPane);
+    public void onMouseReleasedProvinceImageView(MouseEvent event) {
+        if (this.wasDragging) {
+            this.wasDragging = false;
+        } else {
+            if (MouseButton.PRIMARY.equals(event.getButton())) {
+                this.selectedProvince = this.provincesMap[(int) event.getX()][(int) event.getY()];
+                this.selectedMapView.onProvinceSelected(this.selectedProvince, this.editPane);
+            }
+        }
+    }
+
+    @FXML
+    public void onDragDetected(MouseEvent event) {
+        this.wasDragging = true;
     }
 
     @FXML
@@ -138,12 +150,12 @@ public class EditorController implements Initializable {
             this.provincesCanvas.setWidth(provinceImage.getWidth());
             this.provincesCanvas.setHeight(provinceImage.getHeight());
 
-            this.provincesMap = new Province[provinceImage.getWidth()][provinceImage.getHeight()];
+            this.provincesMap = new SaveProvince[provinceImage.getWidth()][provinceImage.getHeight()];
 
             for (int x = 0; x < provinceImage.getWidth(); x++) {
                 for (int y = 0; y < provinceImage.getHeight(); y++) {
                     int[] rgb = provinceImage.getRaster().getPixel(x, y, (int[]) null);
-                    Province province = this.save.getProvinceByColor(rgb[0], rgb[1], rgb[2]);
+                    SaveProvince province = this.save.getProvinceByColor(rgb[0], rgb[1], rgb[2]);
                     this.provincesMap[x][y] = province;
                 }
             }
@@ -167,11 +179,12 @@ public class EditorController implements Initializable {
                     this.provincesPane.getHmax() * (2850 / this.provincesCanvas.getWidth()));
         }
 
-        this.provincesCanvas.getScene()
-                            .setCursor(new ImageCursor(new Image(this.save.getGame()
-                                                                          .getNormalCursorImage()
-                                                                          .toURI()
-                                                                          .toString())));
+        this.imageCursor = new ImageCursor(new Image(this.save.getGame()
+                                                              .getNormalCursorImage()
+                                                              .toURI()
+                                                              .toString()));
+
+        this.provincesCanvas.getScene().setCursor(this.imageCursor);
     }
 
     private void setTitle() {

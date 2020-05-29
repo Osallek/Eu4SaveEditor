@@ -1,4 +1,4 @@
-package com.osallek.eu4saveeditor.controller.item;
+package com.osallek.eu4saveeditor.controller.control;
 
 import javafx.animation.FadeTransition;
 import javafx.beans.InvalidationListener;

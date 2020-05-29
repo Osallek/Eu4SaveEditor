@@ -44,7 +44,7 @@ public class CheckBoxItem implements CustomItem<Void> {
 
     @Override
     public String getDescription() {
-        return null;
+        return this.name;
     }
 
     @Override

@@ -2,7 +2,7 @@ package com.osallek.eu4saveeditor.controller.mapview;
 
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.country.Country;
-import com.osallek.eu4parser.model.save.province.Province;
+import com.osallek.eu4parser.model.save.province.SaveProvince;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.VBox;
@@ -10,7 +10,7 @@ import javafx.scene.paint.Color;
 
 public class CountriesMapView extends AbstractMapView {
 
-    public CountriesMapView(Province[][] provincesMap, Canvas canvas, Save save) {
+    public CountriesMapView(SaveProvince[][] provincesMap, Canvas canvas, Save save) {
         super(provincesMap, canvas, save, MapViewType.COUNTRIES_MAP_VIEW);
     }
 
@@ -19,7 +19,7 @@ public class CountriesMapView extends AbstractMapView {
         GraphicsContext gc = this.canvas.getGraphicsContext2D();
         for (int x = 0; x < this.provincesMap.length; x++) {
             for (int y = 0; y < this.provincesMap[x].length; y++) {
-                Province province = this.provincesMap[x][y];
+                SaveProvince province = this.provincesMap[x][y];
                 int startY = y;
                 while (y < this.provincesMap[x].length && this.provincesMap[x][y].equals(province)) {
                     y++;
@@ -34,14 +34,14 @@ public class CountriesMapView extends AbstractMapView {
     }
 
     @Override
-    public void onProvinceSelected(Province province, VBox editPane) {
+    public void onProvinceSelected(SaveProvince province, VBox editPane) {
         editPane.setVisible(true);
         editPane.setMinWidth(300);
         editPane.setMaxWidth(600);
 //        editPaneTitle.setText(ClausewitzUtils.removeQuotes(province.getName()) + " (" + ClausewitzUtils.removeQuotes(province.getOwner()) + ")");
     }
 
-    private Color getOwnerColor(Province province) {
+    private Color getOwnerColor(SaveProvince province) {
         if (province.getCountry() != null) {
             return countryToMapColor(province.getCountry());
         } else {
