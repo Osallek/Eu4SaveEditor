@@ -13,6 +13,7 @@ import javafx.util.Callback;
 import javafx.util.StringConverter;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public class ClearableComboBoxItem<U> implements CustomItem<U> {
 
@@ -33,6 +34,10 @@ public class ClearableComboBoxItem<U> implements CustomItem<U> {
     private StringConverter<U> converter;
 
     private Callback<ListView<U>, ListCell<U>> cellFactory;
+
+    public ClearableComboBoxItem(SheetCategory category, String name, ObservableList<U> values, ClearableComboBox<U> comboBox) {
+        this(category, name, values, null, comboBox, true);
+    }
 
     public ClearableComboBoxItem(SheetCategory category, String name, ObservableList<U> values, U value, ClearableComboBox<U> comboBox) {
         this(category, name, values, value, comboBox, true);
@@ -102,6 +107,12 @@ public class ClearableComboBoxItem<U> implements CustomItem<U> {
 
     public void select(U u) {
         this.comboBox.getComboBox().getSelectionModel().select(u);
+    }
+
+    public void setSupplier(Supplier<U> clearSupplier) {
+        if (clearSupplier != null) {
+            this.comboBox.setSupplier(clearSupplier);
+        }
     }
 
     public EventHandler<ActionEvent> getOnAction() {

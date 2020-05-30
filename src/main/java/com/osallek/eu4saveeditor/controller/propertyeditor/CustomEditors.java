@@ -1,6 +1,5 @@
 package com.osallek.eu4saveeditor.controller.propertyeditor;
 
-import com.osallek.eu4parser.model.game.Building;
 import com.osallek.eu4saveeditor.controller.control.ClearableCheckComboBox;
 import com.osallek.eu4saveeditor.controller.control.ClearableComboBox;
 import com.osallek.eu4saveeditor.controller.control.ClearableSlider;
@@ -17,28 +16,20 @@ import com.osallek.eu4saveeditor.controller.propertyeditor.item.ComboBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.HBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.SelectableGridViewItem;
 import javafx.beans.property.ListProperty;
-import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SetProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleSetProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import org.controlsfx.control.CheckComboBox;
-import org.controlsfx.control.PropertySheet;
 import org.controlsfx.property.editor.AbstractPropertyEditor;
 import org.controlsfx.property.editor.PropertyEditor;
-
-import java.util.Collection;
 
 public class CustomEditors {
 
@@ -46,7 +37,7 @@ public class CustomEditors {
 
     public static PropertyEditor<String> createClearableLabeledTextEditor(ClearableTextItem property) {
 
-        return new AbstractPropertyEditor<String, TextField>(property, CustomClearableTextField.createClearableTextField(property.getSupplier())) {
+        return new AbstractPropertyEditor<String, TextField>(property, property.getTextField()) {
 
             @Override
             protected StringProperty getObservableValue() {
@@ -190,7 +181,9 @@ public class CustomEditors {
             private ListProperty<T> list;
 
             {
-                getEditor().getItems().setAll(comboBoxItem.getChoices());
+                if (getEditor().getItems() != null && comboBoxItem.getChoices() != null) {
+                    getEditor().getItems().setAll(comboBoxItem.getChoices());
+                }
 
                 if (comboBoxItem.getConverter() != null) {
                     getEditor().setConverter(comboBoxItem.getConverter());
@@ -208,6 +201,7 @@ public class CustomEditors {
 
             @Override
             public void setValue(ObservableList<T> checked) {
+                getEditor().clearChecks();
                 checked.forEach(getEditor()::check);
             }
         };

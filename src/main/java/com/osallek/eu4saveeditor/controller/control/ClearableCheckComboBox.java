@@ -20,6 +20,10 @@ public class ClearableCheckComboBox<U> extends HBox {
 
     private final Button button;
 
+    public ClearableCheckComboBox() {
+        this(null);
+    }
+
     public ClearableCheckComboBox(Supplier<List<U>> clearSupplier) {
         this.getStyleClass().add("clearable-check-combo");
         this.checkComboBox = new CheckComboBox<>();
@@ -28,10 +32,13 @@ public class ClearableCheckComboBox<U> extends HBox {
 
         this.button = new Button("", new Glyph("FontAwesome", FontAwesome.Glyph.CLOSE));
         this.button.setAlignment(Pos.TOP_CENTER);
-        this.button.setOnMouseReleased(e -> {
-            this.clearChecks();
-            clearSupplier.get().forEach(this::check);
-        });
+
+        if (clearSupplier != null) {
+            this.button.setOnMouseReleased(e -> {
+                this.clearChecks();
+                clearSupplier.get().forEach(this::check);
+            });
+        }
 
         Pane centerPane = new Pane();
         HBox.setHgrow(centerPane, Priority.ALWAYS);
@@ -54,11 +61,20 @@ public class ClearableCheckComboBox<U> extends HBox {
     }
 
     public void clearCheck(U u) {
-        this.checkComboBox.getCheckModel().clearCheck(this.checkComboBox.getCheckModel().getItemIndex(u));
+        this.checkComboBox.getCheckModel().clearCheck(u);
     }
 
     public void clearChecks() {
         this.checkComboBox.getCheckModel().clearChecks();
+    }
+
+    public void setSupplier(Supplier<List<U>> clearSupplier) {
+        if (clearSupplier != null) {
+            this.button.setOnMouseReleased(e -> {
+                this.clearChecks();
+                clearSupplier.get().forEach(this::check);
+            });
+        }
     }
 
     public void setConverter(StringConverter<U> converter) {

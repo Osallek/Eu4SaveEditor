@@ -10,6 +10,10 @@ import java.util.function.Supplier;
 
 public class ClearableSpinnerDouble extends ClearableSpinner<Double> {
 
+    public ClearableSpinnerDouble(double min, double max, double step) {
+        this(min, max , 0, step, null);
+    }
+
     public ClearableSpinnerDouble(double min, double max, double value, double step, Supplier<Double> clearSupplier) {
         this.spinner = new Spinner<>(min, max, value, step);
         this.spinner.setEditable(true);
@@ -34,5 +38,10 @@ public class ClearableSpinnerDouble extends ClearableSpinner<Double> {
 
         HBox.setHgrow(this.spinner, Priority.ALWAYS);
         fill(clearSupplier);
+    }
+
+    @Override
+    public void setValue(Double value) {
+        super.setValue(value == null ? 0 : value);
     }
 }

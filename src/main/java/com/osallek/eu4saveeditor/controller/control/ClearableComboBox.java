@@ -25,13 +25,20 @@ public class ClearableComboBox<U> extends HBox {
 
     private final Button button;
 
+    public ClearableComboBox(ComboBox<U> comboBox) {
+        this(comboBox, null);
+    }
+
     public ClearableComboBox(ComboBox<U> comboBox, Supplier<U> clearSupplier) {
         this.comboBox = comboBox;
         HBox.setHgrow(this.comboBox, Priority.ALWAYS);
 
         this.button = new Button("", new Glyph("FontAwesome", FontAwesome.Glyph.CLOSE));
         this.button.setAlignment(Pos.TOP_CENTER);
-        this.button.setOnMouseReleased(e -> this.select(clearSupplier.get()));
+
+        if (clearSupplier != null) {
+            this.button.setOnMouseReleased(e -> this.select(clearSupplier.get()));
+        }
 
         getChildren().add(this.comboBox);
         getChildren().add(this.button);
@@ -47,6 +54,12 @@ public class ClearableComboBox<U> extends HBox {
 
     public void select(U u) {
         this.comboBox.getSelectionModel().select(u);
+    }
+
+    public void setSupplier(Supplier<U> clearSupplier) {
+        if (clearSupplier != null) {
+            this.button.setOnMouseReleased(e -> this.select(clearSupplier.get()));
+        }
     }
 
     public EventHandler<ActionEvent> getOnAction() {
@@ -81,7 +94,9 @@ public class ClearableComboBox<U> extends HBox {
         this.comboBox.setSelectionModel(value);
     }
 
-    public final SingleSelectionModel<U> getSelectionModel() { return this.comboBox.getSelectionModel(); }
+    public final SingleSelectionModel<U> getSelectionModel() {
+        return this.comboBox.getSelectionModel();
+    }
 
     public final ObjectProperty<SingleSelectionModel<U>> selectionModelProperty() {
         return this.comboBox.selectionModelProperty();

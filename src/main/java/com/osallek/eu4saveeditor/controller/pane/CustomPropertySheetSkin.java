@@ -16,7 +16,7 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.osallek.eu4saveeditor.controller.control;
+package com.osallek.eu4saveeditor.controller.pane;
 
 import com.sun.javafx.scene.control.behavior.BehaviorBase;
 import com.sun.javafx.scene.control.behavior.KeyBinding;
@@ -259,7 +259,7 @@ public class CustomPropertySheetSkin extends BehaviorSkinBase<PropertySheet, Beh
         }
 
         public PropertyPane(List<Item> properties, int nestingLevel) {
-            setVgap(5);
+            setVgap(10);
             setHgap(5);
             setPadding(new Insets(5, 15, 5, 15 + nestingLevel * 10));
             getStyleClass().add("property-pane"); //$NON-NLS-1$

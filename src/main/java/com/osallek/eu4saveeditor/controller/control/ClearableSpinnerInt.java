@@ -8,8 +8,12 @@ import java.util.function.Supplier;
 
 public class ClearableSpinnerInt extends ClearableSpinner<Integer> {
 
-    public ClearableSpinnerInt(int min, int max, int value, int step, Supplier<Integer> clearSupplier) {
-        this.spinner = new Spinner<>(min, max, value, step);
+    public ClearableSpinnerInt(int min, int max, int step) {
+        this(min, max , 0, step, null);
+    }
+
+    public ClearableSpinnerInt(int min, int max, Integer value, int step, Supplier<Integer> clearSupplier) {
+        this.spinner = new Spinner<>(min, max, value == null ? 0 : value, step);
         this.spinner.setEditable(true);
         this.spinner.focusedProperty().addListener((observable, oldValue, newValue) -> {
             if (Boolean.FALSE.equals(newValue)) {
@@ -19,5 +23,10 @@ public class ClearableSpinnerInt extends ClearableSpinner<Integer> {
 
         HBox.setHgrow(this.spinner, Priority.ALWAYS);
         fill(clearSupplier);
+    }
+
+    @Override
+    public void setValue(Integer value) {
+        super.setValue(value == null ? 0 : value);
     }
 }

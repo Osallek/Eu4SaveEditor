@@ -35,10 +35,16 @@ public abstract class ClearableSpinner<T> extends HBox {
         return this.spinner.valueFactoryProperty();
     }
 
+    public void setSupplier(Supplier<T> clearSupplier) {
+        if (clearSupplier != null) {
+            this.button.setOnMouseReleased(e -> this.setValue(clearSupplier.get()));
+        }
+    }
+
     protected void fill(Supplier<T> clearSupplier) {
         this.button = new Button("", new Glyph("FontAwesome", FontAwesome.Glyph.CLOSE));
         this.button.setAlignment(Pos.TOP_CENTER);
-        this.button.setOnMouseReleased(e -> this.setValue(clearSupplier.get()));
+        setSupplier(clearSupplier);
 
         Pane centerPane = new Pane();
         HBox.setHgrow(centerPane, Priority.ALWAYS);

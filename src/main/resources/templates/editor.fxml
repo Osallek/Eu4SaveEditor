@@ -1,26 +1,18 @@
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.canvas.Canvas?>
-<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
-<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.osallek.eu4saveeditor.controller.EditorController">
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:id="pane" fx:controller="com.osallek.eu4saveeditor.controller.EditorController">
   <top>
     <HBox alignment="CENTER">
       <Text fx:id="title" textAlignment="CENTER" style="-fx-font-size: 14px"/>
     </HBox>
   </top>
-  <center>
-    <ScrollPane fx:id="provincesPane" onKeyPressed="#onKeyPressedProvinceImageView" focusTraversable="true">
-      <Canvas fx:id="provincesCanvas" onMouseReleased="#onMouseReleasedProvinceImageView"
-              onMouseMoved="#onMouseMovedProvinceImageView" onDragDetected="#onDragDetected"/>
-    </ScrollPane>
-  </center>
   <right>
-    <VBox fx:id="editPane" visible="false" alignment="TOP_CENTER" spacing="5">
+    <VBox fx:id="editPane" alignment="TOP_CENTER" spacing="5" minWidth="300" prefWidth="600" maxWidth="600">
       <padding>
-        <Insets right="5" left="10"/>
+        <Insets right="5" left="10" top="5" bottom="5"/>
       </padding>
     </VBox>
   </right>

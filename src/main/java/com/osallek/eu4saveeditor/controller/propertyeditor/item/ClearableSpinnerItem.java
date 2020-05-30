@@ -88,4 +88,10 @@ public class ClearableSpinnerItem<T> implements CustomItem<Integer> {
     public ObjectProperty<T> valueProperty() {
         return this.spinner.getSpinner().getValueFactory().valueProperty();
     }
+
+    public void setSupplier(Supplier<T> clearSupplier) {
+        if (clearSupplier != null) {
+            this.spinner.setSupplier(clearSupplier);
+        }
+    }
 }

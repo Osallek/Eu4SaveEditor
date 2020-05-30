@@ -52,7 +52,10 @@ public class ClearableSlider extends HBox {
 
         this.button = new Button("", new Glyph("FontAwesome", FontAwesome.Glyph.CLOSE));
         this.button.setAlignment(Pos.TOP_CENTER);
-        this.button.setOnMouseReleased(e -> this.setValue(clearSupplier.getAsDouble()));
+
+        if (clearSupplier != null) {
+            this.button.setOnMouseReleased(e -> this.setValue(clearSupplier.getAsDouble()));
+        }
 
         this.setAlignment(Pos.CENTER_LEFT);
         this.setSpacing(5);
@@ -75,5 +78,11 @@ public class ClearableSlider extends HBox {
 
     public ObservableValue<Double> getObservableValue() {
         return this.slider.valueProperty().asObject();
+    }
+
+    public void setSupplier(DoubleSupplier clearSupplier) {
+        if (clearSupplier != null) {
+            this.button.setOnMouseReleased(e -> this.setValue(clearSupplier.getAsDouble()));
+        }
     }
 }

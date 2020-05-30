@@ -1,25 +1,32 @@
 package com.osallek.eu4saveeditor.controller;
 
+import com.osallek.eu4parser.model.game.Culture;
+import com.osallek.eu4parser.model.game.Religion;
+import com.osallek.eu4parser.model.game.TradeGood;
 import com.osallek.eu4parser.model.save.Save;
+import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
 import com.osallek.eu4saveeditor.controller.mapview.AbstractMapView;
 import com.osallek.eu4saveeditor.controller.mapview.CountriesMapView;
 import com.osallek.eu4saveeditor.controller.mapview.MapViewType;
 import com.osallek.eu4saveeditor.controller.mapview.ProvincesMapView;
+import com.osallek.eu4saveeditor.controller.pane.ZoomableScrollPane;
 import javafx.animation.PauseTransition;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.ImageCursor;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -69,22 +76,38 @@ public class EditorController implements Initializable {
 
     private ImageCursor imageCursor;
 
+    private ZoomableScrollPane provincesPane;
+
+    private Canvas provincesCanvas;
+
+    private ObservableList<Country> playableCountries;
+
+    private ObservableList<Culture> cultures;
+
+    private ObservableList<Religion> religions;
+
+    private ObservableList<TradeGood> tradeGoods;
+
     @FXML
     private Text title;
 
     @FXML
-    private ScrollPane provincesPane;
-
-    @FXML
-    private Canvas provincesCanvas;
-
-    @FXML
     private VBox editPane;
+
+    @FXML
+    private BorderPane pane;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        this.provincesCanvas = new Canvas();
+        this.provincesCanvas.setOnMouseReleased(this::onMouseReleasedProvinceImageView);
+        this.provincesCanvas.setOnMouseMoved(this::onMouseMovedProvinceImageView);
+        this.provincesCanvas.setOnDragDetected(this::onDragDetected);
+
+        this.provincesPane = new ZoomableScrollPane(this.provincesCanvas);
         this.provincesPane.setTooltip(this.tooltip);
-        this.provincesPane.setPannable(true);
+        this.provincesPane.setOnKeyPressed(this::onKeyPressedProvinceImageView);
+        this.provincesPane.setFocusTraversable(true);
 
         this.mousePauseTransition.setOnFinished(e -> this.mouseMoving.set(false));
         this.mouseMoving.addListener((obs, wasMoving, isNowMoving) -> {
@@ -96,6 +119,8 @@ public class EditorController implements Initializable {
                 this.tooltip.setAnchorY(this.mouseSceneY - 20);
             }
         });
+
+        this.pane.setCenter(this.provincesPane);
     }
 
     @FXML
@@ -105,7 +130,13 @@ public class EditorController implements Initializable {
         } else {
             if (MouseButton.PRIMARY.equals(event.getButton())) {
                 this.selectedProvince = this.provincesMap[(int) event.getX()][(int) event.getY()];
-                this.selectedMapView.onProvinceSelected(this.selectedProvince, this.editPane);
+                this.selectedMapView.onProvinceSelected(this.selectedProvince);
+                this.selectedMapView.setSelected(true);
+                this.mapViews.values().forEach(abstractMapView -> {
+                    if (!abstractMapView.equals(this.selectedMapView)) {
+                        abstractMapView.setSelected(false);
+                    }
+                });
             }
         }
     }
@@ -160,10 +191,18 @@ public class EditorController implements Initializable {
                 }
             }
 
+            this.playableCountries = FXCollections.observableArrayList(provincesMap[0][0].getSave()
+                                                                                         .getPlayableCountries());
+            this.cultures = FXCollections.observableArrayList(provincesMap[0][0].getSave().getGame().getCultures());
+            this.religions = FXCollections.observableArrayList(provincesMap[0][0].getSave().getGame().getReligions());
+            this.tradeGoods = FXCollections.observableArrayList(provincesMap[0][0].getSave().getGame().getTradeGoods());
+
             this.mapViews.put(MapViewType.PROVINCES_MAP_VIEW,
-                              new ProvincesMapView(this.provincesMap, this.provincesCanvas, this.save));
+                              new ProvincesMapView(this.provincesMap, this.provincesCanvas, this.editPane, this.save,
+                                                   this.playableCountries, this.cultures, this.religions, this.tradeGoods));
             this.mapViews.put(MapViewType.COUNTRIES_MAP_VIEW,
-                              new CountriesMapView(this.provincesMap, this.provincesCanvas, this.save));
+                              new CountriesMapView(this.provincesMap, this.provincesCanvas, this.editPane, this.save,
+                                                   this.playableCountries, this.cultures, this.religions, this.tradeGoods));
             this.selectedMapView = this.mapViews.get(MapViewType.PROVINCES_MAP_VIEW);
             this.selectedMapView.draw();
         } catch (IOException e) {
@@ -185,6 +224,7 @@ public class EditorController implements Initializable {
                                                               .toString()));
 
         this.provincesCanvas.getScene().setCursor(this.imageCursor);
+        this.provincesCanvas.setCursor(this.imageCursor);
     }
 
     private void setTitle() {

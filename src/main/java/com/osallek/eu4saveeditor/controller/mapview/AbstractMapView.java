@@ -1,7 +1,12 @@
 package com.osallek.eu4saveeditor.controller.mapview;
 
+import com.osallek.eu4parser.model.game.Culture;
+import com.osallek.eu4parser.model.game.Religion;
+import com.osallek.eu4parser.model.game.TradeGood;
 import com.osallek.eu4parser.model.save.Save;
+import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
+import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.image.PixelWriter;
@@ -22,13 +27,32 @@ public abstract class AbstractMapView {
 
     protected final MapViewType type;
 
+    protected final VBox editPane;
+
+    protected final ObservableList<Country> playableCountries;
+
+    protected final ObservableList<Culture> cultures;
+
+    protected final ObservableList<Religion> religions;
+
+    protected final ObservableList<TradeGood> tradeGoods;
+
+    protected boolean selected;
+
     private List<Point2D> borders;
 
-    public AbstractMapView(SaveProvince[][] provincesMap, Canvas canvas, Save save, MapViewType type) {
+    public AbstractMapView(SaveProvince[][] provincesMap, Canvas canvas, VBox editPane, Save save, MapViewType type,
+                           ObservableList<Country> playableCountries, ObservableList<Culture> cultures,
+                           ObservableList<Religion> religions, ObservableList<TradeGood> tradeGoods) {
         this.provincesMap = provincesMap;
         this.canvas = canvas;
+        this.editPane = editPane;
         this.save = save;
         this.type = type;
+        this.playableCountries = playableCountries;
+        this.cultures = cultures;
+        this.religions = religions;
+        this.tradeGoods = tradeGoods;
     }
 
     public void drawProvincesBorders() {
@@ -51,7 +75,15 @@ public abstract class AbstractMapView {
 
     public abstract void draw();
 
-    public abstract void onProvinceSelected(SaveProvince province, VBox editPane);
+    public abstract void onProvinceSelected(SaveProvince province);
+
+    public boolean isSelected() {
+        return selected;
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected = selected;
+    }
 
     @Override
     public boolean equals(Object o) {

@@ -35,7 +35,6 @@ public class SelectableGridView<T> extends GridView<T> {
     public SelectableGridView(ObservableList<T> items, ObservableSet<T> selectedItems) {
         this(items);
         this.selection = selectedItems;
-        this.selection.forEach(this::select);
     }
 
     public void setCellFactory(Function<T, String> textFunction) {

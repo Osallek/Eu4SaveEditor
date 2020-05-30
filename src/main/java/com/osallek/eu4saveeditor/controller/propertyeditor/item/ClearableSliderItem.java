@@ -18,6 +18,10 @@ public class ClearableSliderItem implements CustomItem<Integer> {
 
     private final boolean editable;
 
+    public ClearableSliderItem(SheetCategory category, String name, double min, double max) {
+        this(category, name, min, max, null, null);
+    }
+
     public ClearableSliderItem(SheetCategory category, String name, double min, double max, Double value, DoubleSupplier supplier) {
         this(category, name, new ClearableSlider(min, max, value, supplier), true);
     }
@@ -60,7 +64,7 @@ public class ClearableSliderItem implements CustomItem<Integer> {
 
     @Override
     public void setValue(Object value) {
-        this.slider.setValue((int) value);
+        this.slider.setValue(value == null ? 0 : (double) value);
     }
 
     @Override
@@ -86,5 +90,9 @@ public class ClearableSliderItem implements CustomItem<Integer> {
         return this.slider.getValue();
     }
 
-
+    public void setSupplier(DoubleSupplier clearSupplier) {
+        if (clearSupplier != null) {
+            this.slider.setSupplier(clearSupplier);
+        }
+    }
 }

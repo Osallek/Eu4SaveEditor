@@ -1,33 +1,44 @@
 package com.osallek.eu4saveeditor.controller.mapview;
 
+import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.eu4parser.model.game.Culture;
 import com.osallek.eu4parser.model.game.Religion;
 import com.osallek.eu4parser.model.game.TradeGood;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
 
+import java.time.Duration;
+import java.time.Instant;
+
 public class ProvincesMapView extends AbstractMapView {
 
-    private final ObservableList<Country> playableCountries;
+    private final ProvincePropertySheet sheet;
 
-    private final ObservableList<Culture> cultures;
+    private final Label titleLabel;
 
-    private final ObservableList<Religion> religions;
+    private final Button submitButton;
 
-    private final ObservableList<TradeGood> tradeGoods;
-
-    public ProvincesMapView(SaveProvince[][] provincesMap, Canvas canvas, Save save) {
-        super(provincesMap, canvas, save, MapViewType.PROVINCES_MAP_VIEW);
-        this.playableCountries = FXCollections.observableArrayList(provincesMap[0][0].getSave().getPlayableCountries());
-        this.cultures = FXCollections.observableArrayList(provincesMap[0][0].getSave().getGame().getCultures());
-        this.religions = FXCollections.observableArrayList(provincesMap[0][0].getSave().getGame().getReligions());
-        this.tradeGoods = FXCollections.observableArrayList(provincesMap[0][0].getSave().getGame().getTradeGoods());
+    public ProvincesMapView(SaveProvince[][] provincesMap, Canvas canvas, VBox editPane, Save save,
+                            ObservableList<Country> playableCountries, ObservableList<Culture> cultures,
+                            ObservableList<Religion> religions, ObservableList<TradeGood> tradeGoods) {
+        super(provincesMap, canvas, editPane, save, MapViewType.PROVINCES_MAP_VIEW, playableCountries, cultures, religions, tradeGoods);
+        this.sheet = new ProvincePropertySheet(save, this.editPane, this.playableCountries, this.cultures, this.religions, this.tradeGoods);
+        this.titleLabel = new Label();
+        this.titleLabel.setVisible(false);
+        this.submitButton = new Button("Submit");
+        this.submitButton.setOnAction(e -> {
+            this.sheet.validate(e);
+            this.sheet.update(this.sheet.getProvince());
+            this.titleLabel.setText(getTitle(this.sheet.getProvince()));
+        });
+        this.submitButton.disableProperty().bind(this.sheet.getValidationSupport().invalidProperty());
     }
 
     @Override
@@ -37,14 +48,32 @@ public class ProvincesMapView extends AbstractMapView {
     }
 
     @Override
-    public void onProvinceSelected(SaveProvince province, VBox editPane) {
-        editPane.setVisible(true);
-        editPane.setMinWidth(300);
-        editPane.setPrefWidth(600);
-        editPane.setMaxWidth(600);
-        editPane.getChildren().clear();
-        editPane.getChildren()
-                .add(new ProvincePropertySheet(editPane, province, this.playableCountries, this.cultures, this.religions,
-                                               this.tradeGoods));
+    public void onProvinceSelected(SaveProvince province) {
+        if (this.selected) {
+            this.titleLabel.setText(getTitle(province));
+            this.sheet.update(province);
+            this.submitButton.disableProperty().bind(this.sheet.getValidationSupport().invalidProperty());
+        } else {
+            this.editPane.getChildren().clear();
+
+            this.titleLabel.setText(getTitle(province));
+            this.titleLabel.setVisible(true);
+
+            this.editPane.getChildren().add(this.titleLabel);
+
+            this.editPane.getChildren().add(this.sheet.update(province));
+
+            this.editPane.getChildren().add(this.submitButton);
+        }
+    }
+
+    private String getTitle(SaveProvince saveProvince) {
+        String title = ClausewitzUtils.removeQuotes(saveProvince.getName());
+
+        if (saveProvince.getCountry() != null) {
+            title += " (" + saveProvince.getCountry().getLocalizedName() + ")";
+        }
+
+        return title;
     }
 }

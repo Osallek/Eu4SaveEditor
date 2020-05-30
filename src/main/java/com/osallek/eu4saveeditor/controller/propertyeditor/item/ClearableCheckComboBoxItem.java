@@ -11,7 +11,9 @@ import javafx.scene.control.ListView;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public class ClearableCheckComboBoxItem<U> implements CustomItem<U> {
 
@@ -32,6 +34,10 @@ public class ClearableCheckComboBoxItem<U> implements CustomItem<U> {
     private StringConverter<U> converter;
 
     private Callback<ListView<U>, ListCell<U>> cellFactory;
+
+    public ClearableCheckComboBoxItem(SheetCategory category, String name, ObservableList<U> values, ClearableCheckComboBox<U> checkComboBox) {
+        this(category, name, values, null, checkComboBox, true);
+    }
 
     public ClearableCheckComboBoxItem(SheetCategory category, String name, ObservableList<U> values, ObservableList<U> selectedValues, ClearableCheckComboBox<U> checkComboBox) {
         this(category, name, values, selectedValues, checkComboBox, true);
@@ -105,6 +111,12 @@ public class ClearableCheckComboBoxItem<U> implements CustomItem<U> {
 
     public void clearCheck(U u) {
         this.checkComboBox.clearCheck(u);
+    }
+
+    public void setSupplier(Supplier<List<U>> clearSupplier) {
+        if (clearSupplier != null) {
+            this.checkComboBox.setSupplier(clearSupplier);
+        }
     }
 
     public EventHandler<ActionEvent> getOnAction() {
