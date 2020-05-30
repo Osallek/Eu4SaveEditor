@@ -6,6 +6,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
 
+import java.io.File;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -99,8 +100,8 @@ public class SelectableGridViewItem<U> implements CustomItem<U> {
         this.selectableGridView.unSelect(u);
     }
 
-    public void setCellFactory(Function<U, String> textFunction) {
-        this.getSelectableGridView().setCellFactory(textFunction);
+    public void setCellFactory(Function<U, String> textFunction, Function<U, File> imageFunction) {
+        this.getSelectableGridView().setCellFactory(textFunction, imageFunction);
     }
 
     public Function<U, String> getCellFactory() {

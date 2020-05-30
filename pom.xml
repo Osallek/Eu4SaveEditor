@@ -16,6 +16,7 @@
     <main.class>com.osallek.eu4saveeditor.Main</main.class>
     <eu4-parser.version>1.0.0</eu4-parser.version>
     <controlsfx.version>8.40.16</controlsfx.version>
+    <imageio-tga.version>3.5</imageio-tga.version>
   </properties>
 
   <dependencies>
@@ -28,6 +29,11 @@
       <groupId>org.controlsfx</groupId>
       <artifactId>controlsfx</artifactId>
       <version>${controlsfx.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.twelvemonkeys.imageio</groupId>
+      <artifactId>imageio-tga</artifactId>
+      <version>${imageio-tga.version}</version>
     </dependency>
 
   </dependencies>

@@ -1,35 +1,41 @@
 package com.osallek.eu4saveeditor.controller.control;
 
+import com.osallek.eu4saveeditor.imagereader.ImageReader;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Pos;
 import javafx.scene.control.Tooltip;
 import javafx.scene.effect.ColorAdjust;
-import javafx.scene.effect.Effect;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.stage.PopupWindow;
 import org.controlsfx.control.GridCell;
-import org.controlsfx.control.InfoOverlay;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.util.function.Function;
 
 public class SelectableGridCell<T> extends GridCell<T> {
 
     private final ColorAdjust notSelectedEffect;
 
-    private final ImageView imageView;
+    private ImageView imageView;
 
     private Tooltip tooltip;
 
     private Function<T, String> textFunction;
 
-    public SelectableGridCell(Function<T, String> textFunction) {
+    private Function<T, File> imageFunction;
+
+    public SelectableGridCell(Function<T, String> textFunction, Function<T, File> imageFunction) {
         this.notSelectedEffect = new ColorAdjust();
         this.notSelectedEffect.setSaturation(-1);
 
-        this.imageView = new ImageView();
-        this.imageView.setPickOnBounds(true);
+        if (imageFunction != null) {
+            this.imageFunction = imageFunction;
+            this.imageView = new ImageView();
+            this.imageView.setPickOnBounds(true);
+        }
 
         if (textFunction != null) {
             this.textFunction = textFunction;
@@ -49,7 +55,10 @@ public class SelectableGridCell<T> extends GridCell<T> {
                     source.getSelectableGridView().getCells().forEach(SelectableGridCell::unSelect);
                     source.updateSelected(true);
                     source.getSelectableGridView().select(source.getItem());
-                    this.imageView.setEffect(null);
+
+                    if (this.imageView != null) {
+                        this.imageView.setEffect(null);
+                    }
                 }
             }
         });
@@ -69,13 +78,7 @@ public class SelectableGridCell<T> extends GridCell<T> {
     protected void updateItem(T item, boolean empty) {
         super.updateItem(item, empty);
         if (!empty) {
-            this.imageView.setImage(new Image(new File("C:\\Users\\gaeta\\Downloads\\latin_temple.jpg")
-                                                      .toURI().toString()));
-            setGraphic(this.imageView);
-            setMaxWidth(50);
-            setMaxHeight(50);
-            this.imageView.setFitHeight(50);
-            this.imageView.setFitWidth(50);
+
             updateSelected(getSelectableGridView().isSelected(item));
             getSelectableGridView().getCells().add(this);
 
@@ -83,10 +86,28 @@ public class SelectableGridCell<T> extends GridCell<T> {
                 this.tooltip.setText(textFunction.apply(item));
             }
 
-            if (!selectedProperty().get()) {
-                this.imageView.setEffect(this.notSelectedEffect);
-            } else {
-                this.imageView.setEffect(null);
+            if (this.imageFunction != null) {
+                try {
+                    BufferedImage image = ImageReader.convertFileToImage(this.imageFunction.apply(item));
+
+                    if (image != null) {
+                        this.imageView.setImage(SwingFXUtils.toFXImage(image, null));
+
+                        setGraphic(this.imageView);
+                        setMaxWidth(48);
+                        setMaxHeight(48);
+                        this.imageView.setFitHeight(48);
+                        this.imageView.setFitWidth(48);
+
+                        if (!selectedProperty().get()) {
+                            this.imageView.setEffect(this.notSelectedEffect);
+                        } else {
+                            this.imageView.setEffect(null);
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }

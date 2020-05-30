@@ -1,15 +1,12 @@
 package com.osallek.eu4saveeditor.controller.control;
 
 import com.sun.javafx.collections.ObservableSetWrapper;
-import impl.org.controlsfx.skin.GridViewSkin;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
-import javafx.scene.control.Cell;
 import org.controlsfx.control.GridView;
 
-import java.util.ArrayList;
+import java.io.File;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -23,8 +20,8 @@ public class SelectableGridView<T> extends GridView<T> {
 
     public SelectableGridView(ObservableList<T> items) {
         super();
-        setCellHeight(50);
-        setCellWidth(50);
+        setCellHeight(48);
+        setCellWidth(48);
         setHorizontalCellSpacing(3);
         setVerticalCellSpacing(5);
         itemsProperty().addListener((observable, oldValue, newValue) ->
@@ -37,8 +34,8 @@ public class SelectableGridView<T> extends GridView<T> {
         this.selection = selectedItems;
     }
 
-    public void setCellFactory(Function<T, String> textFunction) {
-        super.setCellFactory(param -> new SelectableGridCell<>(textFunction));
+    public void setCellFactory(Function<T, String> textFunction, Function<T, File> imageFunction) {
+        super.setCellFactory(param -> new SelectableGridCell<>(textFunction, imageFunction));
     }
 
     public void select(T t) {

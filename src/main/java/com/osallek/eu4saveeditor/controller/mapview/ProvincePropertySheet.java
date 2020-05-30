@@ -387,7 +387,7 @@ public class ProvincePropertySheet extends VBox {
                                                                                                                                   .observableList(buildings),
                                                                                                                           buildingsBuilt));
 
-                    gridViewItem.setCellFactory(Building::getLocalizedName);
+                    gridViewItem.setCellFactory(Building::getLocalizedName, Building::getImageFile);
                     this.buildingsFields.add(gridViewItem);
                 });
 
