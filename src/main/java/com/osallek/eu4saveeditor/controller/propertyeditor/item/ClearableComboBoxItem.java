@@ -27,7 +27,7 @@ public class ClearableComboBoxItem<U> implements CustomItem<U> {
 
     private final ClearableComboBox<U> comboBox;
 
-    private final boolean editable;
+    private boolean editable;
 
     private EventHandler<ActionEvent> onAction;
 
@@ -95,6 +95,10 @@ public class ClearableComboBoxItem<U> implements CustomItem<U> {
     @Override
     public boolean isEditable() {
         return this.editable;
+    }
+
+    public void setEditable(boolean editable) {
+        this.editable = editable;
     }
 
     public ClearableComboBox<U> getComboBox() {

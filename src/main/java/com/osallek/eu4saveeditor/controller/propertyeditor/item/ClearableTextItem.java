@@ -21,7 +21,7 @@ public class ClearableTextItem implements CustomItem<Void> {
 
     private Supplier<String> supplier;
 
-    private final boolean editable;
+    private boolean editable;
 
     public ClearableTextItem(SheetCategory category, String name) {
         this(category, name, null, null, true);
@@ -83,6 +83,10 @@ public class ClearableTextItem implements CustomItem<Void> {
     @Override
     public boolean isEditable() {
         return this.editable;
+    }
+
+    public void setEditable(boolean editable) {
+        this.editable = editable;
     }
 
     public void setSupplier(Supplier<String> supplier) {

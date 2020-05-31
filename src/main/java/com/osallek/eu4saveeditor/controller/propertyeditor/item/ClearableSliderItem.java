@@ -16,7 +16,7 @@ public class ClearableSliderItem implements CustomItem<Integer> {
 
     private final ClearableSlider slider;
 
-    private final boolean editable;
+    private boolean editable;
 
     public ClearableSliderItem(SheetCategory category, String name, double min, double max) {
         this(category, name, min, max, null, null);
@@ -80,6 +80,10 @@ public class ClearableSliderItem implements CustomItem<Integer> {
     @Override
     public boolean isEditable() {
         return this.editable;
+    }
+
+    public void setEditable(boolean editable) {
+        this.editable = editable;
     }
 
     public ClearableSlider getSlider() {

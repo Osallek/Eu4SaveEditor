@@ -17,7 +17,7 @@ public class ClearableSpinnerItem<T> implements CustomItem<Integer> {
 
     private final ClearableSpinner<T> spinner;
 
-    private final boolean editable;
+    private boolean editable;
 
     public ClearableSpinnerItem(SheetCategory category, String name, ClearableSpinner<T> spinner) {
         this(category, name, spinner, true);
@@ -73,6 +73,10 @@ public class ClearableSpinnerItem<T> implements CustomItem<Integer> {
     @Override
     public boolean isEditable() {
         return this.editable;
+    }
+
+    public void setEditable(boolean editable) {
+        this.editable = editable;
     }
 
     public ClearableSpinner<T> getSpinner() {

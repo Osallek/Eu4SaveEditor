@@ -14,7 +14,7 @@ public class CheckBoxItem implements CustomItem<Void> {
 
     private boolean value;
 
-    private final boolean editable;
+    private boolean editable;
 
     public CheckBoxItem(SheetCategory category, String name, boolean value) {
         this(category, name, value, true);
@@ -72,19 +72,11 @@ public class CheckBoxItem implements CustomItem<Void> {
         return this.editable;
     }
 
+    public void setEditable(boolean editable) {
+        this.editable = editable;
+    }
+
     public boolean isSelected() {
         return this.value;
     }
-
-    /*    public final ObjectProperty<EventHandler<ActionEvent>> onActionProperty() {
-        return this.textField.onActionProperty();
-    }
-
-    public final EventHandler<ActionEvent> getOnAction() {
-        return onActionProperty().get();
-    }
-
-    public final void setOnAction(EventHandler<ActionEvent> value) {
-        onActionProperty().set(value);
-    }*/
 }
