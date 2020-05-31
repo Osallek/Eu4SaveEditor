@@ -90,6 +90,8 @@ public class ProvincePropertySheet extends VBox {
 
     private final ClearableSpinnerItem<Integer> nativeFerocityField;
 
+    private final ClearableSpinnerItem<Integer> nativeSizeField;
+
     private final ClearableSpinnerItem<Double> baseTaxField;
 
     private final ClearableSpinnerItem<Double> baseProdField;
@@ -198,6 +200,10 @@ public class ProvincePropertySheet extends VBox {
                                                               save.getGame().getLocalisationClean("PP_FEROCITY"),
                                                               new ClearableSpinnerInt(0, 10, 1));
 
+        this.nativeSizeField = new ClearableSpinnerItem<>(SheetCategory.PROVINCE_COLONY,
+                                                              save.getGame().getLocalisationClean("PP_NATIVES"),
+                                                              new ClearableSpinnerInt(0, 10000, 1));
+
         this.colonySizeField = new ClearableSliderItem(SheetCategory.PROVINCE_COLONY,
                                                        save.getGame().getLocalisation("LEDGER_POPULATION"),
                                                        0, 1000);
@@ -280,6 +286,7 @@ public class ProvincePropertySheet extends VBox {
         this.colonySizeField.setEditable(false);
         this.nativeHostilenessField.setEditable(false);
         this.nativeFerocityField.setEditable(false);
+        this.nativeSizeField.setEditable(false);
         this.baseTaxField.setEditable(false);
         this.baseProdField.setEditable(false);
         this.baseMPField.setEditable(false);
@@ -354,6 +361,11 @@ public class ProvincePropertySheet extends VBox {
                     this.colonySizeField.setEditable(true);
                     items.add(this.colonySizeField);
                 }
+
+                this.nativeSizeField.setValue(this.province.getNativeSize());
+                this.nativeSizeField.setSupplier(this.province::getNativeSize);
+                this.nativeSizeField.setEditable(true);
+                items.add(this.nativeSizeField);
 
                 this.nativeHostilenessField.setValue(this.province.getNativeHostileness());
                 this.nativeHostilenessField.setSupplier(this.province::getNativeHostileness);
@@ -537,6 +549,12 @@ public class ProvincePropertySheet extends VBox {
         if (this.nativeFerocityField.isEditable()) {
             if (!Objects.deepEquals(this.province.getNativeFerocity(), this.nativeFerocityField.getTrueValue())) {
                 this.province.setNativeFerocity(this.nativeFerocityField.getTrueValue());
+            }
+        }
+
+        if (this.nativeSizeField.isEditable()) {
+            if (!Objects.deepEquals(this.province.getNativeSize(), this.nativeSizeField.getTrueValue())) {
+                this.province.setNativeSize(this.nativeSizeField.getTrueValue());
             }
         }
 
