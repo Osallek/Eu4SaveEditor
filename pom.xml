@@ -45,17 +45,32 @@
           <artifactId>maven-assembly-plugin</artifactId>
           <configuration>
             <appendAssemblyId>false</appendAssemblyId>
+            <descriptors>
+              <descriptor>src/assembly/jar-with-dependencies.xml</descriptor>
+              <descriptor>src/assembly/zip.xml</descriptor>
+            </descriptors>
             <archive>
               <manifest>
                 <mainClass>${main.class}</mainClass>
               </manifest>
             </archive>
-            <descriptorRefs>
-              <descriptorRef>jar-with-dependencies</descriptorRef>
-            </descriptorRefs>
           </configuration>
         </plugin>
       </plugins>
     </pluginManagement>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <excludes>
+          <exclude>dont_copy/**</exclude>
+        </excludes>
+        <filtering>false</filtering>
+      </resource>
+      <resource>
+        <directory>src/main/resources/dont_copy</directory>
+        <targetPath>${project.build.directory}</targetPath>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
   </build>
 </project>
