@@ -4,7 +4,6 @@ import com.osallek.eu4saveeditor.controller.control.ClearableCheckComboBox;
 import com.osallek.eu4saveeditor.controller.control.ClearableComboBox;
 import com.osallek.eu4saveeditor.controller.control.ClearableSlider;
 import com.osallek.eu4saveeditor.controller.control.ClearableSpinner;
-import com.osallek.eu4saveeditor.controller.control.CustomClearableTextField;
 import com.osallek.eu4saveeditor.controller.control.SelectableGridView;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.CheckComboBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableCheckComboBoxItem;

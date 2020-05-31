@@ -2,6 +2,7 @@ package com.osallek.eu4saveeditor.controller;
 
 import com.osallek.eu4parser.Eu4Parser;
 import com.osallek.eu4parser.model.save.Save;
+import com.osallek.eu4saveeditor.Main;
 import com.osallek.eu4saveeditor.common.Constants;
 import com.osallek.eu4saveeditor.i18n.MenusI18n;
 import javafx.application.Platform;
@@ -24,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
 
 public class HomeController implements Initializable {
 
@@ -134,7 +136,7 @@ public class HomeController implements Initializable {
             try {
                 save = Eu4Parser.loadSave(this.gameDirectory.getAbsolutePath(), this.saveFile.getAbsolutePath());
             } catch (Exception e) {
-                e.printStackTrace();
+                Main.LOGGER.log(Level.SEVERE, "An error occurred while extracting the save: " + e.getMessage(), e);
                 Platform.runLater(() -> {
                     this.infoText.setFill(Paint.valueOf(Color.RED.toString()));
                     this.infoText.setText("An error occurred while extracting the save: " + e.getMessage());
@@ -151,6 +153,7 @@ public class HomeController implements Initializable {
                     this.startExtractButton.getScene().setRoot(editorNode);
                     ((EditorController) this.editorLoader.getController()).maximize();
                 } catch (IOException e) {
+                    Main.LOGGER.log(Level.SEVERE, "An error occurred while extracting the save: " + e.getMessage(), e);
                     this.infoText.setFill(Paint.valueOf(Color.RED.toString()));
                     this.infoText.setText("An error occurred while extracting the save: " + e.getMessage());
                     this.canOpenGameDirectoryChoose = true;

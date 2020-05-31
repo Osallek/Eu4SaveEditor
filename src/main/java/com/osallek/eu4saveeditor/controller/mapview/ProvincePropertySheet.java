@@ -49,8 +49,6 @@ import org.controlsfx.validation.Validator;
 import org.controlsfx.validation.decoration.CompoundValidationDecoration;
 import org.controlsfx.validation.decoration.StyleClassValidationDecoration;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -249,7 +247,6 @@ public class ProvincePropertySheet extends VBox {
     }
 
     public PropertySheet update(SaveProvince province) {
-        Instant start = Instant.now();
         this.province = province;
         this.countryChanged.set(false);
 
@@ -403,8 +400,6 @@ public class ProvincePropertySheet extends VBox {
         this.propertySheet.getItems().setAll(items);
 
         this.ownerComboBox.valueProperty().addListener(this.ownerChangeListener);
-
-        System.err.println("Update sheet: " + Duration.between(start, Instant.now()).toMillis());
         return this.propertySheet;
     }
 

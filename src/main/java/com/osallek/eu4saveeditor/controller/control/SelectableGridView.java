@@ -1,6 +1,6 @@
 package com.osallek.eu4saveeditor.controller.control;
 
-import com.sun.javafx.collections.ObservableSetWrapper;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
 import org.controlsfx.control.GridView;
@@ -12,7 +12,7 @@ import java.util.function.Function;
 
 public class SelectableGridView<T> extends GridView<T> {
 
-    private ObservableSet<T> selection = new ObservableSetWrapper<>(new HashSet<>());
+    private ObservableSet<T> selection = FXCollections.observableSet(new HashSet<>());
 
     private Set<SelectableGridCell<T>> cells = new HashSet<>();
 

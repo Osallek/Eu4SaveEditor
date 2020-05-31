@@ -4,7 +4,6 @@ import com.osallek.eu4saveeditor.controller.control.CustomClearableTextField;
 import com.osallek.eu4saveeditor.controller.mapview.SheetCategory;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-import javafx.scene.layout.StackPane;
 import org.controlsfx.control.textfield.CustomTextField;
 
 import java.util.Optional;

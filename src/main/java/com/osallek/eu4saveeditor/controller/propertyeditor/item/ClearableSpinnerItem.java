@@ -1,8 +1,6 @@
 package com.osallek.eu4saveeditor.controller.propertyeditor.item;
 
 import com.osallek.eu4saveeditor.controller.control.ClearableSpinner;
-import com.osallek.eu4saveeditor.controller.control.ClearableSpinnerDouble;
-import com.osallek.eu4saveeditor.controller.control.ClearableSpinnerInt;
 import com.osallek.eu4saveeditor.controller.mapview.SheetCategory;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ObservableValue;

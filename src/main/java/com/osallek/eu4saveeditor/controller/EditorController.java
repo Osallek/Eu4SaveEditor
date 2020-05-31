@@ -7,6 +7,7 @@ import com.osallek.eu4parser.model.game.TradeGood;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
+import com.osallek.eu4saveeditor.Main;
 import com.osallek.eu4saveeditor.common.Constants;
 import com.osallek.eu4saveeditor.controller.mapview.AbstractMapView;
 import com.osallek.eu4saveeditor.controller.mapview.CountriesMapView;
@@ -47,6 +48,7 @@ import java.text.SimpleDateFormat;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
 
 public class EditorController implements Initializable {
 
@@ -109,7 +111,8 @@ public class EditorController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         this.saveFileChooser.setTitle(MenusI18n.SAVE_AS.getForDefaultLocale());
-        this.saveFileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(MenusI18n.EU4_EXT_DESC.getForDefaultLocale(), "*.eu4"));
+        this.saveFileChooser.getExtensionFilters()
+                            .add(new FileChooser.ExtensionFilter(MenusI18n.EU4_EXT_DESC.getForDefaultLocale(), "*.eu4"));
 
         if (Constants.DOCUMENTS_FOLDER.exists()) {
             this.saveFileChooser.setInitialDirectory(Constants.SAVES_FOLDER);
@@ -181,6 +184,7 @@ public class EditorController implements Initializable {
                     Eu4Parser.writeSave(this.save, file.toString());
                 }
             } catch (IOException e) {
+                Main.LOGGER.log(Level.SEVERE, "Can't write save ! " + e.getMessage(), e);
                 this.title.setText("Can't write save ! " + e.getLocalizedMessage());
                 this.title.setFill(Paint.valueOf(Color.RED.toString()));
             }
@@ -190,7 +194,8 @@ public class EditorController implements Initializable {
     public void load(Save save) {
         this.save = save;
         int extIndex = this.save.getName().lastIndexOf('.');
-        this.saveFileChooser.setInitialFileName(this.save.getName().substring(0, extIndex) + "_edit" + this.save.getName().substring(extIndex));
+        this.saveFileChooser.setInitialFileName(
+                this.save.getName().substring(0, extIndex) + "_edit" + this.save.getName().substring(extIndex));
 
         try {
             BufferedImage provinceImage = ImageIO.read(this.save.getGame().getProvincesImage());
@@ -229,6 +234,7 @@ public class EditorController implements Initializable {
             this.selectedMapView = this.mapViews.get(MapViewType.COUNTRIES_MAP_VIEW);
             this.selectedMapView.draw();
         } catch (IOException e) {
+            Main.LOGGER.log(Level.SEVERE, "Can't load terrain image ! Make sure your game files are not corrupted !" + e.getMessage(), e);
             this.title.setText("Can't load terrain image ! Make sure your game files are not corrupted !");
             this.title.setFill(Paint.valueOf(Color.RED.toString()));
         }

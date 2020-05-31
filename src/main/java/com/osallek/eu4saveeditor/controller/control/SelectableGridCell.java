@@ -1,5 +1,6 @@
 package com.osallek.eu4saveeditor.controller.control;
 
+import com.osallek.eu4saveeditor.Main;
 import com.osallek.eu4saveeditor.imagereader.ImageReader;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Pos;
@@ -14,6 +15,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.function.Function;
+import java.util.logging.Level;
 
 public class SelectableGridCell<T> extends GridCell<T> {
 
@@ -106,7 +108,7 @@ public class SelectableGridCell<T> extends GridCell<T> {
                         }
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Main.LOGGER.log(Level.SEVERE, e.getMessage(), e);
                 }
             }
         }
