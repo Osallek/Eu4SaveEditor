@@ -9,7 +9,6 @@ import com.osallek.eu4parser.model.save.province.SaveProvince;
 import com.osallek.eu4saveeditor.controller.mapview.AbstractMapView;
 import com.osallek.eu4saveeditor.controller.mapview.CountriesMapView;
 import com.osallek.eu4saveeditor.controller.mapview.MapViewType;
-import com.osallek.eu4saveeditor.controller.mapview.ProvincesMapView;
 import com.osallek.eu4saveeditor.controller.pane.ZoomableScrollPane;
 import javafx.animation.PauseTransition;
 import javafx.beans.property.BooleanProperty;
@@ -22,8 +21,6 @@ import javafx.scene.ImageCursor;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
@@ -70,7 +67,7 @@ public class EditorController implements Initializable {
 
     private boolean wasDragging;
 
-    private Map<MapViewType, AbstractMapView> mapViews = new EnumMap<>(MapViewType.class);
+    private final Map<MapViewType, AbstractMapView> mapViews = new EnumMap<>(MapViewType.class);
 
     private AbstractMapView selectedMapView;
 
@@ -106,7 +103,6 @@ public class EditorController implements Initializable {
 
         this.provincesPane = new ZoomableScrollPane(this.provincesCanvas);
         this.provincesPane.setTooltip(this.tooltip);
-        this.provincesPane.setOnKeyPressed(this::onKeyPressedProvinceImageView);
         this.provincesPane.setFocusTraversable(true);
 
         this.mousePauseTransition.setOnFinished(e -> this.mouseMoving.set(false));
@@ -156,21 +152,6 @@ public class EditorController implements Initializable {
         this.mousePauseTransition.playFromStart();
     }
 
-    @FXML
-    public void onKeyPressedProvinceImageView(KeyEvent keyEvent) {
-        if (KeyCode.C.equals(keyEvent.getCode())) {
-            if (!selectedMapView.equals(this.mapViews.get(MapViewType.COUNTRIES_MAP_VIEW))) {
-                this.selectedMapView = this.mapViews.get(MapViewType.COUNTRIES_MAP_VIEW);
-                this.selectedMapView.draw();
-            }
-        } else if (KeyCode.P.equals(keyEvent.getCode())) {
-            if (!selectedMapView.equals(this.mapViews.get(MapViewType.PROVINCES_MAP_VIEW))) {
-                this.selectedMapView = this.mapViews.get(MapViewType.PROVINCES_MAP_VIEW);
-                this.selectedMapView.draw();
-            }
-        }
-    }
-
     public void load(Save save) {
         this.save = save;
 
@@ -191,19 +172,22 @@ public class EditorController implements Initializable {
                 }
             }
 
-            this.playableCountries = FXCollections.observableArrayList(provincesMap[0][0].getSave()
-                                                                                         .getPlayableCountries());
-            this.cultures = FXCollections.observableArrayList(provincesMap[0][0].getSave().getGame().getCultures());
-            this.religions = FXCollections.observableArrayList(provincesMap[0][0].getSave().getGame().getReligions());
-            this.tradeGoods = FXCollections.observableArrayList(provincesMap[0][0].getSave().getGame().getTradeGoods());
+            this.playableCountries = FXCollections.observableArrayList(this.provincesMap[0][0].getSave()
+                                                                                              .getPlayableCountries());
+            this.cultures = FXCollections.observableArrayList(this.provincesMap[0][0].getSave()
+                                                                                     .getGame()
+                                                                                     .getCultures());
+            this.religions = FXCollections.observableArrayList(this.provincesMap[0][0].getSave()
+                                                                                      .getGame()
+                                                                                      .getReligions());
+            this.tradeGoods = FXCollections.observableArrayList(this.provincesMap[0][0].getSave()
+                                                                                       .getGame()
+                                                                                       .getTradeGoods());
 
-            this.mapViews.put(MapViewType.PROVINCES_MAP_VIEW,
-                              new ProvincesMapView(this.provincesMap, this.provincesCanvas, this.editPane, this.save,
-                                                   this.playableCountries, this.cultures, this.religions, this.tradeGoods));
             this.mapViews.put(MapViewType.COUNTRIES_MAP_VIEW,
                               new CountriesMapView(this.provincesMap, this.provincesCanvas, this.editPane, this.save,
                                                    this.playableCountries, this.cultures, this.religions, this.tradeGoods));
-            this.selectedMapView = this.mapViews.get(MapViewType.PROVINCES_MAP_VIEW);
+            this.selectedMapView = this.mapViews.get(MapViewType.COUNTRIES_MAP_VIEW);
             this.selectedMapView.draw();
         } catch (IOException e) {
             this.title.setText("Can't load terrain image ! Make sure your game files are not corrupted !");

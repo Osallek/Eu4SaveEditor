@@ -38,7 +38,6 @@ import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
 import javafx.event.ActionEvent;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import org.controlsfx.control.PropertySheet;
@@ -55,7 +54,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ProvincePropertySheet extends VBox {
@@ -64,84 +62,69 @@ public class ProvincePropertySheet extends VBox {
 
     private final PropertySheet propertySheet;
 
-    private final Pane pane;
+    private final ValidationSupport validationSupport;
 
-    private final ObservableList<Country> playableCountries;
+    private final ClearableTextItem nameField;
 
-    private final ObservableList<Culture> cultures;
+    private final ClearableComboBoxItem<Culture> cultureComboBox;
 
-    private final ObservableList<Religion> religions;
+    private final ClearableComboBoxItem<Religion> religionComboBox;
 
-    private final ObservableList<TradeGood> tradeGoods;
+    private final ClearableTextItem capitalField;
 
-    private ValidationSupport validationSupport;
+    private final ClearableComboBoxItem<Country> ownerComboBox;
 
-    private ClearableTextItem nameField;
+    private final ClearableComboBoxItem<Country> controllerComboBox;
 
-    private ClearableComboBoxItem<Culture> cultureComboBox;
+    private final ClearableCheckComboBoxItem<Country> coresField;
 
-    private ClearableComboBoxItem<Religion> religionComboBox;
+    private final ClearableCheckComboBoxItem<Country> claimsField;
 
-    private ClearableTextItem capitalField;
+    private final CheckBoxItem hreField;
 
-    private ClearableComboBoxItem<Country> ownerComboBox;
+    private final ClearableComboBoxItem<Country> colonizeForField;
 
-    private ClearableComboBoxItem<Country> controllerComboBox;
+    private final ClearableSliderItem colonySizeField;
 
-    private ClearableCheckComboBoxItem<Country> coresField;
+    private final ClearableSpinnerItem<Double> baseTaxField;
 
-    private ClearableCheckComboBoxItem<Country> claimsField;
+    private final ClearableSpinnerItem<Double> baseProdField;
 
-    private CheckBoxItem hreField;
+    private final ClearableSpinnerItem<Double> baseMPField;
 
-    private ClearableComboBoxItem<Country> colonizeForField;
+    private final ClearableComboBoxItem<TradeGood> tradeGoodField;
 
-    private ClearableSliderItem colonySizeField;
+    private final ClearableComboBoxItem<TradeGood> latentTradeGoodField;
 
-    private ClearableSpinnerItem<Double> baseTaxField;
+    private final ClearableSpinnerItem<Integer> cotField;
 
-    private ClearableSpinnerItem<Double> baseProdField;
+    private final List<ClearableSliderItem> institutionFields;
 
-    private ClearableSpinnerItem<Double> baseMPField;
+    private final ClearableSliderItem autonomyField;
 
-    private ClearableComboBoxItem<TradeGood> tradeGoodField;
-
-    private ClearableComboBoxItem<TradeGood> latentTradeGoodField;
-
-    private ClearableSpinnerItem<Integer> cotField;
-
-    private List<ClearableSliderItem> institutionFields;
-
-    private ClearableSliderItem autonomyField;
-
-    private ClearableSliderItem devastationField;
+    private final ClearableSliderItem devastationField;
 
     private List<SelectableGridViewItem<Building>> buildingsFields;
 
-    private ChangeListener<? super Country> ownerChangeListener;
+    private final ChangeListener<? super Country> ownerChangeListener;
 
-    public ProvincePropertySheet(Save save, Pane pane, ObservableList<Country> playableCountries,
+    public ProvincePropertySheet(Save save, ObservableList<Country> playableCountries,
                                  ObservableList<Culture> cultures, ObservableList<Religion> religions,
                                  ObservableList<TradeGood> tradeGoods) {
-        this.pane = pane;
-        this.playableCountries = playableCountries;
-        this.cultures = cultures;
-        this.religions = religions;
-        this.tradeGoods = tradeGoods;
         this.propertySheet = new PropertySheet();
         this.propertySheet.setPropertyEditorFactory(new CustomPropertyEditorFactory());
         this.propertySheet.setMode(PropertySheet.Mode.CATEGORY);
         this.propertySheet.setCategoryComparator(Comparator.comparing(SheetCategory::getByLocale));
         this.propertySheet.setModeSwitcherVisible(false);
+        this.propertySheet.setSearchBoxVisible(false);
         this.propertySheet.setSkin(new CustomPropertySheetSkin(this.propertySheet));
-        VBox.setVgrow(this.propertySheet, Priority.ALWAYS);
 
         //GENERAL
         this.nameField = new ClearableTextItem(SheetCategory.PROVINCE_GENERAL,
                                                save.getGame().getLocalisation("LEDGER_NAME"));
         this.nameField.getTextField()
                       .getStylesheets()
-                      .add(getClass().getClassLoader().getResource("styles/style.css").toExternalForm());
+                      .add(getClass().getClassLoader().getResource("styles/propertySheetsStyle.css").toExternalForm());
 
         this.validationSupport = new ValidationSupport();
         this.validationSupport.registerValidator(this.nameField.getTextField(), Validator.createEmptyValidator("Text is required"));
@@ -153,41 +136,41 @@ public class ProvincePropertySheet extends VBox {
 
         this.cultureComboBox = new ClearableComboBoxItem<>(SheetCategory.PROVINCE_GENERAL,
                                                            save.getGame().getLocalisation("LEDGER_CULTURE"),
-                                                           this.cultures,
+                                                           cultures,
                                                            new ClearableComboBox<>(new SearchableComboBox<>()));
         this.cultureComboBox.setConverter(new CultureStringConverter());
         this.cultureComboBox.setCellFactory(new CultureStringCellFactory());
 
         this.religionComboBox = new ClearableComboBoxItem<>(SheetCategory.PROVINCE_GENERAL,
                                                             save.getGame().getLocalisation("LEDGER_RELIGION"),
-                                                            this.religions,
+                                                            religions,
                                                             new ClearableComboBox<>(new SearchableComboBox<>()));
         this.religionComboBox.setConverter(new ReligionStringConverter());
         this.religionComboBox.setCellFactory(new ReligionStringCellFactory());
 
         this.controllerComboBox = new ClearableComboBoxItem<>(SheetCategory.PROVINCE_POLITICAL,
                                                               save.getGame().getLocalisationClean("SUPPLY_CONTROLLER"),
-                                                              this.playableCountries,
+                                                              playableCountries,
                                                               new ClearableComboBox<>(new SearchableComboBox<>()));
         this.controllerComboBox.setConverter(new CountryStringConverter());
         this.controllerComboBox.setCellFactory(new CountryStringCellFactory());
 
         this.ownerComboBox = new ClearableComboBoxItem<>(SheetCategory.PROVINCE_POLITICAL,
                                                          save.getGame().getLocalisation("LEDGER_OWNER"),
-                                                         this.playableCountries,
+                                                         playableCountries,
                                                          new ClearableComboBox<>(new SearchableComboBox<>()));
         this.ownerComboBox.setConverter(new CountryStringConverter());
         this.ownerComboBox.setCellFactory(new CountryStringCellFactory());
 
         this.coresField = new ClearableCheckComboBoxItem<>(SheetCategory.PROVINCE_POLITICAL,
                                                            save.getGame().getLocalisation("LEDGER_CORE"),
-                                                           this.playableCountries,
+                                                           playableCountries,
                                                            new ClearableCheckComboBox<>());
         this.coresField.setConverter(new CountryStringConverter());
 
         this.claimsField = new ClearableCheckComboBoxItem<>(SheetCategory.PROVINCE_POLITICAL,
                                                             save.getGame().getLocalisation("HAVE_CLAIM_IN"),
-                                                            this.playableCountries,
+                                                            playableCountries,
                                                             new ClearableCheckComboBox<>());
         this.claimsField.setConverter(new CountryStringConverter());
 
@@ -197,7 +180,7 @@ public class ProvincePropertySheet extends VBox {
 
         this.colonizeForField = new ClearableComboBoxItem<>(SheetCategory.PROVINCE_COLONY,
                                                             save.getGame().getLocalisation("COLONIZE_PROVINCE"),
-                                                            this.playableCountries,
+                                                            playableCountries,
                                                             new ClearableComboBox<>(new SearchableComboBox<>()));
         this.colonizeForField.setConverter(new CountryStringConverter());
 
@@ -219,7 +202,7 @@ public class ProvincePropertySheet extends VBox {
 
         this.tradeGoodField = new ClearableComboBoxItem<>(SheetCategory.PROVINCE_ECONOMY,
                                                           save.getGame().getLocalisation("LEDGER_GOODS"),
-                                                          this.tradeGoods,
+                                                          tradeGoods,
                                                           new ClearableComboBox<>(new SearchableComboBox<>()));
         this.tradeGoodField.setConverter(new TradeGoodStringConverter());
         this.tradeGoodField.setCellFactory(new TradeGoodStringCellFactory());
@@ -227,7 +210,7 @@ public class ProvincePropertySheet extends VBox {
         this.latentTradeGoodField = new ClearableComboBoxItem<>(SheetCategory.PROVINCE_ECONOMY,
                                                                 save.getGame()
                                                                     .getLocalisationClean("LATENT_TRADE_GOODS_TOOLTIP_HEADER"),
-                                                                this.tradeGoods,
+                                                                tradeGoods,
                                                                 new ClearableComboBox<>(new SearchableComboBox<>()));
         this.latentTradeGoodField.setConverter(new TradeGoodStringConverter());
         this.latentTradeGoodField.setCellFactory(new TradeGoodStringCellFactory());
@@ -608,5 +591,9 @@ public class ProvincePropertySheet extends VBox {
 
     public ValidationSupport getValidationSupport() {
         return validationSupport;
+    }
+
+    public PropertySheet getPropertySheet() {
+        return propertySheet;
     }
 }

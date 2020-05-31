@@ -280,7 +280,7 @@ public class CustomPropertySheetSkin extends BehaviorSkinBase<PropertySheet, Beh
                 // filter properties
                 String title = item.getName();
 
-                if (!filter.isEmpty() && !title.toLowerCase().contains(filter)) {
+                if (title == null || (!filter.isEmpty() && !title.toLowerCase().contains(filter))) {
                     continue;
                 }
 

@@ -9,9 +9,12 @@ import com.osallek.eu4parser.model.save.province.SaveProvince;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.control.Label;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import org.controlsfx.control.SegmentedButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +40,12 @@ public abstract class AbstractMapView {
 
     protected final ObservableList<TradeGood> tradeGoods;
 
+    protected final Label titleLabel;
+
+    protected final SegmentedButton tabsSegmentedButton;
+
+    protected final ToggleButton saveButton;
+
     protected boolean selected;
 
     private List<Point2D> borders;
@@ -53,6 +62,24 @@ public abstract class AbstractMapView {
         this.cultures = cultures;
         this.religions = religions;
         this.tradeGoods = tradeGoods;
+
+        this.titleLabel = new Label();
+        this.titleLabel.setVisible(false);
+
+        this.saveButton = new ToggleButton(save.getGame().getLocalisation("SM_GAME"));
+        this.saveButton.setSelected(true);
+        this.saveButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (Boolean.FALSE.equals(oldValue) && Boolean.TRUE.equals(newValue)) {
+                this.removeSheets();
+                this.titleLabel.setText(save.getName());
+            }
+        });
+        this.saveButton.disableProperty().bind(this.saveButton.selectedProperty());
+
+        this.tabsSegmentedButton = new SegmentedButton(this.saveButton);
+        this.tabsSegmentedButton.getStyleClass().add(SegmentedButton.STYLE_CLASS_DARK);
+        this.tabsSegmentedButton.setMaxWidth(Double.MAX_VALUE);
+        this.tabsSegmentedButton.getStylesheets().add(getClass().getClassLoader().getResource("styles/style.css").toExternalForm());
     }
 
     public void drawProvincesBorders() {
@@ -77,12 +104,18 @@ public abstract class AbstractMapView {
 
     public abstract void onProvinceSelected(SaveProvince province);
 
+    public abstract void removeSheets();
+
     public boolean isSelected() {
         return selected;
     }
 
     public void setSelected(boolean selected) {
         this.selected = selected;
+    }
+
+    protected void clearTabsSegmentedButton() {
+        this.tabsSegmentedButton.getButtons().subList(1, this.tabsSegmentedButton.getButtons().size()).clear();
     }
 
     @Override
