@@ -32,6 +32,8 @@ import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableTextIte
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.HBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.SelectableGridViewItem;
 import com.osallek.eu4saveeditor.controller.validator.CustomGraphicValidationDecoration;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -107,6 +109,8 @@ public class ProvincePropertySheet extends VBox {
     private List<SelectableGridViewItem<Building>> buildingsFields;
 
     private final ChangeListener<? super Country> ownerChangeListener;
+
+    private BooleanProperty countryChanged;
 
     public ProvincePropertySheet(Save save, ObservableList<Country> playableCountries,
                                  ObservableList<Culture> cultures, ObservableList<Religion> religions,
@@ -247,6 +251,7 @@ public class ProvincePropertySheet extends VBox {
     public PropertySheet update(SaveProvince province) {
         Instant start = Instant.now();
         this.province = province;
+        this.countryChanged.set(false);
 
         this.ownerComboBox.valueProperty().removeListener(this.ownerChangeListener);
 
@@ -406,7 +411,6 @@ public class ProvincePropertySheet extends VBox {
     public void validate(ActionEvent actionEvent) {
         boolean nameChanged;
         boolean capitalChanged;
-        boolean countryChanged;
         boolean controllerChanged;
         boolean coresChanged;
         boolean claimsChanged;
@@ -441,7 +445,7 @@ public class ProvincePropertySheet extends VBox {
         if (this.ownerComboBox != null) {
             if (!Objects.deepEquals(this.province.getCountry(), this.ownerComboBox.getValue())) {
                 this.province.setOwner(this.ownerComboBox.getSelectedValue().getTag());
-                countryChanged = true;
+                this.countryChanged.set(true);
             }
         }
 
@@ -583,6 +587,24 @@ public class ProvincePropertySheet extends VBox {
                 colonized = true;
             }
         }
+    }
+
+    public final BooleanProperty countryChangedProperty() {
+        if (this.countryChanged == null) {
+            this.countryChanged = new BooleanPropertyBase() {
+                @Override
+                public Object getBean() {
+                    return ProvincePropertySheet.this;
+                }
+
+                @Override
+                public String getName() {
+                    return "countryChanged";
+                }
+            };
+        }
+
+        return countryChanged;
     }
 
     public SaveProvince getProvince() {

@@ -3,6 +3,7 @@ package com.osallek.eu4saveeditor.controller;
 import com.osallek.eu4parser.Eu4Parser;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4saveeditor.common.Constants;
+import com.osallek.eu4saveeditor.i18n.MenusI18n;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -41,7 +42,10 @@ public class HomeController implements Initializable {
     private boolean canOpenSaveFileChooser = true;
 
     @FXML
-    private Button startExtractButton;
+    public Text selectGameFolderText;
+
+    @FXML
+    public Text selectSaveFileText;
 
     @FXML
     private TextField selectedGameDirectory;
@@ -50,13 +54,27 @@ public class HomeController implements Initializable {
     private TextField selectedSaveFile;
 
     @FXML
+    public Button chooseGameFolderButton;
+
+    @FXML
+    public Button chooseSaveFileButton;
+
+    @FXML
+    private Button startExtractButton;
+
+    @FXML
     private Text infoText;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        this.gameDirectoryChooser.setTitle("EuIV game folder");
-        this.saveFileChooser.setTitle("Select save file");
-        this.saveFileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Eu4 save file", "*.eu4"));
+        this.gameDirectoryChooser.setTitle(MenusI18n.SELECT_GAME_FOLDER.getForDefaultLocale());
+        this.saveFileChooser.setTitle(MenusI18n.SELECT_SAVE_FILE.getForDefaultLocale());
+        this.saveFileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(MenusI18n.EU4_EXT_DESC.getForDefaultLocale(), "*.eu4"));
+        this.selectGameFolderText.setText(MenusI18n.SELECT_GAME_FOLDER_DESC.getForDefaultLocale());
+        this.selectSaveFileText.setText(MenusI18n.SELECT_SAVE_FILE_DESC.getForDefaultLocale());
+        this.chooseGameFolderButton.setText(MenusI18n.CHOOSE_FOLDER.getForDefaultLocale());
+        this.chooseSaveFileButton.setText(MenusI18n.CHOOSE_FILE.getForDefaultLocale());
+        this.startExtractButton.setText(MenusI18n.START_EXTRACT.getForDefaultLocale());
 
         if (Constants.DEFAULT_INSTALLATION_FILE.exists()) {
             this.gameDirectoryChooser.setInitialDirectory(Constants.DEFAULT_INSTALLATION_FILE);
@@ -87,7 +105,7 @@ public class HomeController implements Initializable {
 
     @FXML
     private void handleOpenSaveFileChoose(ActionEvent event) {
-        if (canOpenSaveFileChooser) {
+        if (this.canOpenSaveFileChooser) {
             Node eventSource = (Node) event.getSource();
             Window actionStage = eventSource.getScene().getWindow();
 
@@ -109,7 +127,7 @@ public class HomeController implements Initializable {
         this.canOpenGameDirectoryChoose = false;
         this.canOpenSaveFileChooser = false;
         this.infoText.setVisible(true);
-        this.infoText.setText("Extracting...");
+        this.infoText.setText(MenusI18n.EXTRACTING.getForDefaultLocale());
         new Thread(() -> {
             Save save;
 

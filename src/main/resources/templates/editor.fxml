@@ -3,10 +3,14 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
+<?import javafx.scene.control.Button?>
 <BorderPane xmlns:fx="http://javafx.com/fxml" fx:id="pane" fx:controller="com.osallek.eu4saveeditor.controller.EditorController">
   <top>
-    <HBox alignment="CENTER">
-      <Text fx:id="title" textAlignment="CENTER" style="-fx-font-size: 14px"/>
+    <HBox alignment="CENTER" spacing="10">
+      <HBox alignment="CENTER">
+        <Text fx:id="title" textAlignment="CENTER" style="-fx-font-size: 14px"/>
+      </HBox>
+      <Button fx:id="saveButton" onMouseClicked="#onClickExportButton"/>
     </HBox>
   </top>
   <right>

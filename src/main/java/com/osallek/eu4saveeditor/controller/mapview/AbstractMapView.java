@@ -7,22 +7,19 @@ import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
 import javafx.collections.ObservableList;
-import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.image.PixelWriter;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import org.controlsfx.control.SegmentedButton;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 public abstract class AbstractMapView {
 
     protected final SaveProvince[][] provincesMap;
+
+    protected final DrawableProvince[] drawableProvinces;
 
     protected final Canvas canvas;
 
@@ -48,12 +45,11 @@ public abstract class AbstractMapView {
 
     protected boolean selected;
 
-    private List<Point2D> borders;
-
     public AbstractMapView(SaveProvince[][] provincesMap, Canvas canvas, VBox editPane, Save save, MapViewType type,
                            ObservableList<Country> playableCountries, ObservableList<Culture> cultures,
                            ObservableList<Religion> religions, ObservableList<TradeGood> tradeGoods) {
         this.provincesMap = provincesMap;
+        this.drawableProvinces = new DrawableProvince[save.getProvinces().size() + 1];
         this.canvas = canvas;
         this.editPane = editPane;
         this.save = save;
@@ -67,37 +63,21 @@ public abstract class AbstractMapView {
         this.titleLabel.setVisible(false);
 
         this.saveButton = new ToggleButton(save.getGame().getLocalisation("SM_GAME"));
-        this.saveButton.setSelected(true);
         this.saveButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
             if (Boolean.FALSE.equals(oldValue) && Boolean.TRUE.equals(newValue)) {
-                this.removeSheets();
-                this.titleLabel.setText(save.getName());
+                selectSaveButton();
             }
         });
+        this.saveButton.setSelected(true);
         this.saveButton.disableProperty().bind(this.saveButton.selectedProperty());
 
         this.tabsSegmentedButton = new SegmentedButton(this.saveButton);
         this.tabsSegmentedButton.getStyleClass().add(SegmentedButton.STYLE_CLASS_DARK);
         this.tabsSegmentedButton.setMaxWidth(Double.MAX_VALUE);
-        this.tabsSegmentedButton.getStylesheets().add(getClass().getClassLoader().getResource("styles/style.css").toExternalForm());
-    }
+        this.tabsSegmentedButton.getStylesheets()
+                                .add(getClass().getClassLoader().getResource("styles/style.css").toExternalForm());
 
-    public void drawProvincesBorders() {
-        if (this.borders == null) {
-            this.borders = new ArrayList<>();
-            for (int x = 1; x < this.provincesMap.length; x++) {
-                for (int y = 1; y < this.provincesMap[x].length; y++) {
-                    SaveProvince province = this.provincesMap[x][y];
-                    if (!province.equals(this.provincesMap[x - 1][y])
-                        || !province.equals(this.provincesMap[x][y - 1])) {
-                        this.borders.add(new Point2D(x, y));
-                    }
-                }
-            }
-        }
-
-        PixelWriter pixelWriter = this.canvas.getGraphicsContext2D().getPixelWriter();
-        this.borders.forEach(point2D -> pixelWriter.setColor((int) point2D.getX(), (int) point2D.getY(), Color.BLACK));
+        init();
     }
 
     public abstract void draw();
@@ -105,6 +85,13 @@ public abstract class AbstractMapView {
     public abstract void onProvinceSelected(SaveProvince province);
 
     public abstract void removeSheets();
+
+    protected abstract void updateTitle();
+
+    protected void selectSaveButton() {
+        removeSheets();
+        updateTitle();
+    }
 
     public boolean isSelected() {
         return selected;
@@ -116,6 +103,34 @@ public abstract class AbstractMapView {
 
     protected void clearTabsSegmentedButton() {
         this.tabsSegmentedButton.getButtons().subList(1, this.tabsSegmentedButton.getButtons().size()).clear();
+    }
+
+    private void init() {
+        for (int x = 0; x < this.provincesMap.length; x++) {
+            for (int y = 0; y < this.provincesMap[x].length; y++) {
+                SaveProvince province = this.provincesMap[x][y];
+                int startY = y;
+                while (y < this.provincesMap[x].length && this.provincesMap[x][y].equals(province)) {
+                    y++;
+                }
+
+                if (this.drawableProvinces[province.getId()] == null) {
+                    this.drawableProvinces[province.getId()] = new DrawableProvince(province);
+                }
+
+                this.drawableProvinces[province.getId()].addRectangle(x, startY, 1, y - startY);
+            }
+        }
+
+        for (int x = 1; x < this.provincesMap.length; x++) {
+            for (int y = 1; y < this.provincesMap[x].length; y++) {
+                SaveProvince province = this.provincesMap[x][y];
+                if (!province.equals(this.provincesMap[x - 1][y])
+                    || !province.equals(this.provincesMap[x][y - 1])) {
+                    this.drawableProvinces[province.getId()].addBorder(x, y);
+                }
+            }
+        }
     }
 
     @Override

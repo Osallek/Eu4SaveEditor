@@ -12,6 +12,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.image.PixelWriter;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
@@ -32,12 +33,16 @@ public class CountriesMapView extends AbstractMapView {
                             ObservableList<Religion> religions, ObservableList<TradeGood> tradeGoods) {
         super(provincesMap, canvas, editPane, save, MapViewType.COUNTRIES_MAP_VIEW, playableCountries, cultures, religions, tradeGoods);
         this.provinceSheet = new ProvincePropertySheet(save, this.playableCountries, this.cultures, this.religions, this.tradeGoods);
+        this.provinceSheet.countryChangedProperty().addListener((observable, oldValue, newValue) -> {
+            if (Boolean.FALSE.equals(oldValue) && Boolean.TRUE.equals(newValue)) {
+                drawProvince(this.provinceSheet.getProvince().getId());
+            }
+        });
 
         this.countryButton = new ToggleButton(save.getGame().getLocalisation("TRIGGER_COUNTRY"));
         this.countryButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
             if (Boolean.FALSE.equals(oldValue) && Boolean.TRUE.equals(newValue)) {
-                this.editPane.getChildren().remove(this.provinceSheet.getPropertySheet());
-                this.titleLabel.setText(this.selectedProvince.getCountry().getLocalizedName());
+                selectCountryButton();
             }
         });
         this.countryButton.disableProperty().bind(this.countryButton.selectedProperty());
@@ -46,8 +51,7 @@ public class CountriesMapView extends AbstractMapView {
         this.provinceButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
             if (Boolean.FALSE.equals(oldValue) && Boolean.TRUE.equals(newValue)
                 && !this.editPane.getChildren().contains(this.provinceSheet.getPropertySheet())) {
-                this.editPane.getChildren().add(2, this.provinceSheet.getPropertySheet());
-                this.titleLabel.setText(getTitle(this.selectedProvince));
+                selectProvinceButton();
             }
         });
         this.provinceButton.disableProperty().bind(this.provinceButton.selectedProperty());
@@ -63,34 +67,24 @@ public class CountriesMapView extends AbstractMapView {
 
     @Override
     public void draw() {
-        GraphicsContext gc = this.canvas.getGraphicsContext2D();
-        for (int x = 0; x < this.provincesMap.length; x++) {
-            for (int y = 0; y < this.provincesMap[x].length; y++) {
-                SaveProvince province = this.provincesMap[x][y];
-                int startY = y;
-                while (y < this.provincesMap[x].length && this.provincesMap[x][y].equals(province)) {
-                    y++;
-                }
-
-                gc.setFill(getOwnerColor(province));
-                gc.fillRect(x, startY, 1, (double) y - startY);
+        for (DrawableProvince drawableProvince : this.drawableProvinces) {
+            if (drawableProvince != null) {
+                drawProvince(drawableProvince.getProvince().getId());
             }
         }
-
-        drawProvincesBorders();
     }
 
     @Override
     public void onProvinceSelected(SaveProvince province) {
         this.selectedProvince = province;
+        this.provinceSheet.update(province);
+        updateTitle();
 
         if (this.selected) {
-            this.titleLabel.setText(getTitle(province));
-            this.provinceSheet.update(province);
             this.submitButton.disableProperty().bind(this.provinceSheet.getValidationSupport().invalidProperty());
         } else {
             this.editPane.getChildren().clear();
-            this.clearTabsSegmentedButton();
+            clearTabsSegmentedButton();
 
             this.tabsSegmentedButton.getButtons().add(this.countryButton);
             this.tabsSegmentedButton.getButtons().add(this.provinceButton);
@@ -105,12 +99,17 @@ public class CountriesMapView extends AbstractMapView {
 
             this.editPane.getChildren().add(this.tabsSegmentedButton);
 
-            this.titleLabel.setText(getTitle(province));
             this.titleLabel.setVisible(true);
 
             this.editPane.getChildren().add(this.titleLabel);
 
-            this.editPane.getChildren().add(this.provinceSheet.update(province));
+            if (this.saveButton.isSelected()) {
+                selectSaveButton();
+            } else if (this.countryButton.isSelected()) {
+                selectCountryButton();
+            } else if (this.provinceButton.isSelected()) {
+                selectProvinceButton();
+            }
 
             this.editPane.getChildren().add(this.submitButton);
         }
@@ -118,7 +117,43 @@ public class CountriesMapView extends AbstractMapView {
 
     @Override
     public void removeSheets() {
+        if (this.provinceSheet != null) {
+            this.editPane.getChildren().remove(this.provinceSheet.getPropertySheet());
+        }
+    }
+
+    @Override
+    protected void updateTitle() {
+        if (this.saveButton.isSelected()) {
+            this.titleLabel.setText(this.save.getName());
+        } else if (this.countryButton.isSelected()) {
+            this.titleLabel.setText(this.selectedProvince.getCountry().getLocalizedName());
+        } else if (this.provinceButton.isSelected()) {
+            this.titleLabel.setText(getTitle(this.selectedProvince));
+        }
+    }
+
+    private void selectCountryButton() {
         this.editPane.getChildren().remove(this.provinceSheet.getPropertySheet());
+        updateTitle();
+    }
+
+    private void selectProvinceButton() {
+        this.editPane.getChildren().add(2, this.provinceSheet.getPropertySheet());
+        updateTitle();
+    }
+
+    private void drawProvince(int provinceId) {
+        GraphicsContext graphicsContext = this.canvas.getGraphicsContext2D();
+        Color color = getOwnerColor(this.drawableProvinces[provinceId].getProvince());
+        graphicsContext.setFill(color);
+        this.drawableProvinces[provinceId].getRectangles()
+                                          .forEach(rectangle -> graphicsContext.fillRect(rectangle.getX(), rectangle.getY(), rectangle
+                                                  .getWidth(), rectangle.getHeight()));
+
+        PixelWriter pixelWriter = graphicsContext.getPixelWriter();
+        this.drawableProvinces[provinceId].getBorders()
+                                          .forEach(point2D -> pixelWriter.setColor((int) point2D.getX(), (int) point2D.getY(), Color.BLACK));
     }
 
     private String getTitle(SaveProvince saveProvince) {
