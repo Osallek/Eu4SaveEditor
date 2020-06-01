@@ -116,6 +116,8 @@ public class ProvincePropertySheet extends VBox {
 
     private BooleanProperty countryChanged;
 
+    private CustomPropertySheetSkin propertySheetSkin;
+
     public ProvincePropertySheet(Save save, ObservableList<Country> playableCountries,
                                  ObservableList<Culture> cultures, ObservableList<Religion> religions,
                                  ObservableList<TradeGood> tradeGoods) {
@@ -125,7 +127,9 @@ public class ProvincePropertySheet extends VBox {
         this.propertySheet.setCategoryComparator(Comparator.comparing(SheetCategory::getByLocale));
         this.propertySheet.setModeSwitcherVisible(false);
         this.propertySheet.setSearchBoxVisible(false);
-        this.propertySheet.setSkin(new CustomPropertySheetSkin(this.propertySheet));
+
+        this.propertySheetSkin = new CustomPropertySheetSkin(this.propertySheet);
+        this.propertySheet.setSkin(this.propertySheetSkin);
 
         //GENERAL
         this.nameField = new ClearableTextItem(SheetCategory.PROVINCE_GENERAL,
@@ -259,7 +263,7 @@ public class ProvincePropertySheet extends VBox {
         this.ownerChangeListener = (observable, oldValue, newValue) -> {
             this.controllerComboBox.select(newValue);
 
-            if (this.province.isCity() && this.coresField != null) {
+            if (this.province.isCity()) {
                 this.coresField.clearCheck(oldValue);
                 this.coresField.check(newValue);
             }
@@ -269,6 +273,8 @@ public class ProvincePropertySheet extends VBox {
     public PropertySheet update(SaveProvince province) {
         this.province = province;
         this.countryChanged.set(false);
+        String expandedPaneName = this.propertySheetSkin.getAccordion().getExpandedPane() == null ? null :
+                                  this.propertySheetSkin.getAccordion().getExpandedPane().getText();
 
         this.ownerComboBox.valueProperty().removeListener(this.ownerChangeListener);
 
@@ -475,6 +481,16 @@ public class ProvincePropertySheet extends VBox {
         }
 
         this.propertySheet.getItems().setAll(items);
+
+        if (expandedPaneName != null) {
+            this.propertySheetSkin.getAccordion()
+                                  .getPanes()
+                                  .stream()
+                                  .filter(titledPane -> titledPane.getText().equals(expandedPaneName))
+                                  .findFirst()
+                                  .ifPresent(titledPane -> this.propertySheetSkin.getAccordion()
+                                                                                 .setExpandedPane(titledPane));
+        }
 
         this.ownerComboBox.valueProperty().addListener(this.ownerChangeListener);
         return this.propertySheet;

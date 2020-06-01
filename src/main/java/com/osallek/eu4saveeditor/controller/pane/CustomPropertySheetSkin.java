@@ -83,6 +83,7 @@ public class CustomPropertySheetSkin extends BehaviorSkinBase<PropertySheet, Beh
             new ActionChangeMode(Mode.CATEGORY)
                                                                                 );
     private final TextField searchField = TextFields.createClearableTextField();
+    private Accordion accordion;
 
 
     /**************************************************************************
@@ -147,15 +148,24 @@ public class CustomPropertySheetSkin extends BehaviorSkinBase<PropertySheet, Beh
     protected void handleControlPropertyChanged(String p) {
         super.handleControlPropertyChanged(p);
 
-        if (p == "MODE" || p == "EDITOR-FACTORY" || p == "FILTER"
-            || p == "CATEGORY-COMPARATOR") { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-            refreshProperties();
-        } else if (p == "FILTER-UI") { //$NON-NLS-1$
-            getSkinnable().setTitleFilter(searchField.getText());
-        } else if (p == "TOOLBAR-MODE") { //$NON-NLS-1$
-            updateToolbar();
-        } else if (p == "TOOLBAR-SEARCH") { //$NON-NLS-1$
-            updateToolbar();
+        switch (p) {
+            case "MODE":
+            case "EDITOR-FACTORY":
+            case "FILTER":
+            case "CATEGORY-COMPARATOR":  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                refreshProperties();
+                break;
+            case "FILTER-UI":  //$NON-NLS-1$
+                getSkinnable().setTitleFilter(searchField.getText());
+                break;
+            case "TOOLBAR-MODE":  //$NON-NLS-1$
+                updateToolbar();
+                break;
+            case "TOOLBAR-SEARCH":  //$NON-NLS-1$
+                updateToolbar();
+                break;
+            default:
+                break;
         }
     }
 
@@ -184,35 +194,39 @@ public class CustomPropertySheetSkin extends BehaviorSkinBase<PropertySheet, Beh
 
     private Node buildPropertySheetContainer() {
         switch (getSkinnable().modeProperty().get()) {
-            case CATEGORY: {
+            case CATEGORY:
                 // group by category
-                Map<String, List<Item>> categoryMap = new TreeMap(getSkinnable().getCategoryComparator());
+                Map<String, List<Item>> categoryMap = new TreeMap<>(getSkinnable().getCategoryComparator());
                 for (Item p : getSkinnable().getItems()) {
-                    String category = p.getCategory();
-                    List<Item> list = categoryMap.get(category);
-                    if (list == null) {
-                        list = new ArrayList<>();
-                        categoryMap.put(category, list);
-                    }
-                    list.add(p);
+                    categoryMap.compute(p.getCategory(), (category, items) -> {
+                        if (items == null) {
+                            items = new ArrayList<>();
+                        }
+
+                        items.add(p);
+
+                        return items;
+                    });
                 }
 
                 // create category-based accordion
-                Accordion accordion = new Accordion();
-                for (String category : categoryMap.keySet()) {
-                    PropertyPane props = new PropertyPane(categoryMap.get(category));
+                accordion = new Accordion();
+                for (Map.Entry<String, List<Item>> category : categoryMap.entrySet()) {
+                    PropertyPane props = new PropertyPane(category.getValue());
+
                     // Only show non-empty categories
-                    if (props.getChildrenUnmodifiable().size() > 0) {
-                        TitledPane pane = new TitledPane(category, props);
+                    if (!props.getChildrenUnmodifiable().isEmpty()) {
+                        TitledPane pane = new TitledPane(category.getKey(), props);
                         pane.setExpanded(true);
                         accordion.getPanes().add(pane);
                     }
                 }
-                if (accordion.getPanes().size() > 0) {
+
+                if (!accordion.getPanes().isEmpty()) {
                     accordion.setExpandedPane(accordion.getPanes().get(0));
                 }
+
                 return accordion;
-            }
 
             default:
                 return new PropertyPane(getSkinnable().getItems());
@@ -352,8 +366,33 @@ public class CustomPropertySheetSkin extends BehaviorSkinBase<PropertySheet, Beh
             } else if (!item.isEditable()) {
                 editor.getEditor().setDisable(true);
             }
+
             editor.setValue(item.getValue());
             return editor.getEditor();
         }
+    }
+
+    public BorderPane getContent() {
+        return content;
+    }
+
+    public ScrollPane getScroller() {
+        return scroller;
+    }
+
+    public ToolBar getToolbar() {
+        return toolbar;
+    }
+
+    public SegmentedButton getModeButton() {
+        return modeButton;
+    }
+
+    public TextField getSearchField() {
+        return searchField;
+    }
+
+    public Accordion getAccordion() {
+        return accordion;
     }
 }
