@@ -16,6 +16,8 @@ import javafx.scene.image.PixelWriter;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
+import java.util.Map;
+
 public class CountriesMapView extends AbstractMapView {
 
     private SaveProvince selectedProvince;
@@ -28,10 +30,11 @@ public class CountriesMapView extends AbstractMapView {
 
     private final Button submitButton;
 
-    public CountriesMapView(SaveProvince[][] provincesMap, Canvas canvas, VBox editPane, Save save,
+    public CountriesMapView(SaveProvince[][] provincesMap, Map<Integer, DrawableProvince> drawableProvinces,
+                            Canvas canvas, VBox editPane, Save save,
                             ObservableList<Country> playableCountries, ObservableList<Culture> cultures,
                             ObservableList<Religion> religions, ObservableList<TradeGood> tradeGoods) {
-        super(provincesMap, canvas, editPane, save, MapViewType.COUNTRIES_MAP_VIEW, playableCountries, cultures, religions, tradeGoods);
+        super(provincesMap, drawableProvinces, canvas, editPane, save, MapViewType.COUNTRIES_MAP_VIEW, playableCountries, cultures, religions, tradeGoods);
         this.provinceSheet = new ProvincePropertySheet(save, this.playableCountries, this.cultures, this.religions, this.tradeGoods);
         this.provinceSheet.countryChangedProperty().addListener((observable, oldValue, newValue) -> {
             if (Boolean.FALSE.equals(oldValue) && Boolean.TRUE.equals(newValue)) {
@@ -60,14 +63,14 @@ public class CountriesMapView extends AbstractMapView {
         this.submitButton.setOnAction(e -> {
             this.provinceSheet.validate(e);
             this.provinceSheet.update(this.provinceSheet.getProvince());
-            this.titleLabel.setText(getTitle(this.provinceSheet.getProvince()));
+            updateTitle();
         });
         this.submitButton.disableProperty().bind(this.provinceSheet.getValidationSupport().invalidProperty());
     }
 
     @Override
     public void draw() {
-        for (DrawableProvince drawableProvince : this.drawableProvinces) {
+        for (DrawableProvince drawableProvince : this.drawableProvinces.values()) {
             if (drawableProvince != null) {
                 drawProvince(drawableProvince.getProvince().getId());
             }
@@ -145,15 +148,15 @@ public class CountriesMapView extends AbstractMapView {
 
     private void drawProvince(int provinceId) {
         GraphicsContext graphicsContext = this.canvas.getGraphicsContext2D();
-        Color color = getOwnerColor(this.drawableProvinces[provinceId].getProvince());
+        Color color = getOwnerColor(this.drawableProvinces.get(provinceId).getProvince());
         graphicsContext.setFill(color);
-        this.drawableProvinces[provinceId].getRectangles()
-                                          .forEach(rectangle -> graphicsContext.fillRect(rectangle.getX(), rectangle.getY(), rectangle
-                                                  .getWidth(), rectangle.getHeight()));
+        this.drawableProvinces.get(provinceId).getRectangles()
+                              .forEach(rectangle -> graphicsContext.fillRect(rectangle.x, rectangle.y, rectangle
+                                      .width, rectangle.height));
 
         PixelWriter pixelWriter = graphicsContext.getPixelWriter();
-        this.drawableProvinces[provinceId].getBorders()
-                                          .forEach(point2D -> pixelWriter.setColor((int) point2D.getX(), (int) point2D.getY(), Color.BLACK));
+        this.drawableProvinces.get(provinceId).getBorders()
+                              .forEach(point2D -> pixelWriter.setColor((int) point2D.getX(), (int) point2D.getY(), Color.BLACK));
     }
 
     private String getTitle(SaveProvince saveProvince) {

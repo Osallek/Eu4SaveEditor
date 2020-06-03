@@ -13,13 +13,14 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.VBox;
 import org.controlsfx.control.SegmentedButton;
 
+import java.util.Map;
 import java.util.Objects;
 
 public abstract class AbstractMapView {
 
     protected final SaveProvince[][] provincesMap;
 
-    protected final DrawableProvince[] drawableProvinces;
+    protected final Map<Integer, DrawableProvince> drawableProvinces;
 
     protected final Canvas canvas;
 
@@ -45,11 +46,11 @@ public abstract class AbstractMapView {
 
     protected boolean selected;
 
-    public AbstractMapView(SaveProvince[][] provincesMap, Canvas canvas, VBox editPane, Save save, MapViewType type,
+    public AbstractMapView(SaveProvince[][] provincesMap, Map<Integer, DrawableProvince> drawableProvinces, Canvas canvas, VBox editPane, Save save, MapViewType type,
                            ObservableList<Country> playableCountries, ObservableList<Culture> cultures,
                            ObservableList<Religion> religions, ObservableList<TradeGood> tradeGoods) {
         this.provincesMap = provincesMap;
-        this.drawableProvinces = new DrawableProvince[save.getProvinces().size() + 1];
+        this.drawableProvinces = drawableProvinces;
         this.canvas = canvas;
         this.editPane = editPane;
         this.save = save;
@@ -76,8 +77,6 @@ public abstract class AbstractMapView {
         this.tabsSegmentedButton.setMaxWidth(Double.MAX_VALUE);
         this.tabsSegmentedButton.getStylesheets()
                                 .add(getClass().getClassLoader().getResource("styles/style.css").toExternalForm());
-
-        init();
     }
 
     public abstract void draw();
@@ -103,34 +102,6 @@ public abstract class AbstractMapView {
 
     protected void clearTabsSegmentedButton() {
         this.tabsSegmentedButton.getButtons().subList(1, this.tabsSegmentedButton.getButtons().size()).clear();
-    }
-
-    private void init() {
-        for (int x = 0; x < this.provincesMap.length; x++) {
-            for (int y = 0; y < this.provincesMap[x].length; y++) {
-                SaveProvince province = this.provincesMap[x][y];
-                int startY = y;
-                while (y < this.provincesMap[x].length && this.provincesMap[x][y].equals(province)) {
-                    y++;
-                }
-
-                if (this.drawableProvinces[province.getId()] == null) {
-                    this.drawableProvinces[province.getId()] = new DrawableProvince(province);
-                }
-
-                this.drawableProvinces[province.getId()].addRectangle(x, startY, 1, y - startY);
-            }
-        }
-
-        for (int x = 1; x < this.provincesMap.length; x++) {
-            for (int y = 1; y < this.provincesMap[x].length; y++) {
-                SaveProvince province = this.provincesMap[x][y];
-                if (!province.equals(this.provincesMap[x - 1][y])
-                    || !province.equals(this.provincesMap[x][y - 1])) {
-                    this.drawableProvinces[province.getId()].addBorder(x, y);
-                }
-            }
-        }
     }
 
     @Override

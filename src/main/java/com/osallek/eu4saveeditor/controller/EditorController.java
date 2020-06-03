@@ -11,9 +11,11 @@ import com.osallek.eu4saveeditor.Main;
 import com.osallek.eu4saveeditor.common.Constants;
 import com.osallek.eu4saveeditor.controller.mapview.AbstractMapView;
 import com.osallek.eu4saveeditor.controller.mapview.CountriesMapView;
+import com.osallek.eu4saveeditor.controller.mapview.DrawableProvince;
 import com.osallek.eu4saveeditor.controller.mapview.MapViewType;
 import com.osallek.eu4saveeditor.controller.pane.ZoomableScrollPane;
 import com.osallek.eu4saveeditor.i18n.MenusI18n;
+import com.sun.javafx.geom.Rectangle;
 import javafx.animation.PauseTransition;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -46,6 +48,7 @@ import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -63,6 +66,8 @@ public class EditorController implements Initializable {
     private final Tooltip tooltip = new Tooltip();
 
     private SaveProvince[][] provincesMap;
+
+    private Map<Integer, DrawableProvince> drawableProvinces;
 
     private final BooleanProperty mouseMoving = new SimpleBooleanProperty();
 
@@ -226,15 +231,42 @@ public class EditorController implements Initializable {
                                                                                        .getGame()
                                                                                        .getTradeGoods());
 
+            this.drawableProvinces = new HashMap<>();
+            for (int x = 0; x < this.provincesMap.length; x++) {
+                for (int y = 0; y < this.provincesMap[x].length; y++) {
+                    SaveProvince province = this.provincesMap[x][y];
+                    int startY = y;
+                    while (y < this.provincesMap[x].length && this.provincesMap[x][y].equals(province)) {
+                        y++;
+                    }
+
+                    DrawableProvince drawableProvince = this.drawableProvinces.getOrDefault(province.getId(), new DrawableProvince(province));
+                    drawableProvince.addRectangle(x, startY, 1, y - startY);
+                    this.drawableProvinces.put(province.getId(), drawableProvince);
+                }
+            }
+
+            for (int x = 1; x < this.provincesMap.length; x++) {
+                for (int y = 1; y < this.provincesMap[x].length; y++) {
+                    SaveProvince province = this.provincesMap[x][y];
+                    if (!province.equals(this.provincesMap[x - 1][y])
+                        || !province.equals(this.provincesMap[x][y - 1])) {
+                        this.drawableProvinces.get(province.getId()).addBorder(x, y);
+                    }
+                }
+            }
+
             this.saveButton.setText(this.save.getGame().getLocalisation("SAVE"));
 
             this.mapViews.put(MapViewType.COUNTRIES_MAP_VIEW,
-                              new CountriesMapView(this.provincesMap, this.provincesCanvas, this.editPane, this.save,
-                                                   this.playableCountries, this.cultures, this.religions, this.tradeGoods));
+                              new CountriesMapView(this.provincesMap, this.drawableProvinces, this.provincesCanvas,
+                                                   this.editPane, this.save, this.playableCountries, this.cultures,
+                                                   this.religions, this.tradeGoods));
             this.selectedMapView = this.mapViews.get(MapViewType.COUNTRIES_MAP_VIEW);
             this.selectedMapView.draw();
         } catch (IOException e) {
-            Main.LOGGER.log(Level.SEVERE, "Can't load terrain image ! Make sure your game files are not corrupted !" + e.getMessage(), e);
+            Main.LOGGER.log(Level.SEVERE, "Can't load terrain image ! Make sure your game files are not corrupted !"
+                                          + e.getMessage(), e);
             this.title.setText("Can't load terrain image ! Make sure your game files are not corrupted !");
             this.title.setFill(Paint.valueOf(Color.RED.toString()));
         }
@@ -243,8 +275,29 @@ public class EditorController implements Initializable {
     public void maximize() {
         ((Stage) this.provincesPane.getScene().getWindow()).setMaximized(true);
         if (this.provincesCanvas.getWidth() > this.provincesPane.getViewportBounds().getWidth()) {
-            this.provincesPane.setHvalue(
-                    this.provincesPane.getHmax() * (2850 / this.provincesCanvas.getWidth()));
+            if (this.drawableProvinces.get(this.save.getPlayedCountry().getCapitalId()) != null
+                && this.drawableProvinces.get(this.save.getPlayedCountry().getCapitalId()).getRectangles() != null) {
+                Rectangle rectangle = this.drawableProvinces.get(this.save.getPlayedCountry().getCapitalId())
+                                                            .getRectangles()
+                                                            .get(0);
+                this.provincesPane.setHvalue(
+                        this.provincesPane.getHmax() * (rectangle.x / this.provincesCanvas.getWidth()));
+
+                this.provincesPane.setVvalue(
+                        this.provincesPane.getVmax() * (rectangle.y / this.provincesCanvas.getHeight()));
+            }
+        }
+
+        if (this.drawableProvinces.get(this.save.getPlayedCountry().getCapitalId()) != null
+            && this.drawableProvinces.get(this.save.getPlayedCountry().getCapitalId()).getRectangles() != null) {
+            Rectangle rectangle = this.drawableProvinces.get(this.save.getPlayedCountry().getCapitalId())
+                                                        .getRectangles()
+                                                        .get(0);
+
+            onMouseReleasedProvinceImageView(new MouseEvent(MouseEvent.MOUSE_RELEASED, rectangle.x, rectangle.y,
+                                                            rectangle.x, rectangle.y, MouseButton.PRIMARY, 1, false, false,
+                                                            false, false, true, false, false, false, false, false,
+                                                            null));
         }
 
         this.imageCursor = new ImageCursor(new Image(this.save.getGame()
