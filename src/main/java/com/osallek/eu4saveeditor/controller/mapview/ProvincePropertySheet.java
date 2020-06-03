@@ -329,13 +329,12 @@ public class ProvincePropertySheet extends VBox {
             if (this.province.isCity() || this.province.getColonySize() != null) {
                 this.ownerComboBox.setValue(this.province.getCountry());
                 this.ownerComboBox.setSupplier(this.province::getCountry);
+                this.ownerComboBox.setEditable(true);
+                items.add(this.ownerComboBox);
 
                 this.controllerComboBox.setValue(this.province.getController());
                 this.controllerComboBox.setSupplier(this.province::getController);
-
-                this.capitalField.setEditable(true);
-                this.capitalField.setEditable(true);
-                items.add(this.ownerComboBox);
+                this.controllerComboBox.setEditable(true);
                 items.add(this.controllerComboBox);
             }
 
