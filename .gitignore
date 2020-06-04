@@ -71,3 +71,4 @@ build/
 /logs.txt
 
 logs.txt.lck
+/config.txt

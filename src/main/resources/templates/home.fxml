@@ -17,9 +17,9 @@
         <Text fx:id="selectSaveFileText"/>
       </VBox>
       <VBox spacing="10">
-        <TextField fx:id="selectedGameDirectory" prefWidth="400" editable="false">
+        <TextField fx:id="selectedGameDirectory" prefWidth="550" editable="false">
         </TextField>
-        <TextField fx:id="selectedSaveFile" prefWidth="400" editable="false">
+        <TextField fx:id="selectedSaveFile" prefWidth="550" editable="false">
         </TextField>
       </VBox>
       <VBox spacing="10">

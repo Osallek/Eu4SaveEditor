@@ -3,7 +3,10 @@ package com.osallek.eu4saveeditor.controller;
 import com.osallek.eu4parser.Eu4Parser;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4saveeditor.Main;
+import com.osallek.eu4saveeditor.common.Config;
 import com.osallek.eu4saveeditor.common.Constants;
+import com.osallek.eu4saveeditor.common.FileProperty;
+import com.osallek.eu4saveeditor.controller.converter.FileStringConverter;
 import com.osallek.eu4saveeditor.i18n.MenusI18n;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -21,7 +24,6 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -35,9 +37,9 @@ public class HomeController implements Initializable {
 
     private final FileChooser saveFileChooser = new FileChooser();
 
-    private File gameDirectory;
+    private FileProperty gameDirectory;
 
-    private File saveFile;
+    private FileProperty saveFile;
 
     private boolean canOpenGameDirectoryChoose = true;
 
@@ -69,22 +71,30 @@ public class HomeController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        this.gameDirectoryChooser.setTitle(MenusI18n.SELECT_GAME_FOLDER.getForDefaultLocale());
-        this.saveFileChooser.setTitle(MenusI18n.SELECT_SAVE_FILE.getForDefaultLocale());
-        this.saveFileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(MenusI18n.EU4_EXT_DESC.getForDefaultLocale(), "*.eu4"));
+        this.gameDirectory = new FileProperty(this, "gameDirectory");
+        this.saveFile = new FileProperty(this, "saveFile");
         this.selectGameFolderText.setText(MenusI18n.SELECT_GAME_FOLDER_DESC.getForDefaultLocale());
         this.selectSaveFileText.setText(MenusI18n.SELECT_SAVE_FILE_DESC.getForDefaultLocale());
         this.chooseGameFolderButton.setText(MenusI18n.CHOOSE_FOLDER.getForDefaultLocale());
         this.chooseSaveFileButton.setText(MenusI18n.CHOOSE_FILE.getForDefaultLocale());
         this.startExtractButton.setText(MenusI18n.START_EXTRACT.getForDefaultLocale());
 
-        if (Constants.DEFAULT_INSTALLATION_FILE.exists()) {
-            this.gameDirectoryChooser.setInitialDirectory(Constants.DEFAULT_INSTALLATION_FILE);
-        }
+        this.gameDirectoryChooser.setTitle(MenusI18n.SELECT_GAME_FOLDER.getForDefaultLocale());
+        this.saveFileChooser.setTitle(MenusI18n.SELECT_SAVE_FILE.getForDefaultLocale());
+        this.saveFileChooser.getExtensionFilters()
+                            .add(new FileChooser.ExtensionFilter(MenusI18n.EU4_EXT_DESC.getForDefaultLocale(), "*.eu4"));
 
-        if (Constants.DOCUMENTS_FOLDER.exists()) {
-            this.saveFileChooser.setInitialDirectory(Constants.SAVES_FOLDER);
-        }
+        this.selectedGameDirectory.textProperty()
+                                  .bindBidirectional(this.gameDirectory, new FileStringConverter());
+        this.selectedSaveFile.textProperty()
+                             .bindBidirectional(this.saveFile, new FileStringConverter());
+
+        this.gameDirectoryChooser.setInitialDirectory(Config.getGameFolder());
+        this.gameDirectory.set(Config.getGameFolder());
+
+        this.saveFileChooser.setInitialDirectory(Config.getSaveFolder());
+        this.selectedSaveFile.setText(Config.getSaveFile() == null ? null : Config.getSaveFile().getAbsolutePath());
+        enableStartExtractButton();
     }
 
     @FXML
@@ -93,14 +103,14 @@ public class HomeController implements Initializable {
             Node eventSource = (Node) event.getSource();
             Window actionStage = eventSource.getScene().getWindow();
 
-            this.gameDirectory = this.gameDirectoryChooser.showDialog(actionStage);
+            this.gameDirectory.set(this.gameDirectoryChooser.showDialog(actionStage));
 
-            if (this.gameDirectory == null) {
+            if (this.gameDirectory.getValue() == null) {
                 this.startExtractButton.setDisable(true);
                 this.selectedGameDirectory.setText(null);
             } else {
                 enableStartExtractButton();
-                this.selectedGameDirectory.setText(this.gameDirectory.getPath());
+                this.selectedGameDirectory.setText(this.gameDirectory.getValue().getPath());
             }
         }
     }
@@ -111,14 +121,14 @@ public class HomeController implements Initializable {
             Node eventSource = (Node) event.getSource();
             Window actionStage = eventSource.getScene().getWindow();
 
-            this.saveFile = this.saveFileChooser.showOpenDialog(actionStage);
+            this.saveFile.set(this.saveFileChooser.showOpenDialog(actionStage));
 
-            if (this.saveFile == null) {
+            if (this.saveFile.getValue() == null) {
                 this.startExtractButton.setDisable(true);
                 this.selectedSaveFile.setText(null);
             } else {
                 enableStartExtractButton();
-                this.selectedSaveFile.setText(this.saveFile.getPath());
+                this.selectedSaveFile.setText(this.saveFile.getValue().getPath());
             }
         }
     }
@@ -130,11 +140,15 @@ public class HomeController implements Initializable {
         this.canOpenSaveFileChooser = false;
         this.infoText.setVisible(true);
         this.infoText.setText(MenusI18n.EXTRACTING.getForDefaultLocale());
+        Config.setGameFolder(this.gameDirectory.getValue());
+        Config.setSaveFile(this.saveFile.getValue());
+
         new Thread(() -> {
             Save save;
 
             try {
-                save = Eu4Parser.loadSave(this.gameDirectory.getAbsolutePath(), this.saveFile.getAbsolutePath());
+                save = Eu4Parser.loadSave(this.gameDirectory.getValue().getAbsolutePath(), this.saveFile.getValue()
+                                                                                                        .getAbsolutePath());
             } catch (Exception e) {
                 Main.LOGGER.log(Level.SEVERE, "An error occurred while extracting the save: " + e.getMessage(), e);
                 Platform.runLater(() -> {
@@ -164,7 +178,7 @@ public class HomeController implements Initializable {
     }
 
     private void enableStartExtractButton() {
-        if (this.saveFile != null && this.gameDirectory != null) {
+        if (this.saveFile.getValue() != null && this.gameDirectory.getValue() != null) {
             this.startExtractButton.setDisable(false);
         }
     }
