@@ -173,7 +173,7 @@ public class CountriesMapView extends AbstractMapView {
         if (province.getCountry() != null) {
             return countryToMapColor(province.getCountry());
         } else {
-            if (province.isOcean()) {
+            if (province.isOcean() || province.isLake()) {
                 return Color.rgb(68, 107, 163);
             } else if (province.isImpassable()) {
                 return Color.rgb(94, 94, 94);
