@@ -270,7 +270,7 @@ public class ProvincePropertySheet extends VBox {
         };
     }
 
-    public PropertySheet update(SaveProvince province) {
+    public void update(SaveProvince province) {
         this.province = province;
         this.countryChanged.set(false);
         String expandedPaneName = this.propertySheetSkin.getAccordion().getExpandedPane() == null ? null :
@@ -492,7 +492,6 @@ public class ProvincePropertySheet extends VBox {
         }
 
         this.ownerComboBox.valueProperty().addListener(this.ownerChangeListener);
-        return this.propertySheet;
     }
 
     public void validate(ActionEvent actionEvent) {

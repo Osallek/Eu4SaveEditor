@@ -24,11 +24,11 @@ public class Main {
         FileHandler fileTxt = new FileHandler(logFile.getAbsolutePath(), true);
         Formatter formatterTxt = new SimpleFormatter();
         fileTxt.setFormatter(formatterTxt);
-        LOGGER.addHandler(fileTxt);
+//        LOGGER.addHandler(fileTxt);
 
         PrintStream logStream = new PrintStream(logFile);
-        System.setErr(logStream);
-        System.setOut(logStream);
+//        System.setErr(logStream);
+//        System.setOut(logStream);
 
         Eu4SaveEditor.run(args);
     }

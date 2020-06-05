@@ -9,9 +9,8 @@ import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
 import com.osallek.eu4saveeditor.Main;
 import com.osallek.eu4saveeditor.common.Constants;
-import com.osallek.eu4saveeditor.controller.mapview.AbstractMapView;
-import com.osallek.eu4saveeditor.controller.mapview.CountriesMapView;
 import com.osallek.eu4saveeditor.controller.mapview.DrawableProvince;
+import com.osallek.eu4saveeditor.controller.mapview.MapViewContainer;
 import com.osallek.eu4saveeditor.controller.mapview.MapViewType;
 import com.osallek.eu4saveeditor.controller.pane.ZoomableScrollPane;
 import com.osallek.eu4saveeditor.i18n.MenusI18n;
@@ -47,7 +46,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -83,9 +81,7 @@ public class EditorController implements Initializable {
 
     private boolean wasDragging;
 
-    private final Map<MapViewType, AbstractMapView> mapViews = new EnumMap<>(MapViewType.class);
-
-    private AbstractMapView selectedMapView;
+    private MapViewContainer mapViewContainer;
 
     private ImageCursor imageCursor;
 
@@ -153,13 +149,7 @@ public class EditorController implements Initializable {
         } else {
             if (MouseButton.PRIMARY.equals(event.getButton())) {
                 this.selectedProvince = this.provincesMap[(int) event.getX()][(int) event.getY()];
-                this.selectedMapView.onProvinceSelected(this.selectedProvince);
-                this.selectedMapView.setSelected(true);
-                this.mapViews.values().forEach(abstractMapView -> {
-                    if (!abstractMapView.equals(this.selectedMapView)) {
-                        abstractMapView.setSelected(false);
-                    }
-                });
+                this.mapViewContainer.onProvinceSelected(this.selectedProvince);
             }
         }
     }
@@ -189,7 +179,7 @@ public class EditorController implements Initializable {
                     Eu4Parser.writeSave(this.save, file.toString());
                 }
             } catch (IOException e) {
-                Main.LOGGER.log(Level.SEVERE, "Can't write save ! " + e.getMessage(), e);
+                Main.LOGGER.log(Level.SEVERE, String.format("Can't write save %s ! ", e.getMessage()), e);
                 this.title.setText("Can't write save ! " + e.getLocalizedMessage());
                 this.title.setFill(Paint.valueOf(Color.RED.toString()));
             }
@@ -258,15 +248,15 @@ public class EditorController implements Initializable {
 
             this.saveButton.setText(this.save.getGame().getLocalisation("SAVE"));
 
-            this.mapViews.put(MapViewType.COUNTRIES_MAP_VIEW,
-                              new CountriesMapView(this.provincesMap, this.drawableProvinces, this.provincesCanvas,
-                                                   this.editPane, this.save, this.playableCountries, this.cultures,
-                                                   this.religions, this.tradeGoods));
-            this.selectedMapView = this.mapViews.get(MapViewType.COUNTRIES_MAP_VIEW);
-            this.selectedMapView.draw();
+            this.mapViewContainer = new MapViewContainer(this.provincesMap, this.drawableProvinces, this.provincesCanvas,
+                                                         this.editPane, this.save, this.playableCountries, this.cultures,
+                                                         this.religions, this.tradeGoods);
+            this.mapViewContainer.registerMapView(MapViewType.COUNTRIES_MAP_VIEW);
+            this.mapViewContainer.selectMapView(MapViewType.COUNTRIES_MAP_VIEW);
+            this.mapViewContainer.draw();
         } catch (IOException e) {
-            Main.LOGGER.log(Level.SEVERE, "Can't load terrain image ! Make sure your game files are not corrupted !"
-                                          + e.getMessage(), e);
+            Main.LOGGER.log(Level.SEVERE, String.format("Can't load terrain image ! Make sure your game files are not corrupted %s!",
+                                                        e.getMessage()), e);
             this.title.setText("Can't load terrain image ! Make sure your game files are not corrupted !");
             this.title.setFill(Paint.valueOf(Color.RED.toString()));
         }
