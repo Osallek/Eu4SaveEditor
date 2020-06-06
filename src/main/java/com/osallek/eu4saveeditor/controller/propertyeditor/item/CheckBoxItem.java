@@ -12,17 +12,24 @@ public class CheckBoxItem implements CustomItem<Void> {
 
     private final String name;
 
+    private final String description;
+
     private boolean value;
 
     private boolean editable;
 
     public CheckBoxItem(SheetCategory category, String name, boolean value) {
-        this(category, name, value, true);
+        this(category, name, value,  null);
     }
 
-    public CheckBoxItem(SheetCategory category, String name, boolean value, boolean editable) {
+    public CheckBoxItem(SheetCategory category, String name, boolean value, String description) {
+        this(category, name, value, description, true);
+    }
+
+    public CheckBoxItem(SheetCategory category, String name, boolean value, String description, boolean editable) {
         this.category = category.getForDefaultLocale();
         this.name = name;
+        this.description = description;
         this.value = value;
         this.editable = editable;
     }
@@ -44,7 +51,7 @@ public class CheckBoxItem implements CustomItem<Void> {
 
     @Override
     public String getDescription() {
-        return this.name;
+        return this.description;
     }
 
     @Override

@@ -132,7 +132,7 @@ public class ProvincePropertySheet extends VBox {
         this.propertySheet.setSkin(this.propertySheetSkin);
 
         //GENERAL
-        this.nameField = new ClearableTextItem(SheetCategory.PROVINCE_GENERAL,
+        this.nameField = new ClearableTextItem(SheetCategory.GENERAL,
                                                save.getGame().getLocalisation("LEDGER_NAME"));
         this.nameField.getTextField()
                       .getStylesheets()
@@ -143,17 +143,17 @@ public class ProvincePropertySheet extends VBox {
         this.validationSupport.setValidationDecorator(new CompoundValidationDecoration(new CustomGraphicValidationDecoration(),
                                                                                        new StyleClassValidationDecoration("validation-error", null)));
 
-        this.capitalField = new ClearableTextItem(SheetCategory.PROVINCE_GENERAL,
+        this.capitalField = new ClearableTextItem(SheetCategory.GENERAL,
                                                   save.getGame().getLocalisation("TRIGGER_CAPITAL"));
 
-        this.cultureComboBox = new ClearableComboBoxItem<>(SheetCategory.PROVINCE_GENERAL,
+        this.cultureComboBox = new ClearableComboBoxItem<>(SheetCategory.GENERAL,
                                                            save.getGame().getLocalisation("LEDGER_CULTURE"),
                                                            cultures,
                                                            new ClearableComboBox<>(new SearchableComboBox<>()));
         this.cultureComboBox.setConverter(new CultureStringConverter());
         this.cultureComboBox.setCellFactory(new CultureStringCellFactory());
 
-        this.religionComboBox = new ClearableComboBoxItem<>(SheetCategory.PROVINCE_GENERAL,
+        this.religionComboBox = new ClearableComboBoxItem<>(SheetCategory.GENERAL,
                                                             save.getGame().getLocalisation("LEDGER_RELIGION"),
                                                             religions,
                                                             new ClearableComboBox<>(new SearchableComboBox<>()));

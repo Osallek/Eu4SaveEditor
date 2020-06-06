@@ -8,12 +8,13 @@ import java.util.Locale;
 import java.util.Map;
 
 public enum SheetCategory {
-    PROVINCE_GENERAL("General", "Général", "Allgemein", "General"),
+    GENERAL("General", "Général", "Allgemein", "General"),
     PROVINCE_POLITICAL("Political", "Politique", "Politik", "Política"),
     PROVINCE_ECONOMY("Economy", "Économie", "Wirtschaft", "Economía"),
     PROVINCE_INSTITUTIONS("Institutions", "Institutions", "Institutionen", "Instituciones"),
     PROVINCE_BUILDINGS("Buildings", "Bâtiments", "Gebäude", "Edificios"),
-    PROVINCE_COLONY("Colonization", "Colonisation", "Kolonisierung", "Colonización");
+    PROVINCE_COLONY("Colonization", "Colonisation", "Kolonisierung", "Colonización"),
+    SAVE_GAME_OPTIONS("Options", "Options", "Einstellungen", "Opciones");
 
     final String english;
 
@@ -78,6 +79,6 @@ public enum SheetCategory {
                 return BY_FRENCH.get(value);
         }
 
-        return SheetCategory.PROVINCE_GENERAL;
+        return SheetCategory.GENERAL;
     }
 }

@@ -31,6 +31,7 @@ public class ClearableComboBox<U> extends HBox {
 
     public ClearableComboBox(ComboBox<U> comboBox, Supplier<U> clearSupplier) {
         this.comboBox = comboBox;
+        this.comboBox.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(this.comboBox, Priority.ALWAYS);
 
         this.button = new Button("", new Glyph("FontAwesome", FontAwesome.Glyph.CLOSE));

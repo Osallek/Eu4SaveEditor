@@ -21,6 +21,8 @@ public class ClearableComboBoxItem<U> implements CustomItem<U> {
 
     private final String name;
 
+    private final String description;
+
     private final ObservableList<U> values;
 
     private U value;
@@ -36,16 +38,21 @@ public class ClearableComboBoxItem<U> implements CustomItem<U> {
     private Callback<ListView<U>, ListCell<U>> cellFactory;
 
     public ClearableComboBoxItem(SheetCategory category, String name, ObservableList<U> values, ClearableComboBox<U> comboBox) {
-        this(category, name, values, null, comboBox, true);
+        this(category, name, values, null, null, comboBox);
     }
 
     public ClearableComboBoxItem(SheetCategory category, String name, ObservableList<U> values, U value, ClearableComboBox<U> comboBox) {
-        this(category, name, values, value, comboBox, true);
+        this(category, name, values, value, null, comboBox);
     }
 
-    public ClearableComboBoxItem(SheetCategory category, String name, ObservableList<U> values, U value, ClearableComboBox<U> comboBox, boolean editable) {
+    public ClearableComboBoxItem(SheetCategory category, String name, ObservableList<U> values, U value, String description, ClearableComboBox<U> comboBox) {
+        this(category, name, values, value, description, comboBox, true);
+    }
+
+    public ClearableComboBoxItem(SheetCategory category, String name, ObservableList<U> values, U value, String description, ClearableComboBox<U> comboBox, boolean editable) {
         this.category = category.getForDefaultLocale();
         this.name = name;
+        this.description = description;
         this.values = values;
         this.value = value;
         this.comboBox = comboBox;
@@ -69,7 +76,7 @@ public class ClearableComboBoxItem<U> implements CustomItem<U> {
 
     @Override
     public String getDescription() {
-        return this.name;
+        return this.description;
     }
 
     @Override
