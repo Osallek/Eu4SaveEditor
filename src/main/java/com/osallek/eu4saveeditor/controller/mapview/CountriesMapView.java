@@ -76,11 +76,10 @@ public class CountriesMapView extends AbstractMapView {
     public void onProvinceSelected(SaveProvince province) {
         this.provinceSheet.update(province);
 
-        if (Boolean.TRUE.equals(this.selected.getValue())) {
+        if (Boolean.FALSE.equals(this.selected.getValue())) {
+            this.mapViewContainer.addTabsSegmentedButtons(this.countryButton, this.provinceButton);
             this.mapViewContainer.bindSubmitButtonDisableProperty(this.provinceSheet.getValidationSupport()
                                                                                     .invalidProperty());
-        } else {
-            this.mapViewContainer.addTabsSegmentedButtons(this.countryButton, this.provinceButton);
 
             if (this.countryButton.isSelected()) {
                 selectCountryButton();

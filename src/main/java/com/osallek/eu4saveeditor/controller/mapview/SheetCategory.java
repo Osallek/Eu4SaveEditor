@@ -14,7 +14,8 @@ public enum SheetCategory {
     PROVINCE_INSTITUTIONS("Institutions", "Institutions", "Institutionen", "Instituciones"),
     PROVINCE_BUILDINGS("Buildings", "Bâtiments", "Gebäude", "Edificios"),
     PROVINCE_COLONY("Colonization", "Colonisation", "Kolonisierung", "Colonización"),
-    SAVE_GAME_OPTIONS("Options", "Options", "Einstellungen", "Opciones");
+    SAVE_GAME_OPTIONS("Options", "Options", "Einstellungen", "Opciones"),
+    SAVE_INSTITUTIONS("Institutions", "Institutions", "Institutionen", "Instituciones");
 
     final String english;
 

@@ -3,26 +3,34 @@ package com.osallek.eu4saveeditor.controller.mapview;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.gameplayoptions.CustomNationDifficulty;
 import com.osallek.eu4parser.model.save.gameplayoptions.Difficulty;
+import com.osallek.eu4parser.model.save.province.SaveProvince;
 import com.osallek.eu4saveeditor.controller.control.ClearableComboBox;
 import com.osallek.eu4saveeditor.controller.control.RequiredComboBox;
 import com.osallek.eu4saveeditor.controller.converter.CustomNationDifficultyStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.CustomNationDifficultyStringConverter;
 import com.osallek.eu4saveeditor.controller.converter.DifficultyStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.DifficultyStringConverter;
+import com.osallek.eu4saveeditor.controller.converter.ProvinceStringCellFactory;
+import com.osallek.eu4saveeditor.controller.converter.ProvinceStringConverter;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheetSkin;
 import com.osallek.eu4saveeditor.controller.propertyeditor.CustomPropertyEditorFactory;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.CheckBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableComboBoxItem;
 import com.osallek.eu4saveeditor.controller.validator.CustomGraphicValidationDecoration;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.layout.VBox;
 import org.controlsfx.control.PropertySheet;
+import org.controlsfx.control.SearchableComboBox;
 import org.controlsfx.validation.ValidationSupport;
+import org.controlsfx.validation.Validator;
 import org.controlsfx.validation.decoration.CompoundValidationDecoration;
 import org.controlsfx.validation.decoration.StyleClassValidationDecoration;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 public class SavePropertySheet extends VBox {
 
@@ -72,9 +80,13 @@ public class SavePropertySheet extends VBox {
 
     private final CheckBoxItem allowFreeTeamCreationField;
 
+    private final List<CheckBoxItem> institutionAvailableFields;
+
+    private final List<ClearableComboBoxItem<SaveProvince>> institutionOriginFields;
+
     private CustomPropertySheetSkin propertySheetSkin;
 
-    public SavePropertySheet(Save save) {
+    public SavePropertySheet(Save save, ObservableList<SaveProvince> cities) {
         this.save = save;
         this.propertySheet = new PropertySheet();
         this.propertySheet.setPropertyEditorFactory(new CustomPropertyEditorFactory());
@@ -244,6 +256,35 @@ public class SavePropertySheet extends VBox {
         this.propertySheet.getItems().add(this.allowNameChangeField);
         this.propertySheet.getItems().add(this.customNationDifficultyField);
         this.propertySheet.getItems().add(this.addNationsToGameField);
+
+        //INSTITUTIONS
+        this.institutionOriginFields = new ArrayList<>();
+        this.institutionAvailableFields = new ArrayList<>();
+        for (int i = 0; i < this.save.getInstitutions().getNbInstitutions(); i++) {
+            CheckBoxItem checkBoxItem = new CheckBoxItem(SheetCategory.SAVE_INSTITUTIONS,
+                                                         this.save.getGame().getInstitution(i).getLocalizedName(),
+                                                         this.save.getInstitutions().isAvailable(i));
+
+            int finalI = i;
+            ClearableComboBoxItem<SaveProvince> comboBoxItem = new ClearableComboBoxItem<>(SheetCategory.SAVE_INSTITUTIONS,
+                                                                                           this.save.getGame()
+                                                                                                    .getInstitution(i)
+                                                                                                    .getLocalizedName(),
+                                                                                           cities,
+                                                                                           this.save.getInstitutions()
+                                                                                                    .getOrigin(i),
+                                                                                           new ClearableComboBox<>(new SearchableComboBox<>(),
+                                                                                                                   () -> this.save
+                                                                                                                           .getInstitutions()
+                                                                                                                           .getOrigin(finalI)));
+            comboBoxItem.setConverter(new ProvinceStringConverter());
+            comboBoxItem.setCellFactory(new ProvinceStringCellFactory());
+
+            this.institutionAvailableFields.add(checkBoxItem);
+            this.institutionOriginFields.add(comboBoxItem);
+            this.propertySheet.getItems().add(checkBoxItem);
+            this.propertySheet.getItems().add(comboBoxItem);
+        }
     }
 
     public void update() {
@@ -268,9 +309,16 @@ public class SavePropertySheet extends VBox {
         this.onlyHostAndObserversCanSaveField.setValue(this.save.getGameplayOptions().getOnlyHostAndObserversCanSave());
         this.allowTeamsField.setValue(this.save.getGameplayOptions().getAllowTeams());
         this.allowFreeTeamCreationField.setValue(this.save.getGameplayOptions().getAllowFreeTeamCreation());
+
+        //INSTITUTIONS
+        for (int i = 0; i < this.institutionOriginFields.size(); i++) {
+            this.institutionAvailableFields.get(i).setValue(this.save.getInstitutions().isAvailable(i));
+            this.institutionOriginFields.get(i).setValue(this.save.getInstitutions().getOrigin(i));
+        }
     }
 
     public void validate(ActionEvent actionEvent) {
+        //GAME OPTIONS
         if (!this.save.getGameplayOptions().getDifficulty().equals(this.difficultyField.getSelectedValue())) {
             this.save.getGameplayOptions().setDifficulty(this.difficultyField.getSelectedValue());
         }
@@ -354,6 +402,24 @@ public class SavePropertySheet extends VBox {
 
         if (this.save.getGameplayOptions().getAllowFreeTeamCreation() != this.allowFreeTeamCreationField.isSelected()) {
             this.save.getGameplayOptions().setAllowFreeTeamCreation(this.allowFreeTeamCreationField.isSelected());
+        }
+
+        //INSTITUTIONS
+        if (!this.institutionAvailableFields.isEmpty()) {
+            for (int i = 0; i < this.institutionAvailableFields.size(); i++) {
+                if ((this.institutionAvailableFields.get(i).isSelected() !=
+                     this.save.getInstitutions().isAvailable(i))
+                    || this.institutionOriginFields.get(i).getSelectedValue() != this.save.getInstitutions()
+                                                                                          .getOrigin(i)) {
+                    if (this.institutionAvailableFields.get(i).isSelected()) {
+                        this.save.getInstitutions()
+                                 .availableIn(i, this.institutionOriginFields.get(i).getSelectedValue());
+                    } else {
+                        this.save.getInstitutions().disable(i);
+                        this.institutionOriginFields.get(i).getComboBox().reset();
+                    }
+                }
+            }
         }
     }
 

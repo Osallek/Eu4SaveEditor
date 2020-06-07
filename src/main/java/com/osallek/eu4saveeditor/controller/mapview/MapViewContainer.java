@@ -49,6 +49,8 @@ public class MapViewContainer {
 
     private final ObservableList<TradeGood> tradeGoods;
 
+    private final ObservableList<SaveProvince> cities;
+
     private final Label titleLabel;
 
     private final SegmentedButton tabsSegmentedButton;
@@ -62,13 +64,14 @@ public class MapViewContainer {
     public MapViewContainer(SaveProvince[][] provincesMap, Map<Integer, DrawableProvince> drawableProvinces,
                             Canvas canvas, VBox editPane, Save save, ObservableList<Country> playableCountries,
                             ObservableList<Culture> cultures, ObservableList<Religion> religions,
-                            ObservableList<TradeGood> tradeGoods) {
+                            ObservableList<TradeGood> tradeGoods, ObservableList<SaveProvince> cities) {
         this.provincesMap = provincesMap;
         this.drawableProvinces = drawableProvinces;
         this.canvas = canvas;
         this.editPane = editPane;
         this.save = save;
-        this.saveSheet = new SavePropertySheet(this.save);
+        this.cities = cities;
+        this.saveSheet = new SavePropertySheet(this.save, this.cities);
         this.mapViews = new EnumMap<>(MapViewType.class);
         this.playableCountries = playableCountries;
         this.cultures = cultures;
@@ -180,6 +183,7 @@ public class MapViewContainer {
     }
 
     public void bindSubmitButtonDisableProperty(ReadOnlyBooleanProperty observable) {
+        this.submitButton.disableProperty().unbind();
         this.submitButton.disableProperty().bind(observable);
     }
 

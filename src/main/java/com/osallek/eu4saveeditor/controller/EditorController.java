@@ -89,6 +89,8 @@ public class EditorController implements Initializable {
 
     private Canvas provincesCanvas;
 
+    private ObservableList<SaveProvince> cities;
+
     private ObservableList<Country> playableCountries;
 
     private ObservableList<Culture> cultures;
@@ -209,6 +211,8 @@ public class EditorController implements Initializable {
                 }
             }
 
+            this.cities = FXCollections.observableArrayList(this.provincesMap[0][0].getSave().getCities());
+
             this.playableCountries = FXCollections.observableArrayList(this.provincesMap[0][0].getSave()
                                                                                               .getPlayableCountries());
             this.cultures = FXCollections.observableArrayList(this.provincesMap[0][0].getSave()
@@ -250,7 +254,7 @@ public class EditorController implements Initializable {
 
             this.mapViewContainer = new MapViewContainer(this.provincesMap, this.drawableProvinces, this.provincesCanvas,
                                                          this.editPane, this.save, this.playableCountries, this.cultures,
-                                                         this.religions, this.tradeGoods);
+                                                         this.religions, this.tradeGoods, this.cities);
             this.mapViewContainer.registerMapView(MapViewType.COUNTRIES_MAP_VIEW);
             this.mapViewContainer.selectMapView(MapViewType.COUNTRIES_MAP_VIEW);
             this.mapViewContainer.draw();

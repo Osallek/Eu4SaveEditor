@@ -25,6 +25,8 @@ public class ClearableComboBox<U> extends HBox {
 
     private final Button button;
 
+    private final Supplier<U> clearSupplier;
+
     public ClearableComboBox(ComboBox<U> comboBox) {
         this(comboBox, null);
     }
@@ -37,8 +39,9 @@ public class ClearableComboBox<U> extends HBox {
         this.button = new Button("", new Glyph("FontAwesome", FontAwesome.Glyph.CLOSE));
         this.button.setAlignment(Pos.TOP_CENTER);
 
-        if (clearSupplier != null) {
-            this.button.setOnMouseReleased(e -> this.select(clearSupplier.get()));
+        this.clearSupplier = clearSupplier;
+        if (this.clearSupplier != null) {
+            this.button.setOnMouseReleased(e -> reset());
         }
 
         getChildren().add(this.comboBox);
@@ -113,5 +116,13 @@ public class ClearableComboBox<U> extends HBox {
 
     public ObjectProperty<ObservableList<U>> itemsProperty() {
         return this.comboBox.itemsProperty();
+    }
+
+    public Supplier<U> getClearSupplier() {
+        return clearSupplier;
+    }
+
+    public void reset() {
+        this.select(clearSupplier.get());
     }
 }
