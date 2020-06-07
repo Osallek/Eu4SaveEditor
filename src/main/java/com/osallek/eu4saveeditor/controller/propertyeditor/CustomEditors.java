@@ -5,6 +5,7 @@ import com.osallek.eu4saveeditor.controller.control.ClearableComboBox;
 import com.osallek.eu4saveeditor.controller.control.ClearableSlider;
 import com.osallek.eu4saveeditor.controller.control.ClearableSpinner;
 import com.osallek.eu4saveeditor.controller.control.SelectableGridView;
+import com.osallek.eu4saveeditor.controller.propertyeditor.item.ButtonItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.CheckComboBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableCheckComboBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableComboBoxItem;
@@ -23,6 +24,7 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
@@ -208,7 +210,8 @@ public class CustomEditors {
 
     public static <T> PropertyEditor<ObservableSet<T>> createSelectableGridViewEditor(SelectableGridViewItem<T> selectableGridViewItem) {
 
-        return new AbstractPropertyEditor<ObservableSet<T>, SelectableGridView<T>>(selectableGridViewItem, selectableGridViewItem.getSelectableGridView()) {
+        return new AbstractPropertyEditor<ObservableSet<T>, SelectableGridView<T>>(selectableGridViewItem, selectableGridViewItem
+                .getSelectableGridView()) {
 
             private SetProperty<T> list = new SimpleSetProperty<>();
 
@@ -241,6 +244,21 @@ public class CustomEditors {
 
             @Override
             public void setValue(T value) {
+            }
+        };
+    }
+
+    public static PropertyEditor<String> createButton(ButtonItem buttonItem) {
+
+        return new AbstractPropertyEditor<String, Button>(buttonItem, buttonItem.getButton()) {
+
+            @Override
+            protected ObservableValue<String> getObservableValue() {
+                return new ReadOnlyObjectWrapper<>(buttonItem.getButton(), "value");
+            }
+
+            @Override
+            public void setValue(String value) {
             }
         };
     }

@@ -1,10 +1,13 @@
 package com.osallek.eu4saveeditor.controller.mapview;
 
 import com.osallek.eu4parser.model.save.Save;
+import com.osallek.eu4parser.model.save.changeprices.ChangePrice;
+import com.osallek.eu4parser.model.save.changeprices.ChangePriceGood;
 import com.osallek.eu4parser.model.save.gameplayoptions.CustomNationDifficulty;
 import com.osallek.eu4parser.model.save.gameplayoptions.Difficulty;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
 import com.osallek.eu4saveeditor.controller.control.ClearableComboBox;
+import com.osallek.eu4saveeditor.controller.control.ClearableSpinnerDouble;
 import com.osallek.eu4saveeditor.controller.control.RequiredComboBox;
 import com.osallek.eu4saveeditor.controller.converter.CustomNationDifficultyStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.CustomNationDifficultyStringConverter;
@@ -14,20 +17,24 @@ import com.osallek.eu4saveeditor.controller.converter.ProvinceStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.ProvinceStringConverter;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheetSkin;
 import com.osallek.eu4saveeditor.controller.propertyeditor.CustomPropertyEditorFactory;
+import com.osallek.eu4saveeditor.controller.propertyeditor.item.ButtonItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.CheckBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableComboBoxItem;
+import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSpinnerItem;
 import com.osallek.eu4saveeditor.controller.validator.CustomGraphicValidationDecoration;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import org.controlsfx.control.PropertySheet;
 import org.controlsfx.control.SearchableComboBox;
 import org.controlsfx.validation.ValidationSupport;
-import org.controlsfx.validation.Validator;
 import org.controlsfx.validation.decoration.CompoundValidationDecoration;
 import org.controlsfx.validation.decoration.StyleClassValidationDecoration;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -83,6 +90,8 @@ public class SavePropertySheet extends VBox {
     private final List<CheckBoxItem> institutionAvailableFields;
 
     private final List<ClearableComboBoxItem<SaveProvince>> institutionOriginFields;
+
+    private final List<ClearableSpinnerItem<Double>> goodsPricesFields;
 
     private CustomPropertySheetSkin propertySheetSkin;
 
@@ -285,6 +294,38 @@ public class SavePropertySheet extends VBox {
             this.propertySheet.getItems().add(checkBoxItem);
             this.propertySheet.getItems().add(comboBoxItem);
         }
+
+        //GOODS
+        this.goodsPricesFields = new ArrayList<>();
+        for (int i = 0; i < this.save.getChangePrices().getGoods().size(); i++) {
+            ChangePriceGood good = this.save.getChangePrices().getGood(i);
+            Text text = new Text(goodToDesc(good, good.getCurrentPrice()));
+            ClearableSpinnerItem<Double> priceSpinnerItem = new ClearableSpinnerItem<>(SheetCategory.SAVE_GOODS,
+                                                                                       save.getGame()
+                                                                                           .getLocalisation(good.getName()),
+                                                                                       new ClearableSpinnerDouble(0,
+                                                                                                                  100,
+                                                                                                                  good.getCurrentPrice(),
+                                                                                                                  0.5,
+                                                                                                                  good::getCurrentPrice,
+                                                                                                                  text));
+            priceSpinnerItem.getSpinner()
+                            .getSpinner()
+                            .getEditor()
+                            .textProperty()
+                            .addListener((observable, oldValue, newValue) -> {
+                                text.setText(goodToDesc(good, Double.valueOf(newValue)));
+                            });
+
+            ButtonItem buttonItem = new ButtonItem(SheetCategory.SAVE_GOODS,
+                                                   " ",
+                                                   save.getGame()
+                                                       .getLocalisationClean("TSI_CURR_MOD_BY"));
+
+            this.goodsPricesFields.add(priceSpinnerItem);
+            this.propertySheet.getItems().add(priceSpinnerItem);
+            this.propertySheet.getItems().add(buttonItem);
+        }
     }
 
     public void update() {
@@ -314,6 +355,13 @@ public class SavePropertySheet extends VBox {
         for (int i = 0; i < this.institutionOriginFields.size(); i++) {
             this.institutionAvailableFields.get(i).setValue(this.save.getInstitutions().isAvailable(i));
             this.institutionOriginFields.get(i).setValue(this.save.getInstitutions().getOrigin(i));
+        }
+
+        //GOODS
+        for (int i = 0; i < this.goodsPricesFields.size(); i++) {
+            this.goodsPricesFields.get(i)
+                                  .getSpinner()
+                                  .setValue(this.save.getChangePrices().getGood(i).getCurrentPrice());
         }
     }
 
@@ -421,6 +469,22 @@ public class SavePropertySheet extends VBox {
                 }
             }
         }
+
+        //GOODS
+    }
+
+    private String goodToDesc(ChangePriceGood good, Double price) {
+        double modifiersSum = good.getChangePrices().stream().mapToDouble(ChangePrice::getValue).sum();
+        BigDecimal basePrice = BigDecimal.valueOf(price)
+                                         .multiply(BigDecimal.valueOf(100))
+                                         .divide(BigDecimal.valueOf(100)
+                                                           .add(BigDecimal.valueOf(modifiersSum)), RoundingMode.HALF_EVEN)
+                                         .setScale(3, RoundingMode.HALF_EVEN);
+        return "("
+               + basePrice.toPlainString()
+               + (modifiersSum < 0 ? " " : " +")
+               + modifiersSum
+               + "%)";
     }
 
     public Save getSave() {

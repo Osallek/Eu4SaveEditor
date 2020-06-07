@@ -1,5 +1,6 @@
 package com.osallek.eu4saveeditor.controller.propertyeditor;
 
+import com.osallek.eu4saveeditor.controller.propertyeditor.item.ButtonItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.CheckComboBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableCheckComboBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableComboBoxItem;
@@ -40,7 +41,7 @@ public class CustomPropertyEditorFactory extends DefaultPropertyEditorFactory {
         }
 
         if (type == ClearableSpinnerItem.class) {
-            return CustomEditors.createClearableSpinnerEditor((ClearableSpinnerItem) item);
+            return CustomEditors.createClearableSpinnerEditor((ClearableSpinnerItem<?>) item);
         }
 
         if (type == ClearableSliderItem.class) {
@@ -53,6 +54,10 @@ public class CustomPropertyEditorFactory extends DefaultPropertyEditorFactory {
 
         if (type == HBoxItem.class) {
             return CustomEditors.createHBox((HBoxItem<?>) item);
+        }
+
+        if (type == ButtonItem.class) {
+            return CustomEditors.createButton((ButtonItem) item);
         }
 
         return super.call(item);

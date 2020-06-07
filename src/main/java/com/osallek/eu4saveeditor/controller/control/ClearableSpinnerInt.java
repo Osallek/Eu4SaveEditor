@@ -1,5 +1,6 @@
 package com.osallek.eu4saveeditor.controller.control;
 
+import javafx.scene.Node;
 import javafx.scene.control.Spinner;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -13,6 +14,10 @@ public class ClearableSpinnerInt extends ClearableSpinner<Integer> {
     }
 
     public ClearableSpinnerInt(int min, int max, Integer value, int step, Supplier<Integer> clearSupplier) {
+        this(min, max, value, step, clearSupplier, null);
+    }
+
+    public ClearableSpinnerInt(int min, int max, Integer value, int step, Supplier<Integer> clearSupplier, Node centerNode) {
         this.spinner = new Spinner<>(min, max, value == null ? 0 : value, step);
         this.spinner.setEditable(true);
         this.spinner.focusedProperty().addListener((observable, oldValue, newValue) -> {
@@ -22,7 +27,7 @@ public class ClearableSpinnerInt extends ClearableSpinner<Integer> {
         });
 
         HBox.setHgrow(this.spinner, Priority.ALWAYS);
-        fill(clearSupplier);
+        fill(clearSupplier, centerNode);
     }
 
     @Override

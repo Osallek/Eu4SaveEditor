@@ -2,9 +2,12 @@ package com.osallek.eu4saveeditor.controller.control;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.Control;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
@@ -18,6 +21,10 @@ public abstract class ClearableSpinner<T> extends HBox {
     protected Spinner<T> spinner;
 
     protected Button button;
+
+    public ClearableSpinner() {
+        super(5);
+    }
 
     public Spinner<T> getSpinner() {
         return spinner;
@@ -42,15 +49,30 @@ public abstract class ClearableSpinner<T> extends HBox {
     }
 
     protected void fill(Supplier<T> clearSupplier) {
+        fill(clearSupplier, null);
+    }
+
+    protected void fill(Supplier<T> clearSupplier, Node centerNode) {
         this.button = new Button("", new Glyph("FontAwesome", FontAwesome.Glyph.CLOSE));
         this.button.setAlignment(Pos.TOP_CENTER);
         setSupplier(clearSupplier);
 
-        Pane centerPane = new Pane();
-        HBox.setHgrow(centerPane, Priority.ALWAYS);
+        if (centerNode == null) {
+            centerNode = new Pane();
+        }
+
+        if (!(centerNode instanceof Pane) && !(centerNode instanceof Control)) {
+            GridPane pane = new GridPane();
+            pane.getChildren().add(centerNode);
+            pane.setAlignment(Pos.CENTER);
+            centerNode = pane;
+        }
+
+        centerNode.maxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(centerNode, Priority.ALWAYS);
 
         getChildren().add(this.spinner);
-        getChildren().add(centerPane);
+        getChildren().add(centerNode);
         getChildren().add(this.button);
     }
 }
