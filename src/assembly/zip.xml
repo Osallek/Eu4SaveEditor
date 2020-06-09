@@ -9,7 +9,7 @@
   <fileSets>
     <fileSet>
       <directory>${project.build.directory}</directory>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory>/${project.build.finalName}</outputDirectory>
       <includes>
         <include>*.jar</include>
         <include>run.cmd</include>
