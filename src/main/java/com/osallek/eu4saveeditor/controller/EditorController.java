@@ -129,6 +129,7 @@ public class EditorController implements Initializable {
         this.provincesPane = new ZoomableScrollPane(this.provincesCanvas);
         this.provincesPane.setTooltip(this.tooltip);
         this.provincesPane.setFocusTraversable(true);
+        this.provincesPane.setStyle("-fx-focus-color: transparent; -fx-faint-focus-color: transparent;");
 
         this.mousePauseTransition.setOnFinished(e -> this.mouseMoving.set(false));
         this.mouseMoving.addListener((obs, wasMoving, isNowMoving) -> {

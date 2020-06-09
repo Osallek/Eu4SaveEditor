@@ -8,9 +8,9 @@
   <top>
     <HBox alignment="CENTER" spacing="10">
       <HBox alignment="CENTER">
-        <Text fx:id="title" textAlignment="CENTER" style="-fx-font-size: 14px"/>
+        <Text fx:id="title" textAlignment="CENTER" style="-fx-font-size: 16px; -fx-font-weight: bold"/>
       </HBox>
-      <Button fx:id="saveButton" onMouseClicked="#onClickExportButton"/>
+      <Button fx:id="saveButton" onMouseClicked="#onClickExportButton" style="-fx-font-weight: bold"/>
     </HBox>
   </top>
   <right>

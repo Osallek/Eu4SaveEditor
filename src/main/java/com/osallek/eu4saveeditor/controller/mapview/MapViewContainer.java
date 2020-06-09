@@ -79,8 +79,10 @@ public class MapViewContainer {
         this.tradeGoods = tradeGoods;
 
         this.titleLabel = new Label();
+        this.titleLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 16px");
 
         this.submitButton = new Button(save.getGame().getLocalisation("DONE"));
+        this.submitButton.setStyle("-fx-font-weight: bold");
 
         this.saveButton = new ToggleButton(save.getGame().getLocalisation("SM_GAME"));
         this.saveButton.selectedProperty().addListener((observable, oldValue, newValue) -> {

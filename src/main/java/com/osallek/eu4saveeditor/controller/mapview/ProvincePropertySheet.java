@@ -440,9 +440,9 @@ public class ProvincePropertySheet extends VBox {
                 items.addAll(this.institutionFields);
             }
 
+            this.buildingsFields.clear();
             if (this.province.isCity()) {
                 //BUILDINGS
-                this.buildingsFields.clear();
                 this.province.getAvailableBuildingsTree().forEach(buildings -> {
                     ObservableSet<Building> buildingsBuilt = FXCollections.observableSet(this.province.getBuildings()
                                                                                                       .stream()

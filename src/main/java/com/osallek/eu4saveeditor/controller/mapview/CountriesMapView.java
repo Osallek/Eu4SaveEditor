@@ -44,7 +44,7 @@ public class CountriesMapView extends AbstractMapView {
 
         this.provinceButton = new ToggleButton(this.mapViewContainer.getSave()
                                                                     .getGame()
-                                                                    .getLocalisation("ANY_ALL_PROVINCE"));
+                                                                    .getLocalisation("UNKNOWN_LOC"));
         this.provinceButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
             if (Boolean.FALSE.equals(oldValue) && Boolean.TRUE.equals(newValue)) {
                 selectProvinceButton();
