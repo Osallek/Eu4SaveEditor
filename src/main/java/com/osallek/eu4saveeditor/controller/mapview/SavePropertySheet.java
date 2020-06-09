@@ -9,6 +9,7 @@ import com.osallek.eu4parser.model.save.province.SaveProvince;
 import com.osallek.eu4saveeditor.controller.control.ClearableComboBox;
 import com.osallek.eu4saveeditor.controller.control.ClearableSpinnerDouble;
 import com.osallek.eu4saveeditor.controller.control.RequiredComboBox;
+import com.osallek.eu4saveeditor.controller.control.TableView2ChangePrice;
 import com.osallek.eu4saveeditor.controller.converter.CustomNationDifficultyStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.CustomNationDifficultyStringConverter;
 import com.osallek.eu4saveeditor.controller.converter.DifficultyStringCellFactory;
@@ -16,6 +17,7 @@ import com.osallek.eu4saveeditor.controller.converter.DifficultyStringConverter;
 import com.osallek.eu4saveeditor.controller.converter.ProvinceStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.ProvinceStringConverter;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheetSkin;
+import com.osallek.eu4saveeditor.controller.pane.TableView2Dialog;
 import com.osallek.eu4saveeditor.controller.propertyeditor.CustomPropertyEditorFactory;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ButtonItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.CheckBoxItem;
@@ -35,9 +37,16 @@ import org.controlsfx.validation.decoration.StyleClassValidationDecoration;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 public class SavePropertySheet extends VBox {
 
@@ -92,6 +101,8 @@ public class SavePropertySheet extends VBox {
     private final List<ClearableComboBoxItem<SaveProvince>> institutionOriginFields;
 
     private final List<ClearableSpinnerItem<Double>> goodsPricesFields;
+
+    private final Map<String, List<ChangePrice>> goodsChangePrices;
 
     private CustomPropertySheetSkin propertySheetSkin;
 
@@ -297,8 +308,10 @@ public class SavePropertySheet extends VBox {
 
         //GOODS
         this.goodsPricesFields = new ArrayList<>();
+        this.goodsChangePrices = new HashMap<>();
         for (int i = 0; i < this.save.getChangePrices().getGoods().size(); i++) {
             ChangePriceGood good = this.save.getChangePrices().getGood(i);
+            this.goodsChangePrices.put(good.getName(), new ArrayList<>(good.getChangePrices()));
             Text text = new Text(goodToDesc(good, good.getCurrentPrice()));
             ClearableSpinnerItem<Double> priceSpinnerItem = new ClearableSpinnerItem<>(SheetCategory.SAVE_GOODS,
                                                                                        save.getGame()
@@ -314,13 +327,56 @@ public class SavePropertySheet extends VBox {
                             .getEditor()
                             .textProperty()
                             .addListener((observable, oldValue, newValue) -> {
-                                text.setText(goodToDesc(good, Double.valueOf(newValue)));
+                                try {
+                                    text.setText(goodToDesc(good, NumberFormat.getInstance()
+                                                                              .parse(newValue)
+                                                                              .doubleValue()));
+                                } catch (ParseException e) {
+                                    text.setText(oldValue);
+                                }
                             });
 
             ButtonItem buttonItem = new ButtonItem(SheetCategory.SAVE_GOODS,
                                                    " ",
                                                    save.getGame()
                                                        .getLocalisationClean("TSI_CURR_MOD_BY"));
+
+            buttonItem.getButton().setOnAction(event -> {
+                Supplier<ChangePrice> supplier = () -> {
+                    ChangePrice changePrice = new ChangePrice(
+                            good.getName() + "_modifier_" + (this.goodsChangePrices.get(good.getName()).size() + 1),
+                            0,
+                            new Date());
+                    this.goodsChangePrices.get(good.getName()).add(changePrice);
+                    return changePrice;
+                };
+
+                TableView2Dialog<ChangePrice> dialog = new TableView2Dialog<>(this.save,
+                                                                              new TableView2ChangePrice(this.goodsChangePrices
+                                                                                                                .get(good.getName()),
+                                                                                                        this.save),
+                                                                              this.save.getGame()
+                                                                                       .getLocalisationClean("TSI_CURR_MOD_BY"),
+                                                                              supplier,
+                                                                              good::getChangePrices);
+                Optional<List<ChangePrice>> changePrices = dialog.showAndWait();
+
+                if (changePrices.isPresent()) {
+                    this.goodsChangePrices.put(good.getName(), changePrices.get());
+                } else {
+                    this.goodsChangePrices.put(good.getName(), good.getChangePrices());
+                }
+
+                try {
+                    text.setText(goodToDesc(good, NumberFormat.getInstance()
+                                                              .parse(priceSpinnerItem.getSpinner()
+                                                                                     .getSpinner()
+                                                                                     .getEditor()
+                                                                                     .getText())
+                                                              .doubleValue()));
+                } catch (ParseException e) {
+                }
+            });
 
             this.goodsPricesFields.add(priceSpinnerItem);
             this.propertySheet.getItems().add(priceSpinnerItem);
@@ -363,6 +419,9 @@ public class SavePropertySheet extends VBox {
                                   .getSpinner()
                                   .setValue(this.save.getChangePrices().getGood(i).getCurrentPrice());
         }
+
+        this.goodsChangePrices.clear();
+        this.save.getChangePrices().getGoods().forEach((name, changePriceGood) -> this.goodsChangePrices.put(name, new ArrayList<>(changePriceGood.getChangePrices())));
     }
 
     public void validate(ActionEvent actionEvent) {
@@ -471,10 +530,25 @@ public class SavePropertySheet extends VBox {
         }
 
         //GOODS
+        if (!this.goodsPricesFields.isEmpty()) {
+            for (int i = 0; i < this.goodsPricesFields.size(); i++) {
+                if (!this.goodsPricesFields.get(i).getTrueValue().equals(this.save.getChangePrices().getGood(i).getCurrentPrice())) {
+                    this.save.getChangePrices().getGood(i).setCurrentPrice(this.goodsPricesFields.get(i).getTrueValue());
+                }
+            }
+        }
+
+        if (!this.goodsChangePrices.isEmpty()) {
+            this.goodsChangePrices.forEach((name, changePrices) -> {
+                if (!changePrices.equals(this.save.getChangePrices().getGood(name).getChangePrices())) {
+                    this.save.getChangePrices().getGood(name).setChangePrices(changePrices);
+                }
+            });
+        }
     }
 
     private String goodToDesc(ChangePriceGood good, Double price) {
-        double modifiersSum = good.getChangePrices().stream().mapToDouble(ChangePrice::getValue).sum();
+        double modifiersSum = this.goodsChangePrices.get(good.getName()).stream().mapToDouble(ChangePrice::getValue).sum();
         BigDecimal basePrice = BigDecimal.valueOf(price)
                                          .multiply(BigDecimal.valueOf(100))
                                          .divide(BigDecimal.valueOf(100)
