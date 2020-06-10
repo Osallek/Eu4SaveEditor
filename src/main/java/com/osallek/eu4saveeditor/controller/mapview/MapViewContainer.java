@@ -43,6 +43,8 @@ public class MapViewContainer {
 
     private final ObservableList<Country> playableCountries;
 
+    private final ObservableList<Country> countriesAlive;
+
     private final ObservableList<Culture> cultures;
 
     private final ObservableList<Religion> religions;
@@ -63,7 +65,7 @@ public class MapViewContainer {
 
     public MapViewContainer(SaveProvince[][] provincesMap, Map<Integer, DrawableProvince> drawableProvinces,
                             Canvas canvas, VBox editPane, Save save, ObservableList<Country> playableCountries,
-                            ObservableList<Culture> cultures, ObservableList<Religion> religions,
+                            ObservableList<Country> countriesAlive, ObservableList<Culture> cultures, ObservableList<Religion> religions,
                             ObservableList<TradeGood> tradeGoods, ObservableList<SaveProvince> cities) {
         this.provincesMap = provincesMap;
         this.drawableProvinces = drawableProvinces;
@@ -71,12 +73,13 @@ public class MapViewContainer {
         this.editPane = editPane;
         this.save = save;
         this.cities = cities;
-        this.saveSheet = new SavePropertySheet(this.save, this.cities);
-        this.mapViews = new EnumMap<>(MapViewType.class);
         this.playableCountries = playableCountries;
+        this.countriesAlive = countriesAlive;
         this.cultures = cultures;
         this.religions = religions;
         this.tradeGoods = tradeGoods;
+        this.saveSheet = new SavePropertySheet(this.save, this.playableCountries, this.countriesAlive, this.cities);
+        this.mapViews = new EnumMap<>(MapViewType.class);
 
         this.titleLabel = new Label();
         this.titleLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 16px");

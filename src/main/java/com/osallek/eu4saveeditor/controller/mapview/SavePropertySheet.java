@@ -3,13 +3,17 @@ package com.osallek.eu4saveeditor.controller.mapview;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.changeprices.ChangePrice;
 import com.osallek.eu4parser.model.save.changeprices.ChangePriceGood;
+import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.gameplayoptions.CustomNationDifficulty;
 import com.osallek.eu4parser.model.save.gameplayoptions.Difficulty;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
+import com.osallek.eu4saveeditor.controller.control.ClearableCheckComboBox;
 import com.osallek.eu4saveeditor.controller.control.ClearableComboBox;
 import com.osallek.eu4saveeditor.controller.control.ClearableSpinnerDouble;
 import com.osallek.eu4saveeditor.controller.control.RequiredComboBox;
 import com.osallek.eu4saveeditor.controller.control.TableView2ChangePrice;
+import com.osallek.eu4saveeditor.controller.converter.CountryStringCellFactory;
+import com.osallek.eu4saveeditor.controller.converter.CountryStringConverter;
 import com.osallek.eu4saveeditor.controller.converter.CustomNationDifficultyStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.CustomNationDifficultyStringConverter;
 import com.osallek.eu4saveeditor.controller.converter.DifficultyStringCellFactory;
@@ -21,11 +25,13 @@ import com.osallek.eu4saveeditor.controller.pane.TableView2Dialog;
 import com.osallek.eu4saveeditor.controller.propertyeditor.CustomPropertyEditorFactory;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ButtonItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.CheckBoxItem;
+import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableCheckComboBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableComboBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSpinnerItem;
 import com.osallek.eu4saveeditor.controller.validator.CustomGraphicValidationDecoration;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
@@ -47,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class SavePropertySheet extends VBox {
 
@@ -104,9 +111,13 @@ public class SavePropertySheet extends VBox {
 
     private final Map<String, List<ChangePrice>> goodsChangePrices;
 
+    private final ClearableComboBoxItem<Country> hreEmperor;
+
+    private final ClearableCheckComboBoxItem<Country> hreElectors;
+
     private CustomPropertySheetSkin propertySheetSkin;
 
-    public SavePropertySheet(Save save, ObservableList<SaveProvince> cities) {
+    public SavePropertySheet(Save save, ObservableList<Country> playableCountries, ObservableList<Country> countriesAlive, ObservableList<SaveProvince> cities) {
         this.save = save;
         this.propertySheet = new PropertySheet();
         this.propertySheet.setPropertyEditorFactory(new CustomPropertyEditorFactory());
@@ -382,6 +393,34 @@ public class SavePropertySheet extends VBox {
             this.propertySheet.getItems().add(priceSpinnerItem);
             this.propertySheet.getItems().add(buttonItem);
         }
+
+        //HRE
+        this.hreEmperor = new ClearableComboBoxItem<>(SheetCategory.SAVE_HRE,
+                                                      save.getGame().getLocalisation("HINT_EMPEROR_TITLE"),
+                                                      new FilteredList<>(countriesAlive,
+                                                                         country -> country.getCapital().getContinent()
+                                                                                    == this.save.getHre()
+                                                                                                .getContinent()),
+                                                      this.save.getHre().getEmperor(),
+                                                      new ClearableComboBox<>(new SearchableComboBox<>(),
+                                                                              () -> this.save.getHre().getEmperor()));
+        this.hreEmperor.setConverter(new CountryStringConverter());
+        this.hreEmperor.setCellFactory(new CountryStringCellFactory());
+
+        //Todo change to ListSelectionView
+        this.hreElectors = new ClearableCheckComboBoxItem<>(SheetCategory.SAVE_HRE,
+                                                            save.getGame().getLocalisation("HINT_ELECTOR_TITLE"),
+                                                            new FilteredList<>(countriesAlive,
+                                                                               country -> country.getCapital().inHre()),
+                                                            FXCollections.observableArrayList(this.save.getHre()
+                                                                                                       .getElectors()),
+                                                            new ClearableCheckComboBox<>(() -> this.save.getHre()
+                                                                                                        .getElectors()));
+        this.hreElectors.setConverter(new CountryStringConverter());
+
+
+        this.propertySheet.getItems().add(this.hreEmperor);
+        this.propertySheet.getItems().add(this.hreElectors);
     }
 
     public void update() {
@@ -421,7 +460,13 @@ public class SavePropertySheet extends VBox {
         }
 
         this.goodsChangePrices.clear();
-        this.save.getChangePrices().getGoods().forEach((name, changePriceGood) -> this.goodsChangePrices.put(name, new ArrayList<>(changePriceGood.getChangePrices())));
+        this.save.getChangePrices()
+                 .getGoods()
+                 .forEach((name, changePriceGood) -> this.goodsChangePrices.put(name, new ArrayList<>(changePriceGood.getChangePrices())));
+
+        //HRE
+        this.hreEmperor.setValue(this.save.getHre().getEmperor());
+        this.hreElectors.setValue(FXCollections.observableArrayList(this.save.getHre().getElectors()));
     }
 
     public void validate(ActionEvent actionEvent) {
@@ -532,8 +577,12 @@ public class SavePropertySheet extends VBox {
         //GOODS
         if (!this.goodsPricesFields.isEmpty()) {
             for (int i = 0; i < this.goodsPricesFields.size(); i++) {
-                if (!this.goodsPricesFields.get(i).getTrueValue().equals(this.save.getChangePrices().getGood(i).getCurrentPrice())) {
-                    this.save.getChangePrices().getGood(i).setCurrentPrice(this.goodsPricesFields.get(i).getTrueValue());
+                if (!this.goodsPricesFields.get(i)
+                                           .getTrueValue()
+                                           .equals(this.save.getChangePrices().getGood(i).getCurrentPrice())) {
+                    this.save.getChangePrices()
+                             .getGood(i)
+                             .setCurrentPrice(this.goodsPricesFields.get(i).getTrueValue());
                 }
             }
         }
@@ -545,10 +594,21 @@ public class SavePropertySheet extends VBox {
                 }
             });
         }
+
+        //HRE
+        if (this.save.getHre().getEmperor() != this.hreEmperor.getSelectedValue()) {
+            this.save.getHre().setEmperor(this.hreEmperor.getSelectedValue());
+        }
+        if (this.save.getHre().getElectors() != this.hreElectors.getSelectedValues()) {
+            this.save.getHre().setElectors(this.hreElectors.getSelectedValues());
+        }
     }
 
     private String goodToDesc(ChangePriceGood good, Double price) {
-        double modifiersSum = this.goodsChangePrices.get(good.getName()).stream().mapToDouble(ChangePrice::getValue).sum();
+        double modifiersSum = this.goodsChangePrices.get(good.getName())
+                                                    .stream()
+                                                    .mapToDouble(ChangePrice::getValue)
+                                                    .sum();
         BigDecimal basePrice = BigDecimal.valueOf(price)
                                          .multiply(BigDecimal.valueOf(100))
                                          .divide(BigDecimal.valueOf(100)

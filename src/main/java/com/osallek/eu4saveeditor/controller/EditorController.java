@@ -20,6 +20,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.ImageCursor;
@@ -92,6 +93,8 @@ public class EditorController implements Initializable {
     private ObservableList<SaveProvince> cities;
 
     private ObservableList<Country> playableCountries;
+
+    private ObservableList<Country> countriesAlive;
 
     private ObservableList<Culture> cultures;
 
@@ -216,6 +219,8 @@ public class EditorController implements Initializable {
 
             this.playableCountries = FXCollections.observableArrayList(this.provincesMap[0][0].getSave()
                                                                                               .getPlayableCountries());
+
+            this.countriesAlive = new FilteredList<>(this.playableCountries, Country::isAlive);
             this.cultures = FXCollections.observableArrayList(this.provincesMap[0][0].getSave()
                                                                                      .getGame()
                                                                                      .getCultures());
@@ -254,8 +259,9 @@ public class EditorController implements Initializable {
             this.saveButton.setText(this.save.getGame().getLocalisation("SAVE"));
 
             this.mapViewContainer = new MapViewContainer(this.provincesMap, this.drawableProvinces, this.provincesCanvas,
-                                                         this.editPane, this.save, this.playableCountries, this.cultures,
-                                                         this.religions, this.tradeGoods, this.cities);
+                                                         this.editPane, this.save, this.playableCountries,
+                                                         this.countriesAlive, this.cultures, this.religions,
+                                                         this.tradeGoods, this.cities);
             this.mapViewContainer.registerMapView(MapViewType.COUNTRIES_MAP_VIEW);
             this.mapViewContainer.selectMapView(MapViewType.COUNTRIES_MAP_VIEW);
             this.mapViewContainer.draw();

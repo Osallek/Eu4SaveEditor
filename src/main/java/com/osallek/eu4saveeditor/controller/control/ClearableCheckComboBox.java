@@ -28,6 +28,7 @@ public class ClearableCheckComboBox<U> extends HBox {
         this.getStyleClass().add("clearable-check-combo");
         this.checkComboBox = new CheckComboBox<>();
         this.checkComboBox.getStyleClass().add("check-combo-box");
+        this.checkComboBox.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(this.checkComboBox, Priority.ALWAYS);
 
         this.button = new Button("", new Glyph("FontAwesome", FontAwesome.Glyph.CLOSE));
@@ -40,11 +41,7 @@ public class ClearableCheckComboBox<U> extends HBox {
             });
         }
 
-        Pane centerPane = new Pane();
-        HBox.setHgrow(centerPane, Priority.ALWAYS);
-
         getChildren().add(this.checkComboBox);
-        getChildren().add(centerPane);
         getChildren().add(this.button);
     }
 
