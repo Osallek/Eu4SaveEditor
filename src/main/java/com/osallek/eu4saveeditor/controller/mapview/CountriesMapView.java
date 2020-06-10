@@ -86,7 +86,9 @@ public class CountriesMapView extends AbstractMapView {
             } else if (this.provinceButton.isSelected()) {
                 selectProvinceButton();
             }
-
+        } else {
+            this.provinceSheet.update(this.provinceSheet.getProvince());
+            this.mapViewContainer.updateTitle();
         }
     }
 
