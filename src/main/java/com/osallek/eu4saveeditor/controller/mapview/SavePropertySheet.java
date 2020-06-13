@@ -1,5 +1,6 @@
 package com.osallek.eu4saveeditor.controller.mapview;
 
+import com.osallek.eu4parser.model.game.ImperialReform;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.changeprices.ChangePrice;
 import com.osallek.eu4parser.model.save.changeprices.ChangePriceGood;
@@ -7,9 +8,10 @@ import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.gameplayoptions.CustomNationDifficulty;
 import com.osallek.eu4parser.model.save.gameplayoptions.Difficulty;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
-import com.osallek.eu4saveeditor.controller.control.ClearableCheckComboBox;
 import com.osallek.eu4saveeditor.controller.control.ClearableComboBox;
 import com.osallek.eu4saveeditor.controller.control.ClearableSpinnerDouble;
+import com.osallek.eu4saveeditor.controller.control.ListSelectionViewCountry;
+import com.osallek.eu4saveeditor.controller.control.ListSelectionViewImperialReform;
 import com.osallek.eu4saveeditor.controller.control.RequiredComboBox;
 import com.osallek.eu4saveeditor.controller.control.TableView2ChangePrice;
 import com.osallek.eu4saveeditor.controller.converter.CountryStringCellFactory;
@@ -21,12 +23,13 @@ import com.osallek.eu4saveeditor.controller.converter.DifficultyStringConverter;
 import com.osallek.eu4saveeditor.controller.converter.ProvinceStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.ProvinceStringConverter;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheetSkin;
+import com.osallek.eu4saveeditor.controller.pane.ListSelectionViewDialog;
 import com.osallek.eu4saveeditor.controller.pane.TableView2Dialog;
 import com.osallek.eu4saveeditor.controller.propertyeditor.CustomPropertyEditorFactory;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ButtonItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.CheckBoxItem;
-import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableCheckComboBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableComboBoxItem;
+import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSpinnerItem;
 import com.osallek.eu4saveeditor.controller.validator.CustomGraphicValidationDecoration;
 import javafx.collections.FXCollections;
@@ -46,6 +49,7 @@ import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -54,6 +58,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SavePropertySheet extends VBox {
 
@@ -111,9 +116,23 @@ public class SavePropertySheet extends VBox {
 
     private final Map<String, List<ChangePrice>> goodsChangePrices;
 
-    private final ClearableComboBoxItem<Country> hreEmperor;
+    private ClearableComboBoxItem<Country> hreEmperor;
 
-    private final ClearableCheckComboBoxItem<Country> hreElectors;
+    private ObservableList<Country> hreElectors;
+
+    private ClearableSliderItem hreInfluenceField;
+
+    private ObservableList<ImperialReform> passedHreMainLineReforms;
+
+    private ObservableList<ImperialReform> notPassedHreMainLineReforms;
+
+    private ObservableList<ImperialReform> passedHreLeftBranchReforms;
+
+    private ObservableList<ImperialReform> notPassedHreLeftBranchReforms;
+
+    private ObservableList<ImperialReform> passedHreRightBranchReforms;
+
+    private ObservableList<ImperialReform> notPassedHreRightBranchReforms;
 
     private CustomPropertySheetSkin propertySheetSkin;
 
@@ -125,6 +144,8 @@ public class SavePropertySheet extends VBox {
         this.propertySheet.setCategoryComparator(Comparator.comparing(SheetCategory::getByLocale));
         this.propertySheet.setModeSwitcherVisible(false);
         this.propertySheet.setSearchBoxVisible(false);
+
+        List<PropertySheet.Item> items = new ArrayList<>();
 
         this.propertySheetSkin = new CustomPropertySheetSkin(this.propertySheet);
         this.propertySheet.setSkin(this.propertySheetSkin);
@@ -267,26 +288,26 @@ public class SavePropertySheet extends VBox {
                                                                     .getAllowFreeTeamCreation(),
                                                            this.save.getGame()
                                                                     .getLocalisationClean("ALLOW_FREE_TEAM_CREATION_TOOLTIP"));
-        this.propertySheet.getItems().add(this.difficultyField);
-        this.propertySheet.getItems().add(this.terraIncognitaField);
-        this.propertySheet.getItems().add(this.dynamicProvinceNamesField);
-        this.propertySheet.getItems().add(this.showMonthlyTaxIncomeField);
-        this.propertySheet.getItems().add(this.colorWastelandsField);
-        this.propertySheet.getItems().add(this.exclavesRegionNameField);
-        this.propertySheet.getItems().add(this.unlimitedIdeaGroupsField);
-        this.propertySheet.getItems().add(this.allowHotJoinField);
-        this.propertySheet.getItems().add(this.allowCoopField);
-        this.propertySheet.getItems().add(this.onlyHostAndObserversCanSaveField);
-        this.propertySheet.getItems().add(this.onlyHostCanPauseField);
-        this.propertySheet.getItems().add(this.saveEditableField);
-        this.propertySheet.getItems().add(this.lockedLedgerField);
-        this.propertySheet.getItems().add(this.limitedLedgerField);
-        this.propertySheet.getItems().add(this.allowTeamsField);
-        this.propertySheet.getItems().add(this.allowFreeTeamCreationField);
-        this.propertySheet.getItems().add(this.blockNationRuiningField);
-        this.propertySheet.getItems().add(this.allowNameChangeField);
-        this.propertySheet.getItems().add(this.customNationDifficultyField);
-        this.propertySheet.getItems().add(this.addNationsToGameField);
+        items.add(this.difficultyField);
+        items.add(this.terraIncognitaField);
+        items.add(this.dynamicProvinceNamesField);
+        items.add(this.showMonthlyTaxIncomeField);
+        items.add(this.colorWastelandsField);
+        items.add(this.exclavesRegionNameField);
+        items.add(this.unlimitedIdeaGroupsField);
+        items.add(this.allowHotJoinField);
+        items.add(this.allowCoopField);
+        items.add(this.onlyHostAndObserversCanSaveField);
+        items.add(this.onlyHostCanPauseField);
+        items.add(this.saveEditableField);
+        items.add(this.lockedLedgerField);
+        items.add(this.limitedLedgerField);
+        items.add(this.allowTeamsField);
+        items.add(this.allowFreeTeamCreationField);
+        items.add(this.blockNationRuiningField);
+        items.add(this.allowNameChangeField);
+        items.add(this.customNationDifficultyField);
+        items.add(this.addNationsToGameField);
 
         //INSTITUTIONS
         this.institutionOriginFields = new ArrayList<>();
@@ -313,8 +334,8 @@ public class SavePropertySheet extends VBox {
 
             this.institutionAvailableFields.add(checkBoxItem);
             this.institutionOriginFields.add(comboBoxItem);
-            this.propertySheet.getItems().add(checkBoxItem);
-            this.propertySheet.getItems().add(comboBoxItem);
+            items.add(checkBoxItem);
+            items.add(comboBoxItem);
         }
 
         //GOODS
@@ -390,37 +411,194 @@ public class SavePropertySheet extends VBox {
             });
 
             this.goodsPricesFields.add(priceSpinnerItem);
-            this.propertySheet.getItems().add(priceSpinnerItem);
-            this.propertySheet.getItems().add(buttonItem);
+            items.add(priceSpinnerItem);
+            items.add(buttonItem);
         }
 
         //HRE
-        this.hreEmperor = new ClearableComboBoxItem<>(SheetCategory.SAVE_HRE,
-                                                      save.getGame().getLocalisation("HINT_EMPEROR_TITLE"),
-                                                      new FilteredList<>(countriesAlive,
-                                                                         country -> country.getCapital().getContinent()
-                                                                                    == this.save.getHre()
-                                                                                                .getContinent()),
-                                                      this.save.getHre().getEmperor(),
-                                                      new ClearableComboBox<>(new SearchableComboBox<>(),
-                                                                              () -> this.save.getHre().getEmperor()));
-        this.hreEmperor.setConverter(new CountryStringConverter());
-        this.hreEmperor.setCellFactory(new CountryStringCellFactory());
+        if (!this.save.getHre().dismantled()) {
+            this.hreEmperor = new ClearableComboBoxItem<>(SheetCategory.SAVE_HRE,
+                                                          save.getGame().getLocalisation("HINT_EMPEROR_TITLE"),
+                                                          new FilteredList<>(countriesAlive,
+                                                                             country ->
+                                                                                     country.getCapital().getContinent()
+                                                                                     == this.save.getHre()
+                                                                                                 .getContinent()),
+                                                          this.save.getHre().getEmperor(),
+                                                          new ClearableComboBox<>(new SearchableComboBox<>(),
+                                                                                  () -> this.save.getHre()
+                                                                                                 .getEmperor()));
+            this.hreEmperor.setConverter(new CountryStringConverter());
+            this.hreEmperor.setCellFactory(new CountryStringCellFactory());
 
-        //Todo change to ListSelectionView
-        this.hreElectors = new ClearableCheckComboBoxItem<>(SheetCategory.SAVE_HRE,
-                                                            save.getGame().getLocalisation("HINT_ELECTOR_TITLE"),
-                                                            new FilteredList<>(countriesAlive,
-                                                                               country -> country.getCapital().inHre()),
-                                                            FXCollections.observableArrayList(this.save.getHre()
-                                                                                                       .getElectors()),
-                                                            new ClearableCheckComboBox<>(() -> this.save.getHre()
-                                                                                                        .getElectors()));
-        this.hreElectors.setConverter(new CountryStringConverter());
+            ButtonItem hreElectorsButtonItem = new ButtonItem(SheetCategory.SAVE_HRE,
+                                                              null,
+                                                              save.getGame()
+                                                                  .getLocalisationClean("HINT_ELECTOR_TITLE"));
 
+            this.hreElectors = FXCollections.observableArrayList(new ArrayList<>(this.save.getHre().getElectors()));
+            ObservableList<Country> members = FXCollections.observableArrayList(countriesAlive.stream()
+                                                                                              .filter(country -> country
+                                                                                                      .getCapital()
+                                                                                                      .inHre())
+                                                                                              .filter(country -> !this.hreElectors
+                                                                                                      .contains(country))
+                                                                                              .collect(Collectors.toList()));
+            hreElectorsButtonItem.getButton().setOnAction(event -> {
+                ListSelectionViewDialog<Country> dialog = new ListSelectionViewDialog<>(this.save,
+                                                                                        new ListSelectionViewCountry(members,
+                                                                                                                     this.hreElectors
+                                                                                        ),
+                                                                                        this.save.getGame()
+                                                                                                 .getLocalisationClean("HINT_ELECTOR_TITLE"),
+                                                                                        () -> countriesAlive.stream()
+                                                                                                            .filter(country -> country
+                                                                                                                    .getCapital()
+                                                                                                                    .inHre())
+                                                                                                            .filter(country -> !this.hreElectors
+                                                                                                                    .contains(country))
+                                                                                                            .collect(Collectors
+                                                                                                                             .toList()),
+                                                                                        () -> this.save.getHre()
+                                                                                                       .getElectors());
+                Optional<List<Country>> newElectors = dialog.showAndWait();
 
-        this.propertySheet.getItems().add(this.hreEmperor);
-        this.propertySheet.getItems().add(this.hreElectors);
+                if (!newElectors.isPresent()) {
+                    this.hreElectors = FXCollections.observableArrayList(new ArrayList<>(this.save.getHre()
+                                                                                                  .getElectors()));
+                }
+            });
+
+            this.hreInfluenceField = new ClearableSliderItem(SheetCategory.SAVE_HRE,
+                                                             save.getGame().getLocalisation("HRE_INFLUENCE"),
+                                                             0, 100,
+                                                             this.save.getHre().getImperialInfluence(),
+                                                             () -> this.save.getHre().getImperialInfluence());
+
+            ButtonItem hreMainLineReformsButtonItem = new ButtonItem(SheetCategory.SAVE_HRE,
+                                                                     null,
+                                                                     save.getGame()
+                                                                         .getLocalisationClean("HRE_REFORMS"));
+
+            this.passedHreMainLineReforms = FXCollections.observableArrayList(this.save.getHre()
+                                                                                       .getMainLinePassedReforms());
+
+            this.notPassedHreMainLineReforms = FXCollections.observableArrayList(this.save.getHre()
+                                                                                          .getMainLineNotPassedReforms());
+            hreMainLineReformsButtonItem.getButton().setOnAction(event -> {
+                ListSelectionViewImperialReform listSelectionView = new ListSelectionViewImperialReform(this.notPassedHreMainLineReforms,
+                                                                                                        this.passedHreMainLineReforms);
+
+                ObservableList<ImperialReform> tmpPassedHreMainLineReforms = FXCollections.observableArrayList(this.passedHreMainLineReforms);
+                ObservableList<ImperialReform> tmpNotPassedHreMainLineReforms = FXCollections.observableArrayList(this.notPassedHreMainLineReforms);
+
+                ListSelectionViewDialog<ImperialReform> dialog = new ListSelectionViewDialog<>(this.save,
+                                                                                               listSelectionView,
+                                                                                               this.save.getGame()
+                                                                                                        .getLocalisationClean("HRE_REFORMS"),
+                                                                                               () -> this.save
+                                                                                                       .getHre()
+                                                                                                       .getMainLineNotPassedReforms(),
+                                                                                               () -> this.save
+                                                                                                       .getHre()
+                                                                                                       .getMainLinePassedReforms());
+
+                Optional<List<ImperialReform>> newMainLineReforms = dialog.showAndWait();
+
+                if (!newMainLineReforms.isPresent()) {
+                    this.passedHreMainLineReforms.setAll(tmpPassedHreMainLineReforms);
+                    this.notPassedHreMainLineReforms.setAll(tmpNotPassedHreMainLineReforms);
+                }
+            });
+
+            ButtonItem hreLeftBranchReformsButtonItem = new ButtonItem(SheetCategory.SAVE_HRE,
+                                                                       null,
+                                                                       this.save.getGame()
+                                                                                .getLocalisationClean("HRE_LEFTBRANCH"));
+
+            this.passedHreLeftBranchReforms = FXCollections.observableArrayList(this.save.getHre()
+                                                                                         .getLeftBranchPassedReforms());
+
+            this.notPassedHreLeftBranchReforms = FXCollections.observableArrayList(this.save.getHre()
+                                                                                            .getLeftBranchNotPassedReforms());
+            hreLeftBranchReformsButtonItem.setOnAction(event -> {
+                ListSelectionViewImperialReform listSelectionView = new ListSelectionViewImperialReform(this.notPassedHreLeftBranchReforms,
+                                                                                                        this.passedHreLeftBranchReforms);
+
+                ObservableList<ImperialReform> tmpPassedHreLeftBranchReforms = FXCollections.observableArrayList(this.passedHreLeftBranchReforms);
+                ObservableList<ImperialReform> tmpNotPassedHreLeftBranchReforms = FXCollections.observableArrayList(this.notPassedHreLeftBranchReforms);
+
+                ListSelectionViewDialog<ImperialReform> dialog = new ListSelectionViewDialog<>(this.save,
+                                                                                               listSelectionView,
+                                                                                               this.save.getGame()
+                                                                                                        .getLocalisationClean("HRE_LEFTBRANCH"),
+                                                                                               () -> this.save
+                                                                                                       .getHre()
+                                                                                                       .getLeftBranchNotPassedReforms(),
+                                                                                               () -> this.save
+                                                                                                       .getHre()
+                                                                                                       .getLeftBranchPassedReforms());
+                Optional<List<ImperialReform>> newLeftBranchReforms = dialog.showAndWait();
+
+                if (newLeftBranchReforms.isPresent()) {
+                    if (!newLeftBranchReforms.get().isEmpty()) {
+                        this.passedHreRightBranchReforms.clear();
+                        this.notPassedHreRightBranchReforms.setAll(this.save.getHre().getRightBranchReforms());
+                    }
+                } else {
+                    this.passedHreLeftBranchReforms.setAll(tmpPassedHreLeftBranchReforms);
+                    this.notPassedHreLeftBranchReforms.setAll(tmpNotPassedHreLeftBranchReforms);
+                }
+            });
+
+            ButtonItem hreRightBranchReformsButtonItem = new ButtonItem(SheetCategory.SAVE_HRE,
+                                                                        null,
+                                                                        this.save.getGame()
+                                                                                 .getLocalisationClean("HRE_RIGHTBRANCH"));
+
+            this.passedHreRightBranchReforms = FXCollections.observableArrayList(this.save.getHre()
+                                                                                          .getRightBranchPassedReforms());
+
+            this.notPassedHreRightBranchReforms = FXCollections.observableArrayList(this.save.getHre()
+                                                                                             .getRightBranchNotPassedReforms());
+            hreRightBranchReformsButtonItem.setOnAction(event -> {
+                ObservableList<ImperialReform> tmpPassedHreRightBranchReforms = FXCollections.observableArrayList(this.passedHreRightBranchReforms);
+                ObservableList<ImperialReform> tmpNotPassedHreRightBranchReforms = FXCollections.observableArrayList(this.notPassedHreRightBranchReforms);
+
+                ListSelectionViewDialog<ImperialReform> dialog = new ListSelectionViewDialog<>(this.save,
+                                                                                               new ListSelectionViewImperialReform(this.notPassedHreRightBranchReforms,
+                                                                                                                                   this.passedHreRightBranchReforms
+                                                                                               ),
+                                                                                               this.save.getGame()
+                                                                                                        .getLocalisationClean("HRE_RIGHTBRANCH"),
+                                                                                               () -> this.save
+                                                                                                       .getHre()
+                                                                                                       .getRightBranchNotPassedReforms(),
+                                                                                               () -> this.save
+                                                                                                       .getHre()
+                                                                                                       .getRightBranchPassedReforms());
+                Optional<List<ImperialReform>> newRightBranchReforms = dialog.showAndWait();
+
+                if (newRightBranchReforms.isPresent()) {
+                    if (!newRightBranchReforms.get().isEmpty()) {
+                        this.passedHreLeftBranchReforms.clear();
+                        this.notPassedHreLeftBranchReforms.setAll(this.save.getHre().getLeftBranchReforms());
+                    }
+                } else {
+                    this.passedHreRightBranchReforms.setAll(tmpPassedHreRightBranchReforms);
+                    this.notPassedHreRightBranchReforms.setAll(tmpNotPassedHreRightBranchReforms);
+                }
+            });
+
+            items.add(this.hreEmperor);
+            items.add(hreElectorsButtonItem);
+            items.add(this.hreInfluenceField);
+            items.add(hreMainLineReformsButtonItem);
+            items.add(hreLeftBranchReformsButtonItem);
+            items.add(hreRightBranchReformsButtonItem);
+        }
+
+        this.propertySheet.getItems().setAll(items);
     }
 
     public void update() {
@@ -465,8 +643,17 @@ public class SavePropertySheet extends VBox {
                  .forEach((name, changePriceGood) -> this.goodsChangePrices.put(name, new ArrayList<>(changePriceGood.getChangePrices())));
 
         //HRE
-        this.hreEmperor.setValue(this.save.getHre().getEmperor());
-        this.hreElectors.setValue(FXCollections.observableArrayList(this.save.getHre().getElectors()));
+        if (!this.save.getHre().dismantled()) {
+            this.hreEmperor.setValue(this.save.getHre().getEmperor());
+            this.hreElectors = FXCollections.observableArrayList(new ArrayList<>(this.save.getHre().getElectors()));
+            this.hreInfluenceField.setValue(this.save.getHre().getImperialInfluence());
+            this.passedHreMainLineReforms.setAll(this.save.getHre().getMainLinePassedReforms());
+            this.notPassedHreMainLineReforms.setAll(this.save.getHre().getMainLineNotPassedReforms());
+            this.passedHreLeftBranchReforms.setAll(this.save.getHre().getLeftBranchPassedReforms());
+            this.notPassedHreLeftBranchReforms.setAll(this.save.getHre().getLeftBranchNotPassedReforms());
+            this.passedHreRightBranchReforms.setAll(this.save.getHre().getRightBranchPassedReforms());
+            this.notPassedHreRightBranchReforms.setAll(this.save.getHre().getRightBranchNotPassedReforms());
+        }
     }
 
     public void validate(ActionEvent actionEvent) {
@@ -596,11 +783,27 @@ public class SavePropertySheet extends VBox {
         }
 
         //HRE
-        if (this.save.getHre().getEmperor() != this.hreEmperor.getSelectedValue()) {
-            this.save.getHre().setEmperor(this.hreEmperor.getSelectedValue());
-        }
-        if (this.save.getHre().getElectors() != this.hreElectors.getSelectedValues()) {
-            this.save.getHre().setElectors(this.hreElectors.getSelectedValues());
+        if (!this.save.getHre().dismantled()) {
+            if (this.save.getHre().getEmperor() != this.hreEmperor.getSelectedValue()) {
+                this.save.getHre().setEmperor(this.hreEmperor.getSelectedValue());
+            }
+
+            if (!this.save.getHre().getElectors().equals(this.hreElectors)) {
+                this.save.getHre().setElectors(this.hreElectors);
+            }
+
+            if (!this.save.getHre().getImperialInfluence().equals(this.hreInfluenceField.getDoubleValue())) {
+                this.save.getHre().setImperialInfluence(this.hreInfluenceField.getDoubleValue());
+            }
+
+            if (!this.save.getHre().getMainLinePassedReforms().equals(this.passedHreMainLineReforms)
+                || !this.save.getHre().getLeftBranchPassedReforms().equals(this.passedHreLeftBranchReforms)
+                || !this.save.getHre().getRightBranchPassedReforms().equals(this.passedHreRightBranchReforms)) {
+                this.save.getHre().setPassedReforms(
+                        Stream.of(this.passedHreMainLineReforms, this.passedHreLeftBranchReforms, this.passedHreRightBranchReforms)
+                              .flatMap(Collection::stream)
+                              .collect(Collectors.toList()));
+            }
         }
     }
 

@@ -18,6 +18,7 @@
  */
 package com.osallek.eu4saveeditor.controller.pane;
 
+import com.osallek.eu4saveeditor.controller.propertyeditor.item.CustomItem;
 import com.sun.javafx.scene.control.behavior.BehaviorBase;
 import com.sun.javafx.scene.control.behavior.KeyBinding;
 import com.sun.javafx.scene.control.skin.BehaviorSkinBase;
@@ -324,7 +325,11 @@ public class CustomPropertySheetSkin extends BehaviorSkinBase<PropertySheet, Beh
                     label.setLabelFor(editor);
                     add(editor, 1, row);
                 } else {
-                    add(editor, 0, row);
+                    if (item instanceof CustomItem) {
+                        add(editor, 0, row, ((CustomItem<?>) item).forceValueColSpan(), 1);
+                    } else {
+                        add(editor, 0, row);
+                    }
                 }
 
                 GridPane.setHgrow(editor, Priority.ALWAYS);

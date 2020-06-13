@@ -7,7 +7,6 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
-import javafx.scene.text.TextAlignment;
 
 import java.util.Optional;
 
@@ -76,6 +75,11 @@ public class ButtonItem implements CustomItem<String> {
     @Override
     public boolean isEditable() {
         return true;
+    }
+
+    @Override
+    public int forceValueColSpan() {
+        return 2;
     }
 
     public Button getButton() {

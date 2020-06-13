@@ -11,11 +11,25 @@ public class HBoxItem<U> implements CustomItem<U> {
 
     private final String category;
 
+    private final String name;
+
     private final HBox hBox;
 
+    private final Integer colSpan;
+
     public HBoxItem(SheetCategory category, HBox hBox) {
+        this(category, null, hBox);
+    }
+
+    public HBoxItem(SheetCategory category, String name, HBox hBox) {
+        this(category, name, hBox, null);
+    }
+
+    public HBoxItem(SheetCategory category, String name, HBox hBox, Integer colSpan) {
         this.category = category.getForDefaultLocale();
+        this.name = name;
         this.hBox = hBox;
+        this.colSpan = colSpan;
     }
 
     @Override
@@ -30,7 +44,7 @@ public class HBoxItem<U> implements CustomItem<U> {
 
     @Override
     public String getName() {
-        return null;
+        return this.name;
     }
 
     @Override
@@ -55,6 +69,11 @@ public class HBoxItem<U> implements CustomItem<U> {
     @Override
     public Optional<ObservableValue<? extends Object>> getObservableValue() {
         return Optional.empty();
+    }
+
+    @Override
+    public int forceValueColSpan() {
+        return this.colSpan == null ? 1 : this.colSpan;
     }
 
     public HBox gethBox() {

@@ -6,4 +6,8 @@ import org.controlsfx.control.PropertySheet;
 public interface CustomItem<T> extends PropertySheet.Item {
 
     ObservableList<T> getChoices();
+
+    default int forceValueColSpan() {
+        return 1;
+    }
 }
