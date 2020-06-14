@@ -550,7 +550,7 @@ public class ProvincePropertySheet extends VBox {
 
         if (this.religionComboBox.isEditable()) {
             if (!Objects.deepEquals(this.province.getReligion(), this.religionComboBox.getSelectedValue())) {
-                this.province.setReligion(this.religionComboBox.getSelectedValue().getName());
+                this.province.setReligion(this.religionComboBox.getSelectedValue());
             }
         }
 

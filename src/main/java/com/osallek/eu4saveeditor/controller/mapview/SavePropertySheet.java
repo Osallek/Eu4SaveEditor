@@ -1,5 +1,6 @@
 package com.osallek.eu4saveeditor.controller.mapview;
 
+import com.osallek.eu4parser.model.game.Decree;
 import com.osallek.eu4parser.model.game.ImperialReform;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.changeprices.ChangePrice;
@@ -18,6 +19,8 @@ import com.osallek.eu4saveeditor.controller.converter.CountryStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.CountryStringConverter;
 import com.osallek.eu4saveeditor.controller.converter.CustomNationDifficultyStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.CustomNationDifficultyStringConverter;
+import com.osallek.eu4saveeditor.controller.converter.DecreeStringCellFactory;
+import com.osallek.eu4saveeditor.controller.converter.DecreeStringConverter;
 import com.osallek.eu4saveeditor.controller.converter.DifficultyStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.DifficultyStringConverter;
 import com.osallek.eu4saveeditor.controller.converter.ProvinceStringCellFactory;
@@ -36,6 +39,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
+import javafx.scene.control.ComboBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import org.controlsfx.control.PropertySheet;
@@ -133,6 +137,16 @@ public class SavePropertySheet extends VBox {
     private ObservableList<ImperialReform> passedHreRightBranchReforms;
 
     private ObservableList<ImperialReform> notPassedHreRightBranchReforms;
+
+    private ClearableComboBoxItem<Country> celestialEmperor;
+
+    private ClearableSliderItem celestialInfluenceField;
+
+    private ObservableList<ImperialReform> passedCelestialReforms;
+
+    private ObservableList<ImperialReform> notPassedCelestialReforms;
+
+    private ClearableComboBoxItem<Decree> decreeField;
 
     private CustomPropertySheetSkin propertySheetSkin;
 
@@ -598,6 +612,89 @@ public class SavePropertySheet extends VBox {
             items.add(hreRightBranchReformsButtonItem);
         }
 
+        //CELESTIAL EMPIRE
+        if (!this.save.getCelestialEmpire().dismantled()) {
+            this.celestialEmperor = new ClearableComboBoxItem<>(SheetCategory.SAVE_CELESTIAL_EMPIRE,
+                                                                save.getGame().getLocalisation("HINT_EMPEROR_TITLE"),
+                                                                new FilteredList<>(countriesAlive,
+                                                                                   country ->
+                                                                                           "pagan".equals(country.getReligion()
+                                                                                                                 .getReligionGroup()
+                                                                                                                 .getName())
+                                                                                           || "eastern".equals(country.getReligion()
+                                                                                                                      .getReligionGroup()
+                                                                                                                      .getName())),
+                                                                this.save.getCelestialEmpire().getEmperor(),
+                                                                new ClearableComboBox<>(new SearchableComboBox<>(),
+                                                                                        () -> this.save.getCelestialEmpire()
+                                                                                                       .getEmperor()));
+            this.celestialEmperor.setConverter(new CountryStringConverter());
+            this.celestialEmperor.setCellFactory(new CountryStringCellFactory());
+
+            this.celestialInfluenceField = new ClearableSliderItem(SheetCategory.SAVE_CELESTIAL_EMPIRE,
+                                                                   save.getGame()
+                                                                       .getLocalisation("CELESTIAL_MANDATE"),
+                                                                   0, 100,
+                                                                   this.save.getCelestialEmpire()
+                                                                            .getImperialInfluence(),
+                                                                   () -> this.save.getCelestialEmpire()
+                                                                                  .getImperialInfluence());
+
+            ButtonItem celestialMainLineReformsButtonItem = new ButtonItem(SheetCategory.SAVE_CELESTIAL_EMPIRE,
+                                                                           null,
+                                                                           save.getGame()
+                                                                               .getLocalisationClean("CELESTIAL_DECISIONS"));
+
+            this.passedCelestialReforms = FXCollections.observableArrayList(this.save.getCelestialEmpire()
+                                                                                     .getMainLinePassedReforms());
+
+            this.notPassedCelestialReforms = FXCollections.observableArrayList(this.save.getCelestialEmpire()
+                                                                                        .getMainLineNotPassedReforms());
+            celestialMainLineReformsButtonItem.getButton().setOnAction(event -> {
+                ListSelectionViewImperialReform listSelectionView = new ListSelectionViewImperialReform(this.notPassedCelestialReforms,
+                                                                                                        this.passedCelestialReforms);
+
+                ObservableList<ImperialReform> tmpPassedCelestialMainLineReforms = FXCollections.observableArrayList(this.passedCelestialReforms);
+                ObservableList<ImperialReform> tmpNotPassedCelestialMainLineReforms = FXCollections.observableArrayList(this.notPassedCelestialReforms);
+
+                ListSelectionViewDialog<ImperialReform> dialog = new ListSelectionViewDialog<>(this.save,
+                                                                                               listSelectionView,
+                                                                                               this.save.getGame()
+                                                                                                        .getLocalisationClean("CELESTIAL_DECISIONS"),
+                                                                                               () -> this.save
+                                                                                                       .getCelestialEmpire()
+                                                                                                       .getMainLineNotPassedReforms(),
+                                                                                               () -> this.save
+                                                                                                       .getCelestialEmpire()
+                                                                                                       .getMainLinePassedReforms());
+
+                Optional<List<ImperialReform>> newMainLineReforms = dialog.showAndWait();
+
+                if (!newMainLineReforms.isPresent()) {
+                    this.passedCelestialReforms.setAll(tmpPassedCelestialMainLineReforms);
+                    this.notPassedCelestialReforms.setAll(tmpNotPassedCelestialMainLineReforms);
+                }
+            });
+
+
+            List<Decree> decrees = new ArrayList<>(this.save.getGame().getDecrees());
+            decrees.add(0, new Decree((String) null));
+
+            this.decreeField = new ClearableComboBoxItem<>(SheetCategory.SAVE_CELESTIAL_EMPIRE,
+                                                           this.save.getGame().getLocalisation("CELESTIAL_DECREES"),
+                                                           FXCollections.observableList(decrees),
+                                                           this.save.getCelestialEmpire().getDecree().getDecree(),
+                                                           new ClearableComboBox<>(new ComboBox<>()));
+            this.decreeField.setConverter(new DecreeStringConverter());
+            this.decreeField.setCellFactory(new DecreeStringCellFactory());
+            this.decreeField.setSupplier(() -> this.save.getCelestialEmpire().getDecree().getDecree());
+
+            items.add(this.celestialEmperor);
+            items.add(this.celestialInfluenceField);
+            items.add(celestialMainLineReformsButtonItem);
+            items.add(this.decreeField);
+        }
+
         this.propertySheet.getItems().setAll(items);
     }
 
@@ -653,6 +750,15 @@ public class SavePropertySheet extends VBox {
             this.notPassedHreLeftBranchReforms.setAll(this.save.getHre().getLeftBranchNotPassedReforms());
             this.passedHreRightBranchReforms.setAll(this.save.getHre().getRightBranchPassedReforms());
             this.notPassedHreRightBranchReforms.setAll(this.save.getHre().getRightBranchNotPassedReforms());
+        }
+
+        //CELESTIAL EMPIRE
+        if (!this.save.getCelestialEmpire().dismantled()) {
+            this.celestialEmperor.setValue(this.save.getCelestialEmpire().getEmperor());
+            this.celestialInfluenceField.setValue(this.save.getCelestialEmpire().getImperialInfluence());
+            this.passedCelestialReforms.setAll(this.save.getCelestialEmpire().getMainLinePassedReforms());
+            this.notPassedCelestialReforms.setAll(this.save.getCelestialEmpire().getMainLineNotPassedReforms());
+            this.decreeField.setValue(this.save.getCelestialEmpire().getDecree().getDecree());
         }
     }
 
@@ -803,6 +909,31 @@ public class SavePropertySheet extends VBox {
                         Stream.of(this.passedHreMainLineReforms, this.passedHreLeftBranchReforms, this.passedHreRightBranchReforms)
                               .flatMap(Collection::stream)
                               .collect(Collectors.toList()));
+            }
+        }
+
+        //CELESTIAL EMPIRE
+        if (!this.save.getCelestialEmpire().dismantled()) {
+            if (this.save.getCelestialEmpire().getEmperor() != this.celestialEmperor.getSelectedValue()) {
+                this.save.getCelestialEmpire().setEmperor(this.celestialEmperor.getSelectedValue());
+            }
+
+            if (!this.save.getCelestialEmpire()
+                          .getImperialInfluence()
+                          .equals(this.celestialInfluenceField.getDoubleValue())) {
+                this.save.getCelestialEmpire().setImperialInfluence(this.celestialInfluenceField.getDoubleValue());
+            }
+
+            if (!this.save.getCelestialEmpire().getMainLinePassedReforms().equals(this.passedCelestialReforms)) {
+                this.save.getCelestialEmpire().setPassedReforms(this.passedCelestialReforms);
+            }
+
+            if ((this.decreeField.getSelectedValue() == null
+                 && this.save.getCelestialEmpire().getDecree().getDecree() != null)
+                || (this.decreeField.getSelectedValue() != null
+                    && !this.decreeField.getSelectedValue()
+                                        .equals(this.save.getCelestialEmpire().getDecree().getDecree()))) {
+                this.save.getCelestialEmpire().setDecree(this.decreeField.getSelectedValue());
             }
         }
     }
