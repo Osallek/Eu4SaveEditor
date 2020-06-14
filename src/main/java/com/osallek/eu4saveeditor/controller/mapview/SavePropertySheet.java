@@ -6,6 +6,7 @@ import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.changeprices.ChangePrice;
 import com.osallek.eu4parser.model.save.changeprices.ChangePriceGood;
 import com.osallek.eu4parser.model.save.country.Country;
+import com.osallek.eu4parser.model.save.empire.HreReligionStatus;
 import com.osallek.eu4parser.model.save.gameplayoptions.CustomNationDifficulty;
 import com.osallek.eu4parser.model.save.gameplayoptions.Difficulty;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
@@ -23,6 +24,8 @@ import com.osallek.eu4saveeditor.controller.converter.DecreeStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.DecreeStringConverter;
 import com.osallek.eu4saveeditor.controller.converter.DifficultyStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.DifficultyStringConverter;
+import com.osallek.eu4saveeditor.controller.converter.HreReligionStatusStringCellFactory;
+import com.osallek.eu4saveeditor.controller.converter.HreReligionStatusStringConverter;
 import com.osallek.eu4saveeditor.controller.converter.ProvinceStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.ProvinceStringConverter;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheetSkin;
@@ -137,6 +140,10 @@ public class SavePropertySheet extends VBox {
     private ObservableList<ImperialReform> passedHreRightBranchReforms;
 
     private ObservableList<ImperialReform> notPassedHreRightBranchReforms;
+
+    private CheckBoxItem hreLeaguesActives;
+
+    private ClearableComboBoxItem<HreReligionStatus> hreReligionStatusField;
 
     private ClearableComboBoxItem<Country> celestialEmperor;
 
@@ -604,12 +611,30 @@ public class SavePropertySheet extends VBox {
                 }
             });
 
+            this.hreLeaguesActives = new CheckBoxItem(SheetCategory.SAVE_HRE,
+                                                      this.save.getGame()
+                                                               .getLocalisationClean("HRE_RELIGIOUS_WAR"),
+                                                      this.save.getHreLeaguesActive());
+
+            this.hreReligionStatusField = new ClearableComboBoxItem<>(SheetCategory.SAVE_HRE,
+                                                                      save.getGame()
+                                                                          .getLocalisation("HRE_DOMINANTFAITH"),
+                                                                      FXCollections.observableArrayList(HreReligionStatus
+                                                                                                                .values()),
+                                                                      this.save.getHreReligionStatus(),
+                                                                      new ClearableComboBox<>(new ComboBox<>(),
+                                                                                              () -> this.save.getHreReligionStatus()));
+            this.hreReligionStatusField.setConverter(new HreReligionStatusStringConverter(this.save));
+            this.hreReligionStatusField.setCellFactory(new HreReligionStatusStringCellFactory(this.save));
+
             items.add(this.hreEmperor);
             items.add(hreElectorsButtonItem);
             items.add(this.hreInfluenceField);
             items.add(hreMainLineReformsButtonItem);
             items.add(hreLeftBranchReformsButtonItem);
             items.add(hreRightBranchReformsButtonItem);
+            items.add(this.hreLeaguesActives);
+            items.add(this.hreReligionStatusField);
         }
 
         //CELESTIAL EMPIRE
@@ -750,6 +775,8 @@ public class SavePropertySheet extends VBox {
             this.notPassedHreLeftBranchReforms.setAll(this.save.getHre().getLeftBranchNotPassedReforms());
             this.passedHreRightBranchReforms.setAll(this.save.getHre().getRightBranchPassedReforms());
             this.notPassedHreRightBranchReforms.setAll(this.save.getHre().getRightBranchNotPassedReforms());
+            this.hreLeaguesActives.setValue(this.save.getHreLeaguesActive());
+            this.hreReligionStatusField.setValue(this.save.getHreReligionStatus());
         }
 
         //CELESTIAL EMPIRE
@@ -934,6 +961,14 @@ public class SavePropertySheet extends VBox {
                     && !this.decreeField.getSelectedValue()
                                         .equals(this.save.getCelestialEmpire().getDecree().getDecree()))) {
                 this.save.getCelestialEmpire().setDecree(this.decreeField.getSelectedValue());
+            }
+
+            if (!this.save.getHreLeaguesActive().equals(this.hreLeaguesActives.isSelected())) {
+                this.save.setHreLeaguesActive(this.hreLeaguesActives.isSelected());
+            }
+
+            if (!this.save.getHreReligionStatus().equals(this.hreReligionStatusField.getSelectedValue())) {
+                this.save.setHreReligionStatus(this.hreReligionStatusField.getSelectedValue());
             }
         }
     }
