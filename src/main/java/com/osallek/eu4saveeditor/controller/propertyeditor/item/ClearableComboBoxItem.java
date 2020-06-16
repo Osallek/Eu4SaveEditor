@@ -45,12 +45,24 @@ public class ClearableComboBoxItem<U> implements CustomItem<U> {
         this(category, name, values, value, null, comboBox);
     }
 
+    public ClearableComboBoxItem(String category, String name, ObservableList<U> values, U value, ClearableComboBox<U> comboBox) {
+        this(category, name, values, value, null, comboBox);
+    }
+
     public ClearableComboBoxItem(SheetCategory category, String name, ObservableList<U> values, U value, String description, ClearableComboBox<U> comboBox) {
         this(category, name, values, value, description, comboBox, true);
     }
 
+    public ClearableComboBoxItem(String category, String name, ObservableList<U> values, U value, String description, ClearableComboBox<U> comboBox) {
+        this(category, name, values, value, description, comboBox, true);
+    }
+
     public ClearableComboBoxItem(SheetCategory category, String name, ObservableList<U> values, U value, String description, ClearableComboBox<U> comboBox, boolean editable) {
-        this.category = category.getForDefaultLocale();
+        this(category.getForDefaultLocale(), name, values, value, description, comboBox, editable);
+    }
+
+    public ClearableComboBoxItem(String category, String name, ObservableList<U> values, U value, String description, ClearableComboBox<U> comboBox, boolean editable) {
+        this.category = category;
         this.name = name;
         this.description = description;
         this.values = values;

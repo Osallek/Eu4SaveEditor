@@ -53,6 +53,7 @@ import org.controlsfx.property.editor.PropertyEditor;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -197,7 +198,9 @@ public class CustomPropertySheetSkin extends BehaviorSkinBase<PropertySheet, Beh
         switch (getSkinnable().modeProperty().get()) {
             case CATEGORY:
                 // group by category
-                Map<String, List<Item>> categoryMap = new TreeMap<>(getSkinnable().getCategoryComparator());
+                Map<String, List<Item>> categoryMap = getSkinnable().getCategoryComparator() == null ?
+                                                      new LinkedHashMap<>() :
+                                                      new TreeMap<>(getSkinnable().getCategoryComparator());
                 for (Item p : getSkinnable().getItems()) {
                     categoryMap.compute(p.getCategory(), (category, items) -> {
                         if (items == null) {

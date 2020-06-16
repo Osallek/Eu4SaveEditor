@@ -176,8 +176,8 @@ public class CountriesMapView extends AbstractMapView {
     }
 
     private Color countryToMapColor(Country country) {
-        return Color.rgb(country.getColors().getCountryColor().getRed(),
-                         country.getColors().getCountryColor().getGreen(),
-                         country.getColors().getCountryColor().getBlue());
+        return Color.rgb(country.getColors().getMapColor().getRed(),
+                         country.getColors().getMapColor().getGreen(),
+                         country.getColors().getMapColor().getBlue());
     }
 }

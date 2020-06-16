@@ -20,6 +20,11 @@ public class ClearableSpinnerDouble extends ClearableSpinner<Double> {
     }
 
     public ClearableSpinnerDouble(double min, double max, double value, double step, Supplier<Double> clearSupplier, Node centerNode) {
+        this(min, max, value, step, clearSupplier, centerNode, true);
+    }
+
+    public ClearableSpinnerDouble(double min, double max, double value, double step, Supplier<Double> clearSupplier, Node centerNode, boolean editable) {
+        this.editable = editable;
         this.spinner = new Spinner<>(min, max, value, step);
         this.spinner.setEditable(true);
         this.spinner.focusedProperty().addListener((observable, oldValue, newValue) -> {

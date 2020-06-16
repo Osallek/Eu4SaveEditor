@@ -1,9 +1,9 @@
 package com.osallek.eu4saveeditor.controller.mapview;
 
 import com.osallek.eu4parser.model.game.Culture;
-import com.osallek.eu4parser.model.game.Religion;
 import com.osallek.eu4parser.model.game.TradeGood;
 import com.osallek.eu4parser.model.save.Save;
+import com.osallek.eu4parser.model.save.SaveReligion;
 import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
 import javafx.beans.property.ReadOnlyBooleanProperty;
@@ -47,7 +47,7 @@ public class MapViewContainer {
 
     private final ObservableList<Culture> cultures;
 
-    private final ObservableList<Religion> religions;
+    private final ObservableList<SaveReligion> religions;
 
     private final ObservableList<TradeGood> tradeGoods;
 
@@ -65,8 +65,9 @@ public class MapViewContainer {
 
     public MapViewContainer(SaveProvince[][] provincesMap, Map<Integer, DrawableProvince> drawableProvinces,
                             Canvas canvas, VBox editPane, Save save, ObservableList<Country> playableCountries,
-                            ObservableList<Country> countriesAlive, ObservableList<Culture> cultures, ObservableList<Religion> religions,
-                            ObservableList<TradeGood> tradeGoods, ObservableList<SaveProvince> cities) {
+                            ObservableList<Country> countriesAlive, ObservableList<Culture> cultures,
+                            ObservableList<SaveReligion> religions, ObservableList<TradeGood> tradeGoods,
+                            ObservableList<SaveProvince> cities) {
         this.provincesMap = provincesMap;
         this.drawableProvinces = drawableProvinces;
         this.canvas = canvas;
@@ -236,7 +237,7 @@ public class MapViewContainer {
         return cultures;
     }
 
-    public ObservableList<Religion> getReligions() {
+    public ObservableList<SaveReligion> getReligions() {
         return religions;
     }
 

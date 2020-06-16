@@ -1,10 +1,11 @@
 package com.osallek.eu4saveeditor.controller;
 
 import com.osallek.eu4parser.Eu4Parser;
+import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.model.game.Culture;
-import com.osallek.eu4parser.model.game.Religion;
 import com.osallek.eu4parser.model.game.TradeGood;
 import com.osallek.eu4parser.model.save.Save;
+import com.osallek.eu4parser.model.save.SaveReligion;
 import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
 import com.osallek.eu4saveeditor.Main;
@@ -54,6 +55,8 @@ import java.util.logging.Level;
 
 public class EditorController implements Initializable {
 
+    public static final Country dummyCountry = new Country(Eu4Utils.DEFAULT_TAG);
+
     private static final DateFormat PRETTY_DATE_FORMAT = new SimpleDateFormat("dd MMMM yyyy");
 
     private final FileChooser saveFileChooser = new FileChooser();
@@ -98,7 +101,7 @@ public class EditorController implements Initializable {
 
     private ObservableList<Culture> cultures;
 
-    private ObservableList<Religion> religions;
+    private ObservableList<SaveReligion> religions;
 
     private ObservableList<TradeGood> tradeGoods;
 
@@ -225,8 +228,9 @@ public class EditorController implements Initializable {
                                                                                      .getGame()
                                                                                      .getCultures());
             this.religions = FXCollections.observableArrayList(this.provincesMap[0][0].getSave()
-                                                                                      .getGame()
-                                                                                      .getReligions());
+                                                                                      .getReligions()
+                                                                                      .getReligions()
+                                                                                      .values());
             this.tradeGoods = FXCollections.observableArrayList(this.provincesMap[0][0].getSave()
                                                                                        .getGame()
                                                                                        .getTradeGoods());

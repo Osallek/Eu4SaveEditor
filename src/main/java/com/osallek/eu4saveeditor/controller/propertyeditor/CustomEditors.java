@@ -14,7 +14,9 @@ import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSpinner
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableTextItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ComboBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.HBoxItem;
+import com.osallek.eu4saveeditor.controller.propertyeditor.item.PropertySheetItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.SelectableGridViewItem;
+import com.osallek.eu4saveeditor.controller.propertyeditor.item.TextItem;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SetProperty;
@@ -24,18 +26,35 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
+import javafx.scene.text.Text;
 import org.controlsfx.control.CheckComboBox;
+import org.controlsfx.control.PropertySheet;
 import org.controlsfx.property.editor.AbstractPropertyEditor;
 import org.controlsfx.property.editor.PropertyEditor;
 
 public class CustomEditors {
 
     private CustomEditors() {}
+
+    public static PropertyEditor<String> createTextEditor(TextItem textItem) {
+
+        return new AbstractPropertyEditor<String, Text>(textItem, textItem.getText()) {
+
+            @Override
+            protected StringProperty getObservableValue() {
+                return getEditor().textProperty();
+            }
+
+            @Override
+            public void setValue(String value) {
+                getEditor().setText(value);
+            }
+        };
+    }
 
     public static PropertyEditor<String> createClearableLabeledTextEditor(ClearableTextItem property) {
 
@@ -256,6 +275,21 @@ public class CustomEditors {
             @Override
             protected ObservableValue<String> getObservableValue() {
                 return new ReadOnlyObjectWrapper<>(buttonItem.getButton(), "value");
+            }
+
+            @Override
+            public void setValue(String value) {
+            }
+        };
+    }
+
+    public static PropertyEditor<String> createPropertySheet(PropertySheetItem propertySheetItem) {
+
+        return new AbstractPropertyEditor<String, PropertySheet>(propertySheetItem, propertySheetItem.getPropertySheet()) {
+
+            @Override
+            protected ObservableValue<String> getObservableValue() {
+                return new ReadOnlyObjectWrapper<>(propertySheetItem.getPropertySheet(), "value");
             }
 
             @Override

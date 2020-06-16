@@ -1,17 +1,17 @@
 package com.osallek.eu4saveeditor.controller.converter;
 
-import com.osallek.eu4parser.model.game.Religion;
+import com.osallek.eu4parser.model.save.SaveReligion;
 import javafx.util.StringConverter;
 
-public class ReligionStringConverter extends StringConverter<Religion> {
+public class ReligionStringConverter extends StringConverter<SaveReligion> {
 
     @Override
-    public String toString(Religion religion) {
+    public String toString(SaveReligion religion) {
         return religion.getLocalizedName();
     }
 
     @Override
-    public Religion fromString(String religion) {
+    public SaveReligion fromString(String religion) {
         return null;
     }
 }

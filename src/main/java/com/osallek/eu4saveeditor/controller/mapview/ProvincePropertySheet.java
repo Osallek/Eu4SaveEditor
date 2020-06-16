@@ -3,9 +3,9 @@ package com.osallek.eu4saveeditor.controller.mapview;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.eu4parser.model.game.Building;
 import com.osallek.eu4parser.model.game.Culture;
-import com.osallek.eu4parser.model.game.Religion;
 import com.osallek.eu4parser.model.game.TradeGood;
 import com.osallek.eu4parser.model.save.Save;
+import com.osallek.eu4parser.model.save.SaveReligion;
 import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
 import com.osallek.eu4saveeditor.controller.control.ClearableCheckComboBox;
@@ -68,7 +68,7 @@ public class ProvincePropertySheet extends VBox {
 
     private final ClearableComboBoxItem<Culture> cultureComboBox;
 
-    private final ClearableComboBoxItem<Religion> religionComboBox;
+    private final ClearableComboBoxItem<SaveReligion> religionComboBox;
 
     private final ClearableTextItem capitalField;
 
@@ -119,7 +119,7 @@ public class ProvincePropertySheet extends VBox {
     private CustomPropertySheetSkin propertySheetSkin;
 
     public ProvincePropertySheet(Save save, ObservableList<Country> playableCountries,
-                                 ObservableList<Culture> cultures, ObservableList<Religion> religions,
+                                 ObservableList<Culture> cultures, ObservableList<SaveReligion> religions,
                                  ObservableList<TradeGood> tradeGoods) {
         this.propertySheet = new PropertySheet();
         this.propertySheet.setPropertyEditorFactory(new CustomPropertyEditorFactory());

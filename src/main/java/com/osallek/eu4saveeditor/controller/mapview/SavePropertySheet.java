@@ -3,6 +3,7 @@ package com.osallek.eu4saveeditor.controller.mapview;
 import com.osallek.eu4parser.model.game.Decree;
 import com.osallek.eu4parser.model.game.ImperialReform;
 import com.osallek.eu4parser.model.save.Save;
+import com.osallek.eu4parser.model.save.SaveReligion;
 import com.osallek.eu4parser.model.save.changeprices.ChangePrice;
 import com.osallek.eu4parser.model.save.changeprices.ChangePriceGood;
 import com.osallek.eu4parser.model.save.country.Country;
@@ -10,8 +11,8 @@ import com.osallek.eu4parser.model.save.empire.HreReligionStatus;
 import com.osallek.eu4parser.model.save.gameplayoptions.CustomNationDifficulty;
 import com.osallek.eu4parser.model.save.gameplayoptions.Difficulty;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
+import com.osallek.eu4saveeditor.Main;
 import com.osallek.eu4saveeditor.controller.control.ClearableComboBox;
-import com.osallek.eu4saveeditor.controller.control.ClearableSpinnerDouble;
 import com.osallek.eu4saveeditor.controller.control.ListSelectionViewCountry;
 import com.osallek.eu4saveeditor.controller.control.ListSelectionViewImperialReform;
 import com.osallek.eu4saveeditor.controller.control.RequiredComboBox;
@@ -36,13 +37,19 @@ import com.osallek.eu4saveeditor.controller.propertyeditor.item.ButtonItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.CheckBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableComboBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderItem;
-import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSpinnerItem;
+import com.osallek.eu4saveeditor.controller.propertyeditor.item.HBoxItem;
+import com.osallek.eu4saveeditor.controller.propertyeditor.item.PropertySheetItem;
 import com.osallek.eu4saveeditor.controller.validator.CustomGraphicValidationDecoration;
+import com.osallek.eu4saveeditor.imagereader.ImageReader;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.scene.control.ComboBox;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import org.controlsfx.control.PropertySheet;
@@ -51,19 +58,18 @@ import org.controlsfx.validation.ValidationSupport;
 import org.controlsfx.validation.decoration.CompoundValidationDecoration;
 import org.controlsfx.validation.decoration.StyleClassValidationDecoration;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.NumberFormat;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -119,8 +125,6 @@ public class SavePropertySheet extends VBox {
 
     private final List<ClearableComboBoxItem<SaveProvince>> institutionOriginFields;
 
-    private final List<ClearableSpinnerItem<Double>> goodsPricesFields;
-
     private final Map<String, List<ChangePrice>> goodsChangePrices;
 
     private ClearableComboBoxItem<Country> hreEmperor;
@@ -155,14 +159,20 @@ public class SavePropertySheet extends VBox {
 
     private ClearableComboBoxItem<Decree> decreeField;
 
+    private final PropertySheet religionPropertySheet;
+
+    private final List<ReligionPropertySheet> religionPropertySheets;
+
+    private CustomPropertySheetSkin religionPropertySheetSkin;
+
     private CustomPropertySheetSkin propertySheetSkin;
 
-    public SavePropertySheet(Save save, ObservableList<Country> playableCountries, ObservableList<Country> countriesAlive, ObservableList<SaveProvince> cities) {
+    public SavePropertySheet(Save save, ObservableList<Country> playableCountries,
+                             ObservableList<Country> countriesAlive, ObservableList<SaveProvince> cities) {
         this.save = save;
         this.propertySheet = new PropertySheet();
         this.propertySheet.setPropertyEditorFactory(new CustomPropertyEditorFactory());
         this.propertySheet.setMode(PropertySheet.Mode.CATEGORY);
-        this.propertySheet.setCategoryComparator(Comparator.comparing(SheetCategory::getByLocale));
         this.propertySheet.setModeSwitcherVisible(false);
         this.propertySheet.setSearchBoxVisible(false);
 
@@ -172,8 +182,9 @@ public class SavePropertySheet extends VBox {
         this.propertySheet.setSkin(this.propertySheetSkin);
 
         this.validationSupport = new ValidationSupport();
-        this.validationSupport.setValidationDecorator(new CompoundValidationDecoration(new CustomGraphicValidationDecoration(),
-                                                                                       new StyleClassValidationDecoration("validation-error", null)));
+        this.validationSupport.setValidationDecorator(
+                new CompoundValidationDecoration(new CustomGraphicValidationDecoration(),
+                                                 new StyleClassValidationDecoration("validation-error", null)));
 
         //GAME OPTIONS
         this.difficultyField = new ClearableComboBoxItem<>(SheetCategory.SAVE_GAME_OPTIONS,
@@ -225,14 +236,18 @@ public class SavePropertySheet extends VBox {
 
         this.customNationDifficultyField = new ClearableComboBoxItem<>(SheetCategory.SAVE_GAME_OPTIONS,
                                                                        this.save.getGame()
-                                                                                .getLocalisation("FE_CUSTOM_NATION_DIFFICULTY"),
-                                                                       FXCollections.observableArrayList(CustomNationDifficulty
-                                                                                                                 .values()),
+                                                                                .getLocalisation(
+                                                                                        "FE_CUSTOM_NATION_DIFFICULTY"),
+                                                                       FXCollections.observableArrayList(
+                                                                               CustomNationDifficulty
+                                                                                       .values()),
                                                                        this.save.getGameplayOptions()
                                                                                 .getCustomNationDifficulty(),
                                                                        this.save.getGame()
-                                                                                .getLocalisation("CN_DIFFICULTY_TOOLTIP"),
-                                                                       new ClearableComboBox<>(new RequiredComboBox<>()));
+                                                                                .getLocalisation(
+                                                                                        "CN_DIFFICULTY_TOOLTIP"),
+                                                                       new ClearableComboBox<>(
+                                                                               new RequiredComboBox<>()));
         this.customNationDifficultyField.setConverter(new CustomNationDifficultyStringConverter(this.save));
         this.customNationDifficultyField.setCellFactory(new CustomNationDifficultyStringCellFactory(this.save));
         this.customNationDifficultyField.setSupplier(() -> this.save.getGameplayOptions().getCustomNationDifficulty());
@@ -249,7 +264,8 @@ public class SavePropertySheet extends VBox {
                                                                    .getLocalisation("SHOW_MONTHLY_TAX_INCOME"),
                                                           this.save.getGameplayOptions().getShowMonthlyTaxIncome(),
                                                           this.save.getGame()
-                                                                   .getLocalisationClean("SHOW_MONTHLY_TAX_INCOME_TOOLTIP"));
+                                                                   .getLocalisationClean(
+                                                                           "SHOW_MONTHLY_TAX_INCOME_TOOLTIP"));
 
         this.colorWastelandsField = new CheckBoxItem(SheetCategory.SAVE_GAME_OPTIONS,
                                                      this.save.getGame().getLocalisation("COLOR_WASTELANDS"),
@@ -293,7 +309,8 @@ public class SavePropertySheet extends VBox {
                                                                  this.save.getGameplayOptions()
                                                                           .getOnlyHostAndObserversCanSave(),
                                                                  this.save.getGame()
-                                                                          .getLocalisationClean("FE_ONLY_HOST_SAVE_DESC"));
+                                                                          .getLocalisationClean(
+                                                                                  "FE_ONLY_HOST_SAVE_DESC"));
 
         this.allowTeamsField = new CheckBoxItem(SheetCategory.SAVE_GAME_OPTIONS,
                                                 this.save.getGame().getLocalisation("FE_USE_TEAMS"),
@@ -308,7 +325,8 @@ public class SavePropertySheet extends VBox {
                                                            this.save.getGameplayOptions()
                                                                     .getAllowFreeTeamCreation(),
                                                            this.save.getGame()
-                                                                    .getLocalisationClean("ALLOW_FREE_TEAM_CREATION_TOOLTIP"));
+                                                                    .getLocalisationClean(
+                                                                            "ALLOW_FREE_TEAM_CREATION_TOOLTIP"));
         items.add(this.difficultyField);
         items.add(this.terraIncognitaField);
         items.add(this.dynamicProvinceNamesField);
@@ -339,17 +357,18 @@ public class SavePropertySheet extends VBox {
                                                          this.save.getInstitutions().isAvailable(i));
 
             int finalI = i;
-            ClearableComboBoxItem<SaveProvince> comboBoxItem = new ClearableComboBoxItem<>(SheetCategory.SAVE_INSTITUTIONS,
-                                                                                           this.save.getGame()
-                                                                                                    .getInstitution(i)
-                                                                                                    .getLocalizedName(),
-                                                                                           cities,
-                                                                                           this.save.getInstitutions()
-                                                                                                    .getOrigin(i),
-                                                                                           new ClearableComboBox<>(new SearchableComboBox<>(),
-                                                                                                                   () -> this.save
-                                                                                                                           .getInstitutions()
-                                                                                                                           .getOrigin(finalI)));
+            ClearableComboBoxItem<SaveProvince> comboBoxItem = new ClearableComboBoxItem<>(
+                    SheetCategory.SAVE_INSTITUTIONS,
+                    this.save.getGame()
+                             .getInstitution(i)
+                             .getLocalizedName(),
+                    cities,
+                    this.save.getInstitutions()
+                             .getOrigin(i),
+                    new ClearableComboBox<>(new SearchableComboBox<>(),
+                                            () -> this.save
+                                                    .getInstitutions()
+                                                    .getOrigin(finalI)));
             comboBoxItem.setConverter(new ProvinceStringConverter());
             comboBoxItem.setCellFactory(new ProvinceStringCellFactory());
 
@@ -360,34 +379,12 @@ public class SavePropertySheet extends VBox {
         }
 
         //GOODS
-        this.goodsPricesFields = new ArrayList<>();
         this.goodsChangePrices = new HashMap<>();
         for (int i = 0; i < this.save.getChangePrices().getGoods().size(); i++) {
             ChangePriceGood good = this.save.getChangePrices().getGood(i);
             this.goodsChangePrices.put(good.getName(), new ArrayList<>(good.getChangePrices()));
-            Text text = new Text(goodToDesc(good, good.getCurrentPrice()));
-            ClearableSpinnerItem<Double> priceSpinnerItem = new ClearableSpinnerItem<>(SheetCategory.SAVE_GOODS,
-                                                                                       save.getGame()
-                                                                                           .getLocalisation(good.getName()),
-                                                                                       new ClearableSpinnerDouble(0,
-                                                                                                                  100,
-                                                                                                                  good.getCurrentPrice(),
-                                                                                                                  0.5,
-                                                                                                                  good::getCurrentPrice,
-                                                                                                                  text));
-            priceSpinnerItem.getSpinner()
-                            .getSpinner()
-                            .getEditor()
-                            .textProperty()
-                            .addListener((observable, oldValue, newValue) -> {
-                                try {
-                                    text.setText(goodToDesc(good, NumberFormat.getInstance()
-                                                                              .parse(newValue)
-                                                                              .doubleValue()));
-                                } catch (ParseException e) {
-                                    text.setText(oldValue);
-                                }
-                            });
+            Text priceText = new Text(goodToPrice(good));
+            Text modifsText = new Text(goodToModifs(good));
 
             ButtonItem buttonItem = new ButtonItem(SheetCategory.SAVE_GOODS,
                                                    " ",
@@ -405,11 +402,13 @@ public class SavePropertySheet extends VBox {
                 };
 
                 TableView2Dialog<ChangePrice> dialog = new TableView2Dialog<>(this.save,
-                                                                              new TableView2ChangePrice(this.goodsChangePrices
-                                                                                                                .get(good.getName()),
-                                                                                                        this.save),
+                                                                              new TableView2ChangePrice(
+                                                                                      this.goodsChangePrices
+                                                                                              .get(good.getName()),
+                                                                                      this.save),
                                                                               this.save.getGame()
-                                                                                       .getLocalisationClean("TSI_CURR_MOD_BY"),
+                                                                                       .getLocalisationClean(
+                                                                                               "TSI_CURR_MOD_BY"),
                                                                               supplier,
                                                                               good::getChangePrices);
                 Optional<List<ChangePrice>> changePrices = dialog.showAndWait();
@@ -420,19 +419,30 @@ public class SavePropertySheet extends VBox {
                     this.goodsChangePrices.put(good.getName(), good.getChangePrices());
                 }
 
-                try {
-                    text.setText(goodToDesc(good, NumberFormat.getInstance()
-                                                              .parse(priceSpinnerItem.getSpinner()
-                                                                                     .getSpinner()
-                                                                                     .getEditor()
-                                                                                     .getText())
-                                                              .doubleValue()));
-                } catch (ParseException e) {
-                }
+                priceText.setText(goodToPrice(good));
+                modifsText.setText(goodToModifs(good));
             });
 
-            this.goodsPricesFields.add(priceSpinnerItem);
-            items.add(priceSpinnerItem);
+            HBox hBox = new HBox(0);
+            HBox.setHgrow(priceText, Priority.ALWAYS);
+            HBox.setHgrow(modifsText, Priority.ALWAYS);
+            hBox.getChildren().add(priceText);
+
+            try {
+                ImageView imageView = new ImageView(
+                        SwingFXUtils.toFXImage(ImageReader.convertFileToImage(this.save.getGame().getGoldImage()),
+                                               null));
+                imageView.setFitWidth(17);
+                imageView.setFitHeight(17);
+                HBox.setHgrow(imageView, Priority.ALWAYS);
+                hBox.getChildren().add(imageView);
+            } catch (IOException e) {
+                Main.LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            }
+
+            hBox.getChildren().add(modifsText);
+
+            items.add(new HBoxItem<>(SheetCategory.SAVE_GOODS, good.getLocalizedName(), hBox));
             items.add(buttonItem);
         }
 
@@ -463,23 +473,29 @@ public class SavePropertySheet extends VBox {
                                                                                                       .getCapital()
                                                                                                       .inHre())
                                                                                               .filter(country -> !this.hreElectors
-                                                                                                      .contains(country))
-                                                                                              .collect(Collectors.toList()));
+                                                                                                      .contains(
+                                                                                                              country))
+                                                                                              .collect(
+                                                                                                      Collectors.toList()));
             hreElectorsButtonItem.getButton().setOnAction(event -> {
                 ListSelectionViewDialog<Country> dialog = new ListSelectionViewDialog<>(this.save,
-                                                                                        new ListSelectionViewCountry(members,
-                                                                                                                     this.hreElectors
+                                                                                        new ListSelectionViewCountry(
+                                                                                                members,
+                                                                                                this.hreElectors
                                                                                         ),
                                                                                         this.save.getGame()
-                                                                                                 .getLocalisationClean("HINT_ELECTOR_TITLE"),
+                                                                                                 .getLocalisationClean(
+                                                                                                         "HINT_ELECTOR_TITLE"),
                                                                                         () -> countriesAlive.stream()
                                                                                                             .filter(country -> country
                                                                                                                     .getCapital()
                                                                                                                     .inHre())
                                                                                                             .filter(country -> !this.hreElectors
-                                                                                                                    .contains(country))
-                                                                                                            .collect(Collectors
-                                                                                                                             .toList()),
+                                                                                                                    .contains(
+                                                                                                                            country))
+                                                                                                            .collect(
+                                                                                                                    Collectors
+                                                                                                                            .toList()),
                                                                                         () -> this.save.getHre()
                                                                                                        .getElectors());
                 Optional<List<Country>> newElectors = dialog.showAndWait();
@@ -507,16 +523,20 @@ public class SavePropertySheet extends VBox {
             this.notPassedHreMainLineReforms = FXCollections.observableArrayList(this.save.getHre()
                                                                                           .getMainLineNotPassedReforms());
             hreMainLineReformsButtonItem.getButton().setOnAction(event -> {
-                ListSelectionViewImperialReform listSelectionView = new ListSelectionViewImperialReform(this.notPassedHreMainLineReforms,
-                                                                                                        this.passedHreMainLineReforms);
+                ListSelectionViewImperialReform listSelectionView = new ListSelectionViewImperialReform(
+                        this.notPassedHreMainLineReforms,
+                        this.passedHreMainLineReforms);
 
-                ObservableList<ImperialReform> tmpPassedHreMainLineReforms = FXCollections.observableArrayList(this.passedHreMainLineReforms);
-                ObservableList<ImperialReform> tmpNotPassedHreMainLineReforms = FXCollections.observableArrayList(this.notPassedHreMainLineReforms);
+                ObservableList<ImperialReform> tmpPassedHreMainLineReforms = FXCollections.observableArrayList(
+                        this.passedHreMainLineReforms);
+                ObservableList<ImperialReform> tmpNotPassedHreMainLineReforms = FXCollections.observableArrayList(
+                        this.notPassedHreMainLineReforms);
 
                 ListSelectionViewDialog<ImperialReform> dialog = new ListSelectionViewDialog<>(this.save,
                                                                                                listSelectionView,
                                                                                                this.save.getGame()
-                                                                                                        .getLocalisationClean("HRE_REFORMS"),
+                                                                                                        .getLocalisationClean(
+                                                                                                                "HRE_REFORMS"),
                                                                                                () -> this.save
                                                                                                        .getHre()
                                                                                                        .getMainLineNotPassedReforms(),
@@ -535,7 +555,8 @@ public class SavePropertySheet extends VBox {
             ButtonItem hreLeftBranchReformsButtonItem = new ButtonItem(SheetCategory.SAVE_HRE,
                                                                        null,
                                                                        this.save.getGame()
-                                                                                .getLocalisationClean("HRE_LEFTBRANCH"));
+                                                                                .getLocalisationClean(
+                                                                                        "HRE_LEFTBRANCH"));
 
             this.passedHreLeftBranchReforms = FXCollections.observableArrayList(this.save.getHre()
                                                                                          .getLeftBranchPassedReforms());
@@ -543,16 +564,20 @@ public class SavePropertySheet extends VBox {
             this.notPassedHreLeftBranchReforms = FXCollections.observableArrayList(this.save.getHre()
                                                                                             .getLeftBranchNotPassedReforms());
             hreLeftBranchReformsButtonItem.setOnAction(event -> {
-                ListSelectionViewImperialReform listSelectionView = new ListSelectionViewImperialReform(this.notPassedHreLeftBranchReforms,
-                                                                                                        this.passedHreLeftBranchReforms);
+                ListSelectionViewImperialReform listSelectionView = new ListSelectionViewImperialReform(
+                        this.notPassedHreLeftBranchReforms,
+                        this.passedHreLeftBranchReforms);
 
-                ObservableList<ImperialReform> tmpPassedHreLeftBranchReforms = FXCollections.observableArrayList(this.passedHreLeftBranchReforms);
-                ObservableList<ImperialReform> tmpNotPassedHreLeftBranchReforms = FXCollections.observableArrayList(this.notPassedHreLeftBranchReforms);
+                ObservableList<ImperialReform> tmpPassedHreLeftBranchReforms = FXCollections.observableArrayList(
+                        this.passedHreLeftBranchReforms);
+                ObservableList<ImperialReform> tmpNotPassedHreLeftBranchReforms = FXCollections.observableArrayList(
+                        this.notPassedHreLeftBranchReforms);
 
                 ListSelectionViewDialog<ImperialReform> dialog = new ListSelectionViewDialog<>(this.save,
                                                                                                listSelectionView,
                                                                                                this.save.getGame()
-                                                                                                        .getLocalisationClean("HRE_LEFTBRANCH"),
+                                                                                                        .getLocalisationClean(
+                                                                                                                "HRE_LEFTBRANCH"),
                                                                                                () -> this.save
                                                                                                        .getHre()
                                                                                                        .getLeftBranchNotPassedReforms(),
@@ -575,7 +600,8 @@ public class SavePropertySheet extends VBox {
             ButtonItem hreRightBranchReformsButtonItem = new ButtonItem(SheetCategory.SAVE_HRE,
                                                                         null,
                                                                         this.save.getGame()
-                                                                                 .getLocalisationClean("HRE_RIGHTBRANCH"));
+                                                                                 .getLocalisationClean(
+                                                                                         "HRE_RIGHTBRANCH"));
 
             this.passedHreRightBranchReforms = FXCollections.observableArrayList(this.save.getHre()
                                                                                           .getRightBranchPassedReforms());
@@ -583,15 +609,19 @@ public class SavePropertySheet extends VBox {
             this.notPassedHreRightBranchReforms = FXCollections.observableArrayList(this.save.getHre()
                                                                                              .getRightBranchNotPassedReforms());
             hreRightBranchReformsButtonItem.setOnAction(event -> {
-                ObservableList<ImperialReform> tmpPassedHreRightBranchReforms = FXCollections.observableArrayList(this.passedHreRightBranchReforms);
-                ObservableList<ImperialReform> tmpNotPassedHreRightBranchReforms = FXCollections.observableArrayList(this.notPassedHreRightBranchReforms);
+                ObservableList<ImperialReform> tmpPassedHreRightBranchReforms = FXCollections.observableArrayList(
+                        this.passedHreRightBranchReforms);
+                ObservableList<ImperialReform> tmpNotPassedHreRightBranchReforms = FXCollections.observableArrayList(
+                        this.notPassedHreRightBranchReforms);
 
                 ListSelectionViewDialog<ImperialReform> dialog = new ListSelectionViewDialog<>(this.save,
-                                                                                               new ListSelectionViewImperialReform(this.notPassedHreRightBranchReforms,
-                                                                                                                                   this.passedHreRightBranchReforms
+                                                                                               new ListSelectionViewImperialReform(
+                                                                                                       this.notPassedHreRightBranchReforms,
+                                                                                                       this.passedHreRightBranchReforms
                                                                                                ),
                                                                                                this.save.getGame()
-                                                                                                        .getLocalisationClean("HRE_RIGHTBRANCH"),
+                                                                                                        .getLocalisationClean(
+                                                                                                                "HRE_RIGHTBRANCH"),
                                                                                                () -> this.save
                                                                                                        .getHre()
                                                                                                        .getRightBranchNotPassedReforms(),
@@ -619,8 +649,9 @@ public class SavePropertySheet extends VBox {
             this.hreReligionStatusField = new ClearableComboBoxItem<>(SheetCategory.SAVE_HRE,
                                                                       save.getGame()
                                                                           .getLocalisation("HRE_DOMINANTFAITH"),
-                                                                      FXCollections.observableArrayList(HreReligionStatus
-                                                                                                                .values()),
+                                                                      FXCollections.observableArrayList(
+                                                                              HreReligionStatus
+                                                                                      .values()),
                                                                       this.save.getHreReligionStatus(),
                                                                       new ClearableComboBox<>(new ComboBox<>(),
                                                                                               () -> this.save.getHreReligionStatus()));
@@ -643,12 +674,14 @@ public class SavePropertySheet extends VBox {
                                                                 save.getGame().getLocalisation("HINT_EMPEROR_TITLE"),
                                                                 new FilteredList<>(countriesAlive,
                                                                                    country ->
-                                                                                           "pagan".equals(country.getReligion()
-                                                                                                                 .getReligionGroup()
-                                                                                                                 .getName())
-                                                                                           || "eastern".equals(country.getReligion()
-                                                                                                                      .getReligionGroup()
-                                                                                                                      .getName())),
+                                                                                           "pagan".equals(
+                                                                                                   country.getReligion()
+                                                                                                          .getReligionGroup()
+                                                                                                          .getName())
+                                                                                           || "eastern".equals(
+                                                                                                   country.getReligion()
+                                                                                                          .getReligionGroup()
+                                                                                                          .getName())),
                                                                 this.save.getCelestialEmpire().getEmperor(),
                                                                 new ClearableComboBox<>(new SearchableComboBox<>(),
                                                                                         () -> this.save.getCelestialEmpire()
@@ -668,7 +701,8 @@ public class SavePropertySheet extends VBox {
             ButtonItem celestialMainLineReformsButtonItem = new ButtonItem(SheetCategory.SAVE_CELESTIAL_EMPIRE,
                                                                            null,
                                                                            save.getGame()
-                                                                               .getLocalisationClean("CELESTIAL_DECISIONS"));
+                                                                               .getLocalisationClean(
+                                                                                       "CELESTIAL_DECISIONS"));
 
             this.passedCelestialReforms = FXCollections.observableArrayList(this.save.getCelestialEmpire()
                                                                                      .getMainLinePassedReforms());
@@ -676,16 +710,20 @@ public class SavePropertySheet extends VBox {
             this.notPassedCelestialReforms = FXCollections.observableArrayList(this.save.getCelestialEmpire()
                                                                                         .getMainLineNotPassedReforms());
             celestialMainLineReformsButtonItem.getButton().setOnAction(event -> {
-                ListSelectionViewImperialReform listSelectionView = new ListSelectionViewImperialReform(this.notPassedCelestialReforms,
-                                                                                                        this.passedCelestialReforms);
+                ListSelectionViewImperialReform listSelectionView = new ListSelectionViewImperialReform(
+                        this.notPassedCelestialReforms,
+                        this.passedCelestialReforms);
 
-                ObservableList<ImperialReform> tmpPassedCelestialMainLineReforms = FXCollections.observableArrayList(this.passedCelestialReforms);
-                ObservableList<ImperialReform> tmpNotPassedCelestialMainLineReforms = FXCollections.observableArrayList(this.notPassedCelestialReforms);
+                ObservableList<ImperialReform> tmpPassedCelestialMainLineReforms = FXCollections.observableArrayList(
+                        this.passedCelestialReforms);
+                ObservableList<ImperialReform> tmpNotPassedCelestialMainLineReforms = FXCollections.observableArrayList(
+                        this.notPassedCelestialReforms);
 
                 ListSelectionViewDialog<ImperialReform> dialog = new ListSelectionViewDialog<>(this.save,
                                                                                                listSelectionView,
                                                                                                this.save.getGame()
-                                                                                                        .getLocalisationClean("CELESTIAL_DECISIONS"),
+                                                                                                        .getLocalisationClean(
+                                                                                                                "CELESTIAL_DECISIONS"),
                                                                                                () -> this.save
                                                                                                        .getCelestialEmpire()
                                                                                                        .getMainLineNotPassedReforms(),
@@ -718,6 +756,43 @@ public class SavePropertySheet extends VBox {
             items.add(this.celestialInfluenceField);
             items.add(celestialMainLineReformsButtonItem);
             items.add(this.decreeField);
+        }
+
+        //RELIGIONS
+        this.religionPropertySheet = new PropertySheet();
+        this.religionPropertySheet.setPropertyEditorFactory(new CustomPropertyEditorFactory());
+        this.religionPropertySheet.setMode(PropertySheet.Mode.CATEGORY);
+        this.religionPropertySheet.setModeSwitcherVisible(false);
+        this.religionPropertySheet.setSearchBoxVisible(false);
+        this.religionPropertySheetSkin = new CustomPropertySheetSkin(this.religionPropertySheet);
+        this.religionPropertySheet.setSkin(this.religionPropertySheetSkin);
+
+        this.religionPropertySheets = new ArrayList<>();
+
+        this.save.getReligions()
+                 .getReligions()
+                 .values()
+                 .stream()
+                 .filter(SaveReligion::hasSpecialAttribute)
+                 .forEach(religion -> {
+                     ObservableList<Country> countries = FXCollections.observableArrayList(
+                             countriesAlive.stream().filter(country -> religion
+                                     .equals(country.getReligion())).collect(
+                                     Collectors.toList()));
+
+                     ReligionPropertySheet relPropertySheet = new ReligionPropertySheet(this.save,
+                                                                                        religion,
+                                                                                        countries);
+
+                     if (!relPropertySheet.getPropertySheet().getItems().isEmpty()) {
+                         this.religionPropertySheets.add(relPropertySheet);
+                         this.religionPropertySheet.getItems()
+                                                   .addAll(relPropertySheet.getPropertySheet().getItems());
+                     }
+                 });
+
+        if (!this.religionPropertySheet.getItems().isEmpty()) {
+            items.add(new PropertySheetItem(this.save.getGame().getLocalisation("LEDGER_RELIGIONS"), this.religionPropertySheet));
         }
 
         this.propertySheet.getItems().setAll(items);
@@ -753,16 +828,11 @@ public class SavePropertySheet extends VBox {
         }
 
         //GOODS
-        for (int i = 0; i < this.goodsPricesFields.size(); i++) {
-            this.goodsPricesFields.get(i)
-                                  .getSpinner()
-                                  .setValue(this.save.getChangePrices().getGood(i).getCurrentPrice());
-        }
-
         this.goodsChangePrices.clear();
         this.save.getChangePrices()
                  .getGoods()
-                 .forEach((name, changePriceGood) -> this.goodsChangePrices.put(name, new ArrayList<>(changePriceGood.getChangePrices())));
+                 .forEach((name, changePriceGood) -> this.goodsChangePrices.put(name, new ArrayList<>(
+                         changePriceGood.getChangePrices())));
 
         //HRE
         if (!this.save.getHre().dismantled()) {
@@ -787,6 +857,9 @@ public class SavePropertySheet extends VBox {
             this.notPassedCelestialReforms.setAll(this.save.getCelestialEmpire().getMainLineNotPassedReforms());
             this.decreeField.setValue(this.save.getCelestialEmpire().getDecree().getDecree());
         }
+
+        //RELIGIONS
+        this.religionPropertySheets.forEach(ReligionPropertySheet::update);
     }
 
     public void validate(ActionEvent actionEvent) {
@@ -895,18 +968,6 @@ public class SavePropertySheet extends VBox {
         }
 
         //GOODS
-        if (!this.goodsPricesFields.isEmpty()) {
-            for (int i = 0; i < this.goodsPricesFields.size(); i++) {
-                if (!this.goodsPricesFields.get(i)
-                                           .getTrueValue()
-                                           .equals(this.save.getChangePrices().getGood(i).getCurrentPrice())) {
-                    this.save.getChangePrices()
-                             .getGood(i)
-                             .setCurrentPrice(this.goodsPricesFields.get(i).getTrueValue());
-                }
-            }
-        }
-
         if (!this.goodsChangePrices.isEmpty()) {
             this.goodsChangePrices.forEach((name, changePrices) -> {
                 if (!changePrices.equals(this.save.getChangePrices().getGood(name).getChangePrices())) {
@@ -933,7 +994,8 @@ public class SavePropertySheet extends VBox {
                 || !this.save.getHre().getLeftBranchPassedReforms().equals(this.passedHreLeftBranchReforms)
                 || !this.save.getHre().getRightBranchPassedReforms().equals(this.passedHreRightBranchReforms)) {
                 this.save.getHre().setPassedReforms(
-                        Stream.of(this.passedHreMainLineReforms, this.passedHreLeftBranchReforms, this.passedHreRightBranchReforms)
+                        Stream.of(this.passedHreMainLineReforms, this.passedHreLeftBranchReforms,
+                                  this.passedHreRightBranchReforms)
                               .flatMap(Collection::stream)
                               .collect(Collectors.toList()));
             }
@@ -971,23 +1033,54 @@ public class SavePropertySheet extends VBox {
                 this.save.setHreReligionStatus(this.hreReligionStatusField.getSelectedValue());
             }
         }
+
+        //RELIGIONS
+        this.religionPropertySheets.forEach(sheet -> sheet.validate(actionEvent));
     }
 
-    private String goodToDesc(ChangePriceGood good, Double price) {
+    private String goodToDesc(ChangePriceGood good) {
         double modifiersSum = this.goodsChangePrices.get(good.getName())
                                                     .stream()
                                                     .mapToDouble(ChangePrice::getValue)
                                                     .sum();
-        BigDecimal basePrice = BigDecimal.valueOf(price)
-                                         .multiply(BigDecimal.valueOf(100))
-                                         .divide(BigDecimal.valueOf(100)
-                                                           .add(BigDecimal.valueOf(modifiersSum)), RoundingMode.HALF_EVEN)
-                                         .setScale(3, RoundingMode.HALF_EVEN);
-        return "("
-               + basePrice.toPlainString()
+
+        //Scale: 5 = desired 3 + 2 for x100
+        BigDecimal newPrice = BigDecimal.valueOf(good.getBasicPrice())
+                                        .multiply(BigDecimal.valueOf(100).add(BigDecimal.valueOf(modifiersSum)))
+                                        .divide(BigDecimal.valueOf(100), 5, RoundingMode.HALF_EVEN)
+                                        .setScale(3, RoundingMode.HALF_EVEN);
+        return newPrice
+               + " ("
+               + good.getBasicPrice()
                + (modifiersSum < 0 ? " " : " +")
                + modifiersSum
                + "%)";
+    }
+
+    private String goodToModifs(ChangePriceGood good) {
+        double modifiersSum = this.goodsChangePrices.get(good.getName())
+                                                    .stream()
+                                                    .mapToDouble(ChangePrice::getValue)
+                                                    .sum();
+
+        return "("
+               + good.getBasicPrice()
+               + (modifiersSum < 0 ? " " : " +")
+               + modifiersSum
+               + "%)";
+    }
+
+    private String goodToPrice(ChangePriceGood good) {
+        double modifiersSum = this.goodsChangePrices.get(good.getName())
+                                                    .stream()
+                                                    .mapToDouble(ChangePrice::getValue)
+                                                    .sum();
+
+        return BigDecimal.valueOf(good.getBasicPrice())
+                         .multiply(BigDecimal.valueOf(100).add(BigDecimal.valueOf(modifiersSum)))
+                         .divide(BigDecimal.valueOf(100), 5, RoundingMode.HALF_EVEN)
+                         .setScale(3, RoundingMode.HALF_EVEN)
+                         .toPlainString();
     }
 
     public Save getSave() {

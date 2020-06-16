@@ -18,12 +18,19 @@ import java.util.function.Supplier;
 
 public abstract class ClearableSpinner<T> extends HBox {
 
+    protected boolean editable;
+
     protected Spinner<T> spinner;
 
     protected Button button;
 
     public ClearableSpinner() {
+        this(true);
+    }
+
+    public ClearableSpinner(boolean editable) {
         super(5);
+        this.editable = editable;
     }
 
     public Spinner<T> getSpinner() {
@@ -53,9 +60,11 @@ public abstract class ClearableSpinner<T> extends HBox {
     }
 
     protected void fill(Supplier<T> clearSupplier, Node centerNode) {
-        this.button = new Button("", new Glyph("FontAwesome", FontAwesome.Glyph.CLOSE));
-        this.button.setAlignment(Pos.TOP_CENTER);
-        setSupplier(clearSupplier);
+        if (this.editable) {
+            this.button = new Button("", new Glyph("FontAwesome", FontAwesome.Glyph.CLOSE));
+            this.button.setAlignment(Pos.TOP_CENTER);
+            setSupplier(clearSupplier);
+        }
 
         if (centerNode == null) {
             centerNode = new Pane();
@@ -73,6 +82,9 @@ public abstract class ClearableSpinner<T> extends HBox {
 
         getChildren().add(this.spinner);
         getChildren().add(centerNode);
-        getChildren().add(this.button);
+
+        if (this.editable) {
+            getChildren().add(this.button);
+        }
     }
 }

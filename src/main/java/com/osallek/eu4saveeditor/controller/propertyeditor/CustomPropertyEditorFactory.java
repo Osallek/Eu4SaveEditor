@@ -9,7 +9,9 @@ import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSpinner
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableTextItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ComboBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.HBoxItem;
+import com.osallek.eu4saveeditor.controller.propertyeditor.item.PropertySheetItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.SelectableGridViewItem;
+import com.osallek.eu4saveeditor.controller.propertyeditor.item.TextItem;
 import org.controlsfx.control.PropertySheet;
 import org.controlsfx.property.editor.DefaultPropertyEditorFactory;
 import org.controlsfx.property.editor.PropertyEditor;
@@ -19,6 +21,10 @@ public class CustomPropertyEditorFactory extends DefaultPropertyEditorFactory {
     @Override
     public PropertyEditor<?> call(PropertySheet.Item item) {
         Class<?> type = item.getType();
+
+        if (type == TextItem.class) {
+            return CustomEditors.createTextEditor((TextItem) item);
+        }
 
         if (type == ClearableTextItem.class) {
             return CustomEditors.createClearableLabeledTextEditor((ClearableTextItem) item);
@@ -58,6 +64,10 @@ public class CustomPropertyEditorFactory extends DefaultPropertyEditorFactory {
 
         if (type == ButtonItem.class) {
             return CustomEditors.createButton((ButtonItem) item);
+        }
+
+        if (type == PropertySheetItem.class) {
+            return CustomEditors.createPropertySheet((PropertySheetItem) item);
         }
 
         return super.call(item);
