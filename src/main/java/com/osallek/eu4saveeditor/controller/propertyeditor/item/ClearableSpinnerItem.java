@@ -20,11 +20,20 @@ public class ClearableSpinnerItem<T> implements CustomItem<Integer> {
     private boolean editable;
 
     public ClearableSpinnerItem(SheetCategory category, String name, ClearableSpinner<T> spinner) {
+        this(category.getForDefaultLocale(), name, spinner);
+    }
+
+
+    public ClearableSpinnerItem(String category, String name, ClearableSpinner<T> spinner) {
         this(category, name, spinner, true);
     }
 
     public ClearableSpinnerItem(SheetCategory category, String name, ClearableSpinner<T> spinner, boolean editable) {
-        this.category = category.getForDefaultLocale();
+        this(category.getForDefaultLocale(), name, spinner, editable);
+    }
+
+    public ClearableSpinnerItem(String category, String name, ClearableSpinner<T> spinner, boolean editable) {
+        this.category = category;
         this.name = name;
         this.spinner = spinner;
         this.editable = editable;

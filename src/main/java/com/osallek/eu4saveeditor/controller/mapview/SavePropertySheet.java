@@ -775,14 +775,9 @@ public class SavePropertySheet extends VBox {
                  .stream()
                  .filter(SaveReligion::hasSpecialAttribute)
                  .forEach(religion -> {
-                     ObservableList<Country> countries = FXCollections.observableArrayList(
-                             countriesAlive.stream().filter(country -> religion
-                                     .equals(country.getReligion())).collect(
-                                     Collectors.toList()));
-
                      ReligionPropertySheet relPropertySheet = new ReligionPropertySheet(this.save,
                                                                                         religion,
-                                                                                        countries);
+                                                                                        countriesAlive);
 
                      if (!relPropertySheet.getPropertySheet().getItems().isEmpty()) {
                          this.religionPropertySheets.add(relPropertySheet);
