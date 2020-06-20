@@ -3,14 +3,12 @@ package com.osallek.eu4saveeditor.controller.control;
 import com.osallek.eu4parser.model.game.ImperialReform;
 import com.osallek.eu4saveeditor.controller.converter.ImperialReformStringCellFactory;
 import com.osallek.eu4saveeditor.controller.pane.ImperialReformListSelectionViewSkin;
-import impl.org.controlsfx.skin.ListSelectionViewSkin;
 import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
 import javafx.geometry.Orientation;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Skin;
 import javafx.scene.input.KeyCombination;
-import javafx.scene.input.MouseButton;
 import org.controlsfx.control.ListSelectionView;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
@@ -19,8 +17,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Supplier;
-
-import static javafx.scene.input.MouseEvent.MOUSE_CLICKED;
 
 public class ListSelectionViewImperialReform extends CustomListSelectionView<ImperialReform> {
 

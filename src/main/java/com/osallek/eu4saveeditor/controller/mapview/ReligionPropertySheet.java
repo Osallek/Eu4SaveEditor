@@ -6,7 +6,6 @@ import com.osallek.eu4parser.model.save.SaveReligion;
 import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4saveeditor.controller.EditorController;
 import com.osallek.eu4saveeditor.controller.control.ClearableComboBox;
-import com.osallek.eu4saveeditor.controller.control.ClearableDatePicker;
 import com.osallek.eu4saveeditor.controller.control.ClearableSpinnerDouble;
 import com.osallek.eu4saveeditor.controller.converter.CountryStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.CountryStringConverter;
@@ -14,8 +13,8 @@ import com.osallek.eu4saveeditor.controller.converter.GoldenBullStringCellFactor
 import com.osallek.eu4saveeditor.controller.converter.GoldenBullStringConverter;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheetSkin;
 import com.osallek.eu4saveeditor.controller.propertyeditor.CustomPropertyEditorFactory;
+import com.osallek.eu4saveeditor.controller.propertyeditor.item.CheckBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableComboBoxItem;
-import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableDatePickerItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSpinnerItem;
 import com.osallek.eu4saveeditor.controller.validator.CustomGraphicValidationDecoration;
@@ -45,7 +44,7 @@ public class ReligionPropertySheet extends VBox {
 
     private final ValidationSupport validationSupport;
 
-    private ClearableDatePickerItem enableField;
+    private CheckBoxItem enableField;
 
     private ClearableComboBoxItem<Country> defenderOfFaithField;
 
@@ -81,8 +80,9 @@ public class ReligionPropertySheet extends VBox {
                                                  new StyleClassValidationDecoration("validation-error", null)));
 
         if (this.religion.hasDate() && this.religion.getEnable() == null) {
-            this.enableField = new ClearableDatePickerItem(this.religion.getLocalizedName(), "Date",
-                                                           new ClearableDatePicker(null, this.religion::getEnable));
+            this.enableField = new CheckBoxItem(this.religion.getLocalizedName(),
+                                                this.save.getGame().getLocalisation("ENABLE"),
+                                                this.religion.getEnable() != null);
             items.add(this.enableField);
         }
 
@@ -183,7 +183,8 @@ public class ReligionPropertySheet extends VBox {
                                                                                                                .getCuriaTreasury()));
             items.add(this.curiaTreasuryField);
 
-            ObservableList<GoldenBull> goldenBulls = FXCollections.observableArrayList(this.save.getGame().getGoldenBulls());
+            ObservableList<GoldenBull> goldenBulls = FXCollections.observableArrayList(this.save.getGame()
+                                                                                                .getGoldenBulls());
             goldenBulls.add(0, new GoldenBull((String) null));
 
             this.goldenBullField = new ClearableComboBoxItem<>(this.religion.getLocalizedName(),
@@ -206,7 +207,7 @@ public class ReligionPropertySheet extends VBox {
 
     public void update() {
         if (this.enableField != null) {
-            this.enableField.setValue(this.religion.getEnable());
+            this.enableField.setValue(this.religion.getEnable() != null);
         }
 
         if (this.defenderOfFaithField != null) {
@@ -237,8 +238,8 @@ public class ReligionPropertySheet extends VBox {
 
     public void validate(ActionEvent actionEvent) {
         if (this.enableField != null) {
-            if (!Objects.equals(this.religion.getEnable(), this.enableField.getTrueValue())) {
-                this.religion.setEnable(this.enableField.getTrueValue());
+            if (this.enableField.isSelected()) {
+                this.religion.setEnable(this.save.getDate());
             }
         }
 

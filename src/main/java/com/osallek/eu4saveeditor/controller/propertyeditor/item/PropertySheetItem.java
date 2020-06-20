@@ -1,6 +1,6 @@
 package com.osallek.eu4saveeditor.controller.propertyeditor.item;
 
-import com.osallek.eu4saveeditor.controller.mapview.SheetCategory;
+import com.osallek.eu4saveeditor.i18n.SheetCategory;
 import javafx.beans.value.ObservableValue;
 import org.controlsfx.control.PropertySheet;
 

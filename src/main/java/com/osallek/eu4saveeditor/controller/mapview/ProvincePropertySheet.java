@@ -32,6 +32,7 @@ import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableTextIte
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.HBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.SelectableGridViewItem;
 import com.osallek.eu4saveeditor.controller.validator.CustomGraphicValidationDecoration;
+import com.osallek.eu4saveeditor.i18n.SheetCategory;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.value.ChangeListener;

@@ -1,4 +1,4 @@
-package com.osallek.eu4saveeditor.controller.mapview;
+package com.osallek.eu4saveeditor.i18n;
 
 import com.osallek.eu4parser.model.game.localisation.Eu4Language;
 

@@ -1,7 +1,6 @@
 package com.osallek.eu4saveeditor.controller.converter;
 
 import com.osallek.eu4parser.model.game.ImperialReform;
-import com.osallek.eu4parser.model.save.country.Country;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.util.Callback;

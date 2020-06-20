@@ -1,6 +1,6 @@
 package com.osallek.eu4saveeditor.controller.propertyeditor.item;
 
-import com.osallek.eu4saveeditor.controller.mapview.SheetCategory;
+import com.osallek.eu4saveeditor.i18n.SheetCategory;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
@@ -19,15 +19,27 @@ public class CheckBoxItem implements CustomItem<Void> {
     private boolean editable;
 
     public CheckBoxItem(SheetCategory category, String name, boolean value) {
+        this(category.getForDefaultLocale(), name, value);
+    }
+
+    public CheckBoxItem(String category, String name, boolean value) {
         this(category, name, value,  null);
     }
 
     public CheckBoxItem(SheetCategory category, String name, boolean value, String description) {
+        this(category.getForDefaultLocale(), name, value, description);
+    }
+
+    public CheckBoxItem(String category, String name, boolean value, String description) {
         this(category, name, value, description, true);
     }
 
     public CheckBoxItem(SheetCategory category, String name, boolean value, String description, boolean editable) {
-        this.category = category.getForDefaultLocale();
+        this(category.getForDefaultLocale(), name, value, description, editable);
+    }
+
+    public CheckBoxItem(String category, String name, boolean value, String description, boolean editable) {
+        this.category = category;
         this.name = name;
         this.description = description;
         this.value = value;
