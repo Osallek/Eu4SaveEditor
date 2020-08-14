@@ -7,7 +7,7 @@ public class GoldenBullStringConverter extends StringConverter<GoldenBull> {
 
     @Override
     public String toString(GoldenBull goldenBull) {
-        return goldenBull.getLocalizedName();
+        return goldenBull == null ? "" : goldenBull.getLocalizedName();
     }
 
     @Override

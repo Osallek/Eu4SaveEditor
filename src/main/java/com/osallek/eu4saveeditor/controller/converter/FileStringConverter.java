@@ -12,11 +12,11 @@ public class FileStringConverter extends StringConverter<File> {
             return file.getPath();
         }
 
-        return null;
+        return "";
     }
 
     @Override
     public File fromString(String path) {
-        return new File(path);
+        return path == null ? null : new File(path);
     }
 }

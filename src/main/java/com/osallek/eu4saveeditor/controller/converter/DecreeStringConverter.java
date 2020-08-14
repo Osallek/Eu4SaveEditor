@@ -7,7 +7,7 @@ public class DecreeStringConverter extends StringConverter<Decree> {
 
     @Override
     public String toString(Decree decree) {
-        return decree.getLocalizedName();
+        return decree == null ? "" : decree.getLocalizedName();
     }
 
     @Override

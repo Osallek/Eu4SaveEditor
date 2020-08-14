@@ -14,11 +14,11 @@ public class DifficultyStringConverter extends StringConverter<Difficulty> {
 
     @Override
     public String toString(Difficulty difficulty) {
-        return this.save.getGame().getLocalisation(difficulty.name());
+        return difficulty == null ? "" : this.save.getGame().getLocalisation(difficulty.name());
     }
 
     @Override
     public Difficulty fromString(String difficulty) {
-        return Difficulty.valueOf(difficulty);
+        return difficulty == null ? null : Difficulty.valueOf(difficulty);
     }
 }

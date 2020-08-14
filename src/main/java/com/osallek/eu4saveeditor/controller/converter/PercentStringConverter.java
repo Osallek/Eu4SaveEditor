@@ -6,11 +6,11 @@ public class PercentStringConverter extends StringConverter<Integer> {
 
     @Override
     public String toString(Integer integer) {
-        return integer + "%";
+        return integer == null ? "" : integer + "%";
     }
 
     @Override
     public Integer fromString(String integer) {
-        return Integer.parseInt(integer.replace("%", ""));
+        return integer == null ? null : Integer.parseInt(integer.replace("%", ""));
     }
 }

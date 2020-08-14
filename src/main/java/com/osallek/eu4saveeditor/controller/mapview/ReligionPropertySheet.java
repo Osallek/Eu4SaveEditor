@@ -98,8 +98,7 @@ public class ReligionPropertySheet extends VBox {
                                                                                            .equals(religion.getReligionGroup()))
                                                                 .collect(Collectors.toList()));
 
-        FilteredList<Country> possibleDefenders = countries.filtered(
-                country -> country.getOverlord() == null && !EditorController.dummyCountry.equals(country));
+        FilteredList<Country> possibleDefenders = countries.filtered(country -> country.getOverlord() == null && !EditorController.dummyCountry.equals(country));
         if (this.religion.hasDefenderOfFaith() && !possibleDefenders.isEmpty()) {
             if (!countries.contains(EditorController.dummyCountry)) {
                 countries.add(0, EditorController.dummyCountry);
@@ -120,9 +119,9 @@ public class ReligionPropertySheet extends VBox {
         }
 
         if (this.religion.hasPapacy() && Boolean.TRUE.equals(this.religion.getPapacy().getPapacyActive())) {
-            FilteredList<Country> possibleControllers = countries.filtered(
-                    country -> country.getCapital() != null && country.getCapital().getContinent() == 0
-                               && !EditorController.dummyCountry.equals(country));
+            FilteredList<Country> possibleControllers = countries.filtered(country -> country.getCapital() != null
+                                                                                      && country.getCapital().getContinent() == 0
+                                                                                      && !EditorController.dummyCountry.equals(country));
 
             if (!possibleControllers.isEmpty()) {
                 if (!countries.contains(EditorController.dummyCountry)) {
@@ -130,15 +129,11 @@ public class ReligionPropertySheet extends VBox {
                 }
 
                 this.papalControllerField = new ClearableComboBoxItem<>(this.religion.getLocalizedName(),
-                                                                        this.save.getGame()
-                                                                                 .getLocalisation(
-                                                                                         "HINT_PAPALCONTROLLER_TITLE"),
+                                                                        this.save.getGame().getLocalisation("HINT_PAPALCONTROLLER_TITLE"),
                                                                         possibleControllers,
                                                                         this.religion.getPapacy().getController(),
-                                                                        new ClearableComboBox<>(
-                                                                                new SearchableComboBox<>(),
-                                                                                () -> this.religion.getPapacy()
-                                                                                                   .getController()));
+                                                                        new ClearableComboBox<>(new SearchableComboBox<>(),
+                                                                                                () -> this.religion.getPapacy().getController()));
                 this.papalControllerField.setConverter(new CountryStringConverter());
                 this.papalControllerField.setCellFactory(new CountryStringCellFactory());
                 items.add(this.papalControllerField);

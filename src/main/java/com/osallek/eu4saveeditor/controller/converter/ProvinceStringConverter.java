@@ -8,7 +8,7 @@ public class ProvinceStringConverter extends StringConverter<SaveProvince> {
 
     @Override
     public String toString(SaveProvince province) {
-        return ClausewitzUtils.removeQuotes(province.getName());
+        return province == null ? "" : ClausewitzUtils.removeQuotes(province.getName());
     }
 
     @Override

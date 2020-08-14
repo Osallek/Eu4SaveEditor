@@ -8,7 +8,7 @@ public class CountryStringConverter extends StringConverter<Country> {
 
     @Override
     public String toString(Country country) {
-        return EditorController.dummyCountry.equals(country) ? "" : country.getLocalizedName();
+        return (country == null || EditorController.dummyCountry.equals(country)) ? "" : country.getLocalizedName();
     }
 
     @Override

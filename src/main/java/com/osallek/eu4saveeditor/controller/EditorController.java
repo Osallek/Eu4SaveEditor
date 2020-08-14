@@ -55,7 +55,7 @@ import java.util.logging.Level;
 
 public class EditorController implements Initializable {
 
-    public static final Country dummyCountry = new Country(Eu4Utils.DEFAULT_TAG);
+    public static Country dummyCountry;
 
     private static final DateFormat PRETTY_DATE_FORMAT = new SimpleDateFormat("dd MMMM yyyy");
 
@@ -202,6 +202,7 @@ public class EditorController implements Initializable {
                 this.save.getName().substring(0, extIndex) + "_edit" + this.save.getName().substring(extIndex));
 
         try {
+            this.dummyCountry = this.save.getCountry(Eu4Utils.DEFAULT_TAG);
             BufferedImage provinceImage = ImageIO.read(this.save.getGame().getProvincesImage());
             setTitle();
 
@@ -224,16 +225,9 @@ public class EditorController implements Initializable {
                                                                                               .getPlayableCountries());
 
             this.countriesAlive = new FilteredList<>(this.playableCountries, Country::isAlive);
-            this.cultures = FXCollections.observableArrayList(this.provincesMap[0][0].getSave()
-                                                                                     .getGame()
-                                                                                     .getCultures());
-            this.religions = FXCollections.observableArrayList(this.provincesMap[0][0].getSave()
-                                                                                      .getReligions()
-                                                                                      .getReligions()
-                                                                                      .values());
-            this.tradeGoods = FXCollections.observableArrayList(this.provincesMap[0][0].getSave()
-                                                                                       .getGame()
-                                                                                       .getTradeGoods());
+            this.cultures = FXCollections.observableArrayList(this.save.getGame().getCultures());
+            this.religions = FXCollections.observableArrayList(this.save.getReligions().getReligions().values());
+            this.tradeGoods = FXCollections.observableArrayList(this.save.getGame().getTradeGoods());
 
             this.drawableProvinces = new HashMap<>();
             for (int x = 0; x < this.provincesMap.length; x++) {

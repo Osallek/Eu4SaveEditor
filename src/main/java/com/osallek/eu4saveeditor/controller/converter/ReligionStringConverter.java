@@ -7,7 +7,7 @@ public class ReligionStringConverter extends StringConverter<SaveReligion> {
 
     @Override
     public String toString(SaveReligion religion) {
-        return religion.getLocalizedName();
+        return religion == null ? "" : religion.getLocalizedName();
     }
 
     @Override

@@ -7,7 +7,7 @@ public class CultureStringConverter extends StringConverter<Culture> {
 
     @Override
     public String toString(Culture culture) {
-        return culture.getLocalizedName();
+        return culture == null ? "" : culture.getLocalizedName();
     }
 
     @Override

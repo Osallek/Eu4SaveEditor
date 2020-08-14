@@ -9,41 +9,41 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DateStringConverter;
-import org.controlsfx.control.tableview2.TableColumn2;
-import org.controlsfx.control.tableview2.TableView2;
-import org.controlsfx.control.tableview2.cell.TextField2TableCell;
 
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
-public class TableView2ChangePrice extends TableView2<ChangePrice> {
+public class TableView2ChangePrice extends TableView<ChangePrice> {
 
     public TableView2ChangePrice(List<ChangePrice> changePrices, Save save) {
-        TableColumn2<ChangePrice, String> name = new TableColumn2<>(save.getGame().getLocalisation("LEDGER_NAME"));
+        TableColumn<ChangePrice, String> name = new TableColumn<>(save.getGame().getLocalisation("LEDGER_NAME"));
         name.setCellValueFactory(p -> p.getValue() == null ? null :
                                       new SimpleStringProperty(p.getValue().getLocalizedName()));
-        name.setCellFactory(TextField2TableCell.forTableColumn());
+        name.setCellFactory(TextFieldTableCell.forTableColumn());
         name.setEditable(false);
         name.setPrefWidth(500);
 
-        TableColumn2<ChangePrice, Integer> value = new TableColumn2<>(save.getGame().getLocalisation("LEDGER_VALUE"));
+        TableColumn<ChangePrice, Integer> value = new TableColumn<>(save.getGame().getLocalisation("LEDGER_VALUE"));
         value.setCellValueFactory(p -> p.getValue() == null ? null :
                                        new SimpleIntegerProperty(p.getValue().getValue()).asObject());
-        value.setCellFactory(TextField2TableCell.forTableColumn(new PercentStringConverter()));
+        value.setCellFactory(TextFieldTableCell.forTableColumn(new PercentStringConverter()));
         value.setOnEditCommit(event -> event.getRowValue().setValue(event.getNewValue()));
         value.setPrefWidth(100);
 
-        TableColumn2<ChangePrice, Date> expiryDate = new TableColumn2<>(save.getGame()
-                                                                            .getLocalisationCleanNoPunctuation("EXPIRES_ON"));
+        TableColumn<ChangePrice, Date> expiryDate = new TableColumn<>(save.getGame()
+                                                                          .getLocalisationCleanNoPunctuation("EXPIRES_ON"));
         expiryDate.setCellValueFactory(p -> p.getValue() == null ? null :
                                             new ReadOnlyObjectWrapper<>(p.getValue().getExpiryDate()));
-        expiryDate.setCellFactory(TextField2TableCell.forTableColumn(new DateStringConverter(ClausewitzUtils.DATE_FORMAT)));
+        expiryDate.setCellFactory(TextFieldTableCell.forTableColumn(new DateStringConverter(ClausewitzUtils.DATE_FORMAT)));
         expiryDate.setOnEditCommit(event -> event.getRowValue().setExpiryDate(event.getNewValue()));
         expiryDate.setPrefWidth(100);
 
-        TableColumn2<ChangePrice, Void> remove = new TableColumn2<>();
+        TableColumn<ChangePrice, Void> remove = new TableColumn<>();
         remove.setPrefWidth(48);
         remove.setEditable(false);
         remove.setCellFactory(new ChangePriceCellFactory());

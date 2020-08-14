@@ -7,7 +7,7 @@ public class TradeGoodStringConverter extends StringConverter<TradeGood> {
 
     @Override
     public String toString(TradeGood tradeGood) {
-        return tradeGood.getLocalizedName();
+        return tradeGood == null ? "" : tradeGood.getLocalizedName();
     }
 
     @Override

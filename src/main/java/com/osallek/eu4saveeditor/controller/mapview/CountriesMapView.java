@@ -118,7 +118,7 @@ public class CountriesMapView extends AbstractMapView {
     @Override
     public String updateTitle(SaveProvince selectedProvince) {
         if (this.countryButton.isSelected()) {
-            return selectedProvince.getCountry().getLocalizedName();
+            return selectedProvince.getController().getLocalizedName();
         } else if (this.provinceButton.isSelected()) {
             return getTitle(selectedProvince);
         }
@@ -154,16 +154,16 @@ public class CountriesMapView extends AbstractMapView {
     private String getTitle(SaveProvince saveProvince) {
         String title = ClausewitzUtils.removeQuotes(saveProvince.getName());
 
-        if (saveProvince.getCountry() != null) {
-            title += " (" + saveProvince.getCountry().getLocalizedName() + ")";
+        if (saveProvince.getOwner() != null) {
+            title += " (" + saveProvince.getController().getLocalizedName() + ")";
         }
 
         return title;
     }
 
     private Color getOwnerColor(SaveProvince province) {
-        if (province.getCountry() != null) {
-            return countryToMapColor(province.getCountry());
+        if (province.getOwner() != null) {
+            return countryToMapColor(province.getOwner());
         } else {
             if (province.isOcean() || province.isLake()) {
                 return Color.rgb(68, 107, 163);

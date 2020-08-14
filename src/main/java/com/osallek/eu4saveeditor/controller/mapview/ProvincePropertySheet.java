@@ -328,8 +328,8 @@ public class ProvincePropertySheet extends VBox {
 
             //POLITICAL
             if (this.province.isCity() || this.province.getColonySize() != null) {
-                this.ownerComboBox.setValue(this.province.getCountry());
-                this.ownerComboBox.setSupplier(this.province::getCountry);
+                this.ownerComboBox.setValue(this.province.getOwner());
+                this.ownerComboBox.setSupplier(this.province::getOwner);
                 this.ownerComboBox.setEditable(true);
                 items.add(this.ownerComboBox);
 
@@ -507,15 +507,15 @@ public class ProvincePropertySheet extends VBox {
         }
 
         if (this.ownerComboBox.isEditable()) {
-            if (!Objects.deepEquals(this.province.getCountry(), this.ownerComboBox.getValue())) {
-                this.province.setOwner(this.ownerComboBox.getSelectedValue().getTag());
+            if (!Objects.deepEquals(this.province.getOwner(), this.ownerComboBox.getValue())) {
+                this.province.setOwner(this.ownerComboBox.getSelectedValue());
                 this.countryChanged.set(true);
             }
         }
 
         if (this.controllerComboBox.isEditable()) {
             if (!Objects.deepEquals(this.province.getController(), this.controllerComboBox.getSelectedValue())) {
-                this.province.setController(this.controllerComboBox.getSelectedValue().getTag());
+                this.province.setController(this.controllerComboBox.getSelectedValue());
             }
         }
 
@@ -545,7 +545,7 @@ public class ProvincePropertySheet extends VBox {
 
         if (this.cultureComboBox.isEditable()) {
             if (!Objects.deepEquals(this.province.getCulture(), this.cultureComboBox.getSelectedValue())) {
-                this.province.setCulture(this.cultureComboBox.getSelectedValue().getName());
+                this.province.setCulture(this.cultureComboBox.getSelectedValue());
             }
         }
 

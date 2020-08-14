@@ -33,7 +33,7 @@ import com.osallek.eu4saveeditor.controller.converter.ProvinceStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.ProvinceStringConverter;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheetSkin;
 import com.osallek.eu4saveeditor.controller.pane.ListSelectionViewDialog;
-import com.osallek.eu4saveeditor.controller.pane.TableView2Dialog;
+import com.osallek.eu4saveeditor.controller.pane.TableViewDialog;
 import com.osallek.eu4saveeditor.controller.propertyeditor.CustomPropertyEditorFactory;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ButtonItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.CheckBoxItem;
@@ -175,8 +175,8 @@ public class SavePropertySheet extends VBox {
 
     private CustomPropertySheetSkin propertySheetSkin;
 
-    public SavePropertySheet(Save save, ObservableList<Country> playableCountries,
-                             ObservableList<Country> countriesAlive, ObservableList<SaveProvince> cities) {
+    public SavePropertySheet(Save save, ObservableList<Country> playableCountries, ObservableList<Country> countriesAlive,
+                             ObservableList<SaveProvince> cities) {
         this.save = save;
         this.propertySheet = new PropertySheet();
         this.propertySheet.setPropertyEditorFactory(new CustomPropertyEditorFactory());
@@ -367,16 +367,10 @@ public class SavePropertySheet extends VBox {
             int finalI = i;
             ClearableComboBoxItem<SaveProvince> comboBoxItem = new ClearableComboBoxItem<>(
                     SheetCategory.SAVE_INSTITUTIONS,
-                    this.save.getGame()
-                             .getInstitution(i)
-                             .getLocalizedName(),
+                    this.save.getGame().getInstitution(i).getLocalizedName(),
                     cities,
-                    this.save.getInstitutions()
-                             .getOrigin(i),
-                    new ClearableComboBox<>(new SearchableComboBox<>(),
-                                            () -> this.save
-                                                    .getInstitutions()
-                                                    .getOrigin(finalI)));
+                    this.save.getInstitutions().getOrigin(i),
+                    new ClearableComboBox<>(new SearchableComboBox<>(), () -> this.save.getInstitutions().getOrigin(finalI)));
             comboBoxItem.setConverter(new ProvinceStringConverter());
             comboBoxItem.setCellFactory(new ProvinceStringCellFactory());
 
@@ -409,16 +403,11 @@ public class SavePropertySheet extends VBox {
                     return changePrice;
                 };
 
-                TableView2Dialog<ChangePrice> dialog = new TableView2Dialog<>(this.save,
-                                                                              new TableView2ChangePrice(
-                                                                                      this.goodsChangePrices
-                                                                                              .get(good.getName()),
-                                                                                      this.save),
-                                                                              this.save.getGame()
-                                                                                       .getLocalisationClean(
-                                                                                               "TSI_CURR_MOD_BY"),
-                                                                              supplier,
-                                                                              good::getChangePrices);
+                TableViewDialog<ChangePrice> dialog = new TableViewDialog<>(this.save,
+                                                                            new TableView2ChangePrice(this.goodsChangePrices.get(good.getName()), this.save),
+                                                                            this.save.getGame().getLocalisationClean("TSI_CURR_MOD_BY"),
+                                                                            supplier,
+                                                                            good::getChangePrices);
                 Optional<List<ChangePrice>> changePrices = dialog.showAndWait();
 
                 if (changePrices.isPresent()) {

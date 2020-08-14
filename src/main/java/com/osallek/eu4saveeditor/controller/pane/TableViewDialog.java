@@ -6,24 +6,24 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
+import javafx.scene.control.TableView;
 import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import org.controlsfx.control.tableview2.TableView2;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
 
 import java.util.List;
 import java.util.function.Supplier;
 
-public class TableView2Dialog<S> extends Dialog<List<S>> {
+public class TableViewDialog<S> extends Dialog<List<S>> {
 
-    private final TableView2<S> tableView2;
+    private final TableView<S> tableView2;
 
-    public TableView2Dialog(Save save, TableView2<S> tableView2, String title, Supplier<S> supplier, Supplier<List<S>> clearSupplier) {
+    public TableViewDialog(Save save, TableView<S> tableView2, String title, Supplier<S> supplier, Supplier<List<S>> clearSupplier) {
         this.tableView2 = tableView2;
         Button addButton = new Button("", new Glyph("FontAwesome", FontAwesome.Glyph.PLUS));
         Button resetButton = new Button(save.getGame().getLocalisation("PW_RESET"));

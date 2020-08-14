@@ -7,7 +7,7 @@ public class ChangePriceStringConverter extends StringConverter<ChangePrice> {
 
     @Override
     public String toString(ChangePrice changePrice) {
-        return changePrice.getLocalizedName();
+        return changePrice == null ? "" : changePrice.getLocalizedName();
     }
 
     @Override

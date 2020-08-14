@@ -15,18 +15,23 @@ public class HreReligionStatusStringConverter extends StringConverter<HreReligio
     @Override
     public String toString(HreReligionStatus hreReligionStatus) {
         String text;
-        switch (hreReligionStatus) {
-            case PROTESTANT:
-                text = this.save.getGame().getLocalisation("protestant");
-                break;
 
-            case CATHOLIC:
-                text = this.save.getGame().getLocalisation("catholic");
-                break;
+        if (hreReligionStatus == null) {
+            text = this.save.getGame().getLocalisationClean("HRE_RELIGIOUS_PEACE");
+        } else {
+            switch (hreReligionStatus) {
+                case PROTESTANT:
+                    text = this.save.getGame().getLocalisation("protestant");
+                    break;
 
-            case PEACE:
-            default:
-                text = this.save.getGame().getLocalisationClean("HRE_RELIGIOUS_PEACE");
+                case CATHOLIC:
+                    text = this.save.getGame().getLocalisation("catholic");
+                    break;
+
+                case PEACE:
+                default:
+                    text = this.save.getGame().getLocalisationClean("HRE_RELIGIOUS_PEACE");
+            }
         }
 
         return text.substring(0, 1).toUpperCase() + text.substring(1);
@@ -34,6 +39,6 @@ public class HreReligionStatusStringConverter extends StringConverter<HreReligio
 
     @Override
     public HreReligionStatus fromString(String name) {
-        return HreReligionStatus.valueOf(name);
+        return name == null ? null : HreReligionStatus.valueOf(name);
     }
 }

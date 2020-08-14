@@ -1,27 +1,22 @@
 /**
- * Copyright (c) 2013, 2015 ControlsFX All rights reserved.
+ * Copyright (c) 2013, 2016 ControlsFX All rights reserved.
  * <p>
- * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
- * following conditions are met: * Redistributions of source code must retain the above copyright notice, this list of
- * conditions and the following disclaimer. * Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation and/or other materials provided with the
- * distribution. * Neither the name of ControlsFX, any associated website, nor the names of its contributors may be used
- * to endorse or promote products derived from this software without specific prior written permission.
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: *
+ * Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. * Redistributions in binary form
+ * must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the
+ * distribution. * Neither the name of ControlsFX, any associated website, nor the names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  * <p>
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
- * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL CONTROLSFX BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
- * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
- * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL CONTROLSFX BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package com.osallek.eu4saveeditor.controller.pane;
 
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.CustomItem;
-import com.sun.javafx.scene.control.behavior.BehaviorBase;
-import com.sun.javafx.scene.control.behavior.KeyBinding;
-import com.sun.javafx.scene.control.skin.BehaviorSkinBase;
+import impl.org.controlsfx.skin.PropertySheetSkin;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.Insets;
@@ -29,6 +24,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.SkinBase;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToolBar;
@@ -52,7 +48,6 @@ import org.controlsfx.property.editor.AbstractPropertyEditor;
 import org.controlsfx.property.editor.PropertyEditor;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,7 +56,7 @@ import java.util.TreeMap;
 import static impl.org.controlsfx.i18n.Localization.asKey;
 import static impl.org.controlsfx.i18n.Localization.localize;
 
-public class CustomPropertySheetSkin extends BehaviorSkinBase<PropertySheet, BehaviorBase<PropertySheet>> {
+public class CustomPropertySheetSkin extends SkinBase<PropertySheet> {
 
     /**************************************************************************
      *
@@ -87,7 +82,6 @@ public class CustomPropertySheetSkin extends BehaviorSkinBase<PropertySheet, Beh
     private final TextField searchField = TextFields.createClearableTextField();
     private Accordion accordion;
 
-
     /**************************************************************************
      *
      * Constructors
@@ -95,7 +89,7 @@ public class CustomPropertySheetSkin extends BehaviorSkinBase<PropertySheet, Beh
      **************************************************************************/
 
     public CustomPropertySheetSkin(final PropertySheet control) {
-        super(control, new BehaviorBase<>(control, Collections.<KeyBinding>emptyList()));
+        super(control);
 
         scroller = new ScrollPane();
         scroller.setFitToWidth(true);
@@ -124,17 +118,17 @@ public class CustomPropertySheetSkin extends BehaviorSkinBase<PropertySheet, Beh
 
 
         // setup listeners
-        registerChangeListener(control.modeProperty(), "MODE"); //$NON-NLS-1$
-        registerChangeListener(control.propertyEditorFactory(), "EDITOR-FACTORY"); //$NON-NLS-1$
-        registerChangeListener(control.titleFilter(), "FILTER"); //$NON-NLS-1$
-        registerChangeListener(searchField.textProperty(), "FILTER-UI"); //$NON-NLS-1$
-        registerChangeListener(control.modeSwitcherVisibleProperty(), "TOOLBAR-MODE"); //$NON-NLS-1$
-        registerChangeListener(control.searchBoxVisibleProperty(), "TOOLBAR-SEARCH"); //$NON-NLS-1$
-        registerChangeListener(control.categoryComparatorProperty(), "CATEGORY-COMPARATOR"); //$NON-NLS-1$
+        registerChangeListener(control.modeProperty(), e -> refreshProperties());
+        registerChangeListener(control.propertyEditorFactory(), e -> refreshProperties());
+        registerChangeListener(control.titleFilter(), e -> refreshProperties());
+        registerChangeListener(searchField.textProperty(), e -> getSkinnable().setTitleFilter(searchField.getText()));
+        registerChangeListener(control.modeSwitcherVisibleProperty(), e -> updateToolbar());
+        registerChangeListener(control.searchBoxVisibleProperty(), e -> updateToolbar());
+        registerChangeListener(control.categoryComparatorProperty(), e -> refreshProperties());
 
         control.getItems().addListener((ListChangeListener<Item>) change -> refreshProperties());
 
-        // initialize properly 
+        // initialize properly
         refreshProperties();
         updateToolbar();
     }
@@ -145,31 +139,6 @@ public class CustomPropertySheetSkin extends BehaviorSkinBase<PropertySheet, Beh
      * Overriding public API
      *
      **************************************************************************/
-
-    @Override
-    protected void handleControlPropertyChanged(String p) {
-        super.handleControlPropertyChanged(p);
-
-        switch (p) {
-            case "MODE":
-            case "EDITOR-FACTORY":
-            case "FILTER":
-            case "CATEGORY-COMPARATOR":  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-                refreshProperties();
-                break;
-            case "FILTER-UI":  //$NON-NLS-1$
-                getSkinnable().setTitleFilter(searchField.getText());
-                break;
-            case "TOOLBAR-MODE":  //$NON-NLS-1$
-                updateToolbar();
-                break;
-            case "TOOLBAR-SEARCH":  //$NON-NLS-1$
-                updateToolbar();
-                break;
-            default:
-                break;
-        }
-    }
 
     @Override
     protected void layoutChildren(double x, double y, double w, double h) {
@@ -196,31 +165,23 @@ public class CustomPropertySheetSkin extends BehaviorSkinBase<PropertySheet, Beh
 
     private Node buildPropertySheetContainer() {
         switch (getSkinnable().modeProperty().get()) {
-            case CATEGORY:
+            case CATEGORY: {
                 // group by category
-                Map<String, List<Item>> categoryMap = getSkinnable().getCategoryComparator() == null ?
-                                                      new LinkedHashMap<>() :
+                Map<String, List<Item>> categoryMap = getSkinnable().getCategoryComparator() == null ? new LinkedHashMap<>() :
                                                       new TreeMap<>(getSkinnable().getCategoryComparator());
                 for (Item p : getSkinnable().getItems()) {
-                    categoryMap.compute(p.getCategory(), (category, items) -> {
-                        if (items == null) {
-                            items = new ArrayList<>();
-                        }
-
-                        items.add(p);
-
-                        return items;
-                    });
+                    String category = p.getCategory();
+                    List<Item> list = categoryMap.computeIfAbsent(category, k -> new ArrayList<>());
+                    list.add(p);
                 }
 
                 // create category-based accordion
                 accordion = new Accordion();
-                for (Map.Entry<String, List<Item>> category : categoryMap.entrySet()) {
-                    PropertyPane props = new PropertyPane(category.getValue());
-
+                for (String category : categoryMap.keySet()) {
+                    PropertyPane props = new PropertyPane(categoryMap.get(category));
                     // Only show non-empty categories
                     if (!props.getChildrenUnmodifiable().isEmpty()) {
-                        TitledPane pane = new TitledPane(category.getKey(), props);
+                        TitledPane pane = new TitledPane(category, props);
                         pane.setExpanded(true);
                         accordion.getPanes().add(pane);
                     }
@@ -229,8 +190,8 @@ public class CustomPropertySheetSkin extends BehaviorSkinBase<PropertySheet, Beh
                 if (!accordion.getPanes().isEmpty()) {
                     accordion.setExpandedPane(accordion.getPanes().get(0));
                 }
-
                 return accordion;
+            }
 
             default:
                 return new PropertyPane(getSkinnable().getItems());
@@ -247,10 +208,10 @@ public class CustomPropertySheetSkin extends BehaviorSkinBase<PropertySheet, Beh
 
     private class ActionChangeMode extends Action {
 
-        private final Image CATEGORY_IMAGE = new Image(CustomPropertySheetSkin.class.getResource("/org/controlsfx/control/format-indent-more.png")
-                                                                                    .toExternalForm()); //$NON-NLS-1$
-        private final Image NAME_IMAGE = new Image(CustomPropertySheetSkin.class.getResource("/org/controlsfx/control/format-line-spacing-triple.png")
-                                                                                .toExternalForm()); //$NON-NLS-1$
+        private final Image CATEGORY_IMAGE = new Image(
+                PropertySheetSkin.class.getResource("/org/controlsfx/control/format-indent-more.png").toExternalForm()); //$NON-NLS-1$
+        private final Image NAME_IMAGE = new Image(
+                PropertySheetSkin.class.getResource("/org/controlsfx/control/format-line-spacing-triple.png").toExternalForm()); //$NON-NLS-1$
 
         public ActionChangeMode(PropertySheet.Mode mode) {
             super(""); //$NON-NLS-1$
@@ -277,7 +238,7 @@ public class CustomPropertySheetSkin extends BehaviorSkinBase<PropertySheet, Beh
         }
 
         public PropertyPane(List<Item> properties, int nestingLevel) {
-            setVgap(10);
+            setVgap(5);
             setHgap(5);
             setPadding(new Insets(5, 15, 5, 15 + nestingLevel * 10));
             getStyleClass().add("property-pane"); //$NON-NLS-1$
@@ -348,8 +309,9 @@ public class CustomPropertySheetSkin extends BehaviorSkinBase<PropertySheet, Beh
         private Node getEditor(Item item) {
             @SuppressWarnings("rawtypes")
             PropertyEditor editor = getSkinnable().getPropertyEditorFactory().call(item);
+
             if (editor == null) {
-                editor = new AbstractPropertyEditor<Object, TextField>(item, new TextField(), true) {
+                editor = new AbstractPropertyEditor<>(item, new TextField(), true) {
                     {
                         getEditor().setEditable(false);
                         getEditor().setDisable(true);
