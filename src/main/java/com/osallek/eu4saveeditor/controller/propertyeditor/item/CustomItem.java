@@ -1,9 +1,9 @@
 package com.osallek.eu4saveeditor.controller.propertyeditor.item;
 
+import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
 import javafx.collections.ObservableList;
-import org.controlsfx.control.PropertySheet;
 
-public interface CustomItem<T> extends PropertySheet.Item {
+public interface CustomItem<T> extends CustomPropertySheet.Item {
 
     ObservableList<T> getChoices();
 

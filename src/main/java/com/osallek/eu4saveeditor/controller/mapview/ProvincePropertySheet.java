@@ -21,6 +21,7 @@ import com.osallek.eu4saveeditor.controller.converter.ReligionStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.ReligionStringConverter;
 import com.osallek.eu4saveeditor.controller.converter.TradeGoodStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.TradeGoodStringConverter;
+import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheetSkin;
 import com.osallek.eu4saveeditor.controller.propertyeditor.CustomPropertyEditorFactory;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.CheckBoxItem;
@@ -61,7 +62,7 @@ public class ProvincePropertySheet extends VBox {
 
     private SaveProvince province;
 
-    private final PropertySheet propertySheet;
+    private final CustomPropertySheet propertySheet;
 
     private final ValidationSupport validationSupport;
 
@@ -122,9 +123,9 @@ public class ProvincePropertySheet extends VBox {
     public ProvincePropertySheet(Save save, ObservableList<Country> playableCountries,
                                  ObservableList<Culture> cultures, ObservableList<SaveReligion> religions,
                                  ObservableList<TradeGood> tradeGoods) {
-        this.propertySheet = new PropertySheet();
+        this.propertySheet = new CustomPropertySheet();
         this.propertySheet.setPropertyEditorFactory(new CustomPropertyEditorFactory());
-        this.propertySheet.setMode(PropertySheet.Mode.CATEGORY);
+        this.propertySheet.setMode(CustomPropertySheet.Mode.CATEGORY);
         this.propertySheet.setCategoryComparator(Comparator.comparing(SheetCategory::getByLocale));
         this.propertySheet.setModeSwitcherVisible(false);
         this.propertySheet.setSearchBoxVisible(false);
@@ -279,7 +280,7 @@ public class ProvincePropertySheet extends VBox {
 
         this.ownerComboBox.valueProperty().removeListener(this.ownerChangeListener);
 
-        List<PropertySheet.Item> items = new ArrayList<>();
+        List<CustomPropertySheet.Item> items = new ArrayList<>();
 
         this.cultureComboBox.setEditable(false);
         this.religionComboBox.setEditable(false);
@@ -500,26 +501,26 @@ public class ProvincePropertySheet extends VBox {
             this.province.setName(this.nameField.getText());
         }
 
-        if (this.capitalField.isEditable()) {
+        if (this.capitalField.isEditable().getValue()) {
             if (!ClausewitzUtils.removeQuotes(this.province.getCapital()).equals(this.capitalField.getText())) {
                 this.province.setCapital(this.capitalField.getText());
             }
         }
 
-        if (this.ownerComboBox.isEditable()) {
+        if (this.ownerComboBox.isEditable().getValue()) {
             if (!Objects.deepEquals(this.province.getOwner(), this.ownerComboBox.getValue())) {
                 this.province.setOwner(this.ownerComboBox.getSelectedValue());
                 this.countryChanged.set(true);
             }
         }
 
-        if (this.controllerComboBox.isEditable()) {
+        if (this.controllerComboBox.isEditable().getValue()) {
             if (!Objects.deepEquals(this.province.getController(), this.controllerComboBox.getSelectedValue())) {
                 this.province.setController(this.controllerComboBox.getSelectedValue());
             }
         }
 
-        if (this.coresField.isEditable()) {
+        if (this.coresField.isEditable().getValue()) {
             if (!Objects.deepEquals(this.province.getCores(), this.coresField.getSelectedValues())) {
                 this.province.setCores(this.coresField.getSelectedValues()
                                                       .stream()
@@ -528,7 +529,7 @@ public class ProvincePropertySheet extends VBox {
             }
         }
 
-        if (this.claimsField.isEditable()) {
+        if (this.claimsField.isEditable().getValue()) {
             if (!Objects.deepEquals(this.province.getClaims(), this.claimsField.getSelectedValues())) {
                 this.province.setClaims(this.claimsField.getSelectedValues()
                                                         .stream()
@@ -537,55 +538,55 @@ public class ProvincePropertySheet extends VBox {
             }
         }
 
-        if (this.hreField.isEditable()) {
+        if (this.hreField.isEditable().getValue()) {
             if (this.province.inHre() != this.hreField.isSelected()) {
                 this.province.setInHre(this.hreField.isSelected());
             }
         }
 
-        if (this.cultureComboBox.isEditable()) {
+        if (this.cultureComboBox.isEditable().getValue()) {
             if (!Objects.deepEquals(this.province.getCulture(), this.cultureComboBox.getSelectedValue())) {
                 this.province.setCulture(this.cultureComboBox.getSelectedValue());
             }
         }
 
-        if (this.religionComboBox.isEditable()) {
+        if (this.religionComboBox.isEditable().getValue()) {
             if (!Objects.deepEquals(this.province.getReligion(), this.religionComboBox.getSelectedValue())) {
                 this.province.setReligion(this.religionComboBox.getSelectedValue());
             }
         }
 
-        if (this.nativeHostilenessField.isEditable()) {
+        if (this.nativeHostilenessField.isEditable().getValue()) {
             if (!Objects.deepEquals(this.province.getNativeHostileness(), this.nativeHostilenessField.getTrueValue())) {
                 this.province.setNativeHostileness(this.nativeHostilenessField.getTrueValue());
             }
         }
 
-        if (this.nativeFerocityField.isEditable()) {
+        if (this.nativeFerocityField.isEditable().getValue()) {
             if (!Objects.deepEquals(this.province.getNativeFerocity(), this.nativeFerocityField.getTrueValue())) {
                 this.province.setNativeFerocity(this.nativeFerocityField.getTrueValue());
             }
         }
 
-        if (this.nativeSizeField.isEditable()) {
+        if (this.nativeSizeField.isEditable().getValue()) {
             if (!Objects.deepEquals(this.province.getNativeSize(), this.nativeSizeField.getTrueValue())) {
                 this.province.setNativeSize(this.nativeSizeField.getTrueValue());
             }
         }
 
-        if (this.baseTaxField.isEditable()) {
+        if (this.baseTaxField.isEditable().getValue()) {
             if (!Objects.deepEquals(this.province.getBaseTax(), this.baseTaxField.getTrueValue())) {
                 this.province.setBaseTax(this.baseTaxField.getTrueValue());
             }
         }
 
-        if (this.baseProdField.isEditable()) {
+        if (this.baseProdField.isEditable().getValue()) {
             if (!Objects.deepEquals(this.province.getBaseProduction(), this.baseProdField.getTrueValue())) {
                 this.province.setBaseProduction(this.baseProdField.getTrueValue());
             }
         }
 
-        if (this.baseMPField.isEditable()) {
+        if (this.baseMPField.isEditable().getValue()) {
             if (!Objects.deepEquals(this.province.getBaseManpower(), this.baseMPField.getTrueValue())) {
                 this.province.setBaseManpower(this.baseMPField.getTrueValue());
             }
@@ -593,7 +594,7 @@ public class ProvincePropertySheet extends VBox {
 
         if (!this.institutionFields.isEmpty()) {
             for (int i = 0; i < this.institutionFields.size(); i++) {
-                if (this.institutionFields.get(i).isEditable()
+                if (this.institutionFields.get(i).isEditable().getValue()
                     && !Objects.deepEquals(this.province.getInstitutionsProgress(i),
                                            this.institutionFields.get(i).getDoubleValue())) {
                     this.province.setInstitutionProgress(i, this.institutionFields.get(i).getDoubleValue());
@@ -601,31 +602,31 @@ public class ProvincePropertySheet extends VBox {
             }
         }
 
-        if (this.tradeGoodField.isEditable()) {
+        if (this.tradeGoodField.isEditable().getValue()) {
             if (!Objects.deepEquals(this.province.getTradeGood(), this.tradeGoodField.getSelectedValue())) {
                 this.province.setTradeGoods(this.tradeGoodField.getSelectedValue().getName());
             }
         }
 
-        if (this.latentTradeGoodField.isEditable()) {
+        if (this.latentTradeGoodField.isEditable().getValue()) {
             if (!Objects.deepEquals(this.province.getLatentTradeGood(), this.latentTradeGoodField.getSelectedValue())) {
                 this.province.setLatentTradeGoods(this.latentTradeGoodField.getSelectedValue().getName());
             }
         }
 
-        if (this.cotField.isEditable()) {
+        if (this.cotField.isEditable().getValue()) {
             if (!Objects.deepEquals(this.province.getCenterOfTrade(), this.cotField.getTrueValue())) {
                 this.province.setCenterOfTrade(this.cotField.getTrueValue());
             }
         }
 
-        if (this.autonomyField.isEditable()) {
+        if (this.autonomyField.isEditable().getValue()) {
             if (!Objects.deepEquals(this.province.getLocalAutonomy(), this.autonomyField.getDoubleValue())) {
                 this.province.setLocalAutonomy(this.autonomyField.getDoubleValue());
             }
         }
 
-        if (this.devastationField.isEditable()) {
+        if (this.devastationField.isEditable().getValue()) {
             if (!Objects.deepEquals(this.province.getDevastation(), this.devastationField.getDoubleValue())) {
                 this.province.setDevastation(this.devastationField.getDoubleValue());
             }
@@ -641,13 +642,13 @@ public class ProvincePropertySheet extends VBox {
             }
         }
 
-        if (this.colonySizeField.isEditable()) {
+        if (this.colonySizeField.isEditable().getValue()) {
             if (!Objects.deepEquals(this.province.getColonySize(), this.colonySizeField.getDoubleValue())) {
                 this.province.setColonySize(this.colonySizeField.getDoubleValue());
             }
         }
 
-        if (this.colonizeForField.isEditable()) {
+        if (this.colonizeForField.isEditable().getValue()) {
             if (this.colonizeForField.getSelectedValue() != null) {
                 this.province.colonize(this.colonizeForField.getSelectedValue());
             }
@@ -680,7 +681,7 @@ public class ProvincePropertySheet extends VBox {
         return validationSupport;
     }
 
-    public PropertySheet getPropertySheet() {
+    public CustomPropertySheet getPropertySheet() {
         return propertySheet;
     }
 }

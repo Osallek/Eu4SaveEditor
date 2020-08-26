@@ -15,6 +15,8 @@
  */
 package com.osallek.eu4saveeditor.controller.pane;
 
+import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheet.Item;
+import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheet.Mode;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.CustomItem;
 import impl.org.controlsfx.skin.PropertySheetSkin;
 import javafx.beans.value.ObservableValue;
@@ -37,14 +39,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.stage.PopupWindow;
-import org.controlsfx.control.PropertySheet;
-import org.controlsfx.control.PropertySheet.Item;
-import org.controlsfx.control.PropertySheet.Mode;
 import org.controlsfx.control.SegmentedButton;
 import org.controlsfx.control.action.Action;
 import org.controlsfx.control.action.ActionUtils;
 import org.controlsfx.control.textfield.TextFields;
-import org.controlsfx.property.editor.AbstractPropertyEditor;
 import org.controlsfx.property.editor.PropertyEditor;
 
 import java.util.ArrayList;
@@ -56,7 +54,7 @@ import java.util.TreeMap;
 import static impl.org.controlsfx.i18n.Localization.asKey;
 import static impl.org.controlsfx.i18n.Localization.localize;
 
-public class CustomPropertySheetSkin extends SkinBase<PropertySheet> {
+public class CustomPropertySheetSkin extends SkinBase<CustomPropertySheet> {
 
     /**************************************************************************
      *
@@ -88,7 +86,7 @@ public class CustomPropertySheetSkin extends SkinBase<PropertySheet> {
      *
      **************************************************************************/
 
-    public CustomPropertySheetSkin(final PropertySheet control) {
+    public CustomPropertySheetSkin(final CustomPropertySheet control) {
         super(control);
 
         scroller = new ScrollPane();
@@ -126,7 +124,7 @@ public class CustomPropertySheetSkin extends SkinBase<PropertySheet> {
         registerChangeListener(control.searchBoxVisibleProperty(), e -> updateToolbar());
         registerChangeListener(control.categoryComparatorProperty(), e -> refreshProperties());
 
-        control.getItems().addListener((ListChangeListener<Item>) change -> refreshProperties());
+        control.getItems().addListener((ListChangeListener<CustomPropertySheet.Item>) change -> refreshProperties());
 
         // initialize properly
         refreshProperties();
@@ -213,7 +211,7 @@ public class CustomPropertySheetSkin extends SkinBase<PropertySheet> {
         private final Image NAME_IMAGE = new Image(
                 PropertySheetSkin.class.getResource("/org/controlsfx/control/format-line-spacing-triple.png").toExternalForm()); //$NON-NLS-1$
 
-        public ActionChangeMode(PropertySheet.Mode mode) {
+        public ActionChangeMode(CustomPropertySheet.Mode mode) {
             super(""); //$NON-NLS-1$
             setEventHandler(ae -> getSkinnable().modeProperty().set(mode));
 
@@ -311,7 +309,7 @@ public class CustomPropertySheetSkin extends SkinBase<PropertySheet> {
             PropertyEditor editor = getSkinnable().getPropertyEditorFactory().call(item);
 
             if (editor == null) {
-                editor = new AbstractPropertyEditor<>(item, new TextField(), true) {
+                editor = new AbstractPropertyEditor<>(item, new TextField()) {
                     {
                         getEditor().setEditable(false);
                         getEditor().setDisable(true);
@@ -333,8 +331,8 @@ public class CustomPropertySheetSkin extends SkinBase<PropertySheet> {
                         getEditor().setText(value == null ? "" : value.toString()); //$NON-NLS-1$
                     }
                 };
-            } else if (!item.isEditable()) {
-                editor.getEditor().setDisable(true);
+            } else {
+                editor.getEditor().disableProperty().bind(item.isEditable().not());
             }
 
             editor.setValue(item.getValue());

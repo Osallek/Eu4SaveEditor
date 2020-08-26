@@ -31,6 +31,7 @@ import com.osallek.eu4saveeditor.controller.converter.HreReligionStatusStringCel
 import com.osallek.eu4saveeditor.controller.converter.HreReligionStatusStringConverter;
 import com.osallek.eu4saveeditor.controller.converter.ProvinceStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.ProvinceStringConverter;
+import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheetSkin;
 import com.osallek.eu4saveeditor.controller.pane.ListSelectionViewDialog;
 import com.osallek.eu4saveeditor.controller.pane.TableViewDialog;
@@ -81,7 +82,7 @@ public class SavePropertySheet extends VBox {
 
     private Save save;
 
-    private final PropertySheet propertySheet;
+    private final CustomPropertySheet propertySheet;
 
     private final ValidationSupport validationSupport;
 
@@ -163,7 +164,7 @@ public class SavePropertySheet extends VBox {
 
     private ClearableComboBoxItem<Decree> decreeField;
 
-    private final PropertySheet religionPropertySheet;
+    private final CustomPropertySheet religionPropertySheet;
 
     private final List<ReligionPropertySheet> religionPropertySheets;
 
@@ -178,13 +179,13 @@ public class SavePropertySheet extends VBox {
     public SavePropertySheet(Save save, ObservableList<Country> playableCountries, ObservableList<Country> countriesAlive,
                              ObservableList<SaveProvince> cities) {
         this.save = save;
-        this.propertySheet = new PropertySheet();
+        this.propertySheet = new CustomPropertySheet();
         this.propertySheet.setPropertyEditorFactory(new CustomPropertyEditorFactory());
-        this.propertySheet.setMode(PropertySheet.Mode.CATEGORY);
+        this.propertySheet.setMode(CustomPropertySheet.Mode.CATEGORY);
         this.propertySheet.setModeSwitcherVisible(false);
         this.propertySheet.setSearchBoxVisible(false);
 
-        List<PropertySheet.Item> items = new ArrayList<>();
+        List<CustomPropertySheet.Item> items = new ArrayList<>();
 
         this.propertySheetSkin = new CustomPropertySheetSkin(this.propertySheet);
         this.propertySheet.setSkin(this.propertySheetSkin);
@@ -756,9 +757,9 @@ public class SavePropertySheet extends VBox {
         }
 
         //RELIGIONS
-        this.religionPropertySheet = new PropertySheet();
+        this.religionPropertySheet = new CustomPropertySheet();
         this.religionPropertySheet.setPropertyEditorFactory(new CustomPropertyEditorFactory());
-        this.religionPropertySheet.setMode(PropertySheet.Mode.CATEGORY);
+        this.religionPropertySheet.setMode(CustomPropertySheet.Mode.CATEGORY);
         this.religionPropertySheet.setModeSwitcherVisible(false);
         this.religionPropertySheet.setSearchBoxVisible(false);
         this.religionPropertySheetSkin = new CustomPropertySheetSkin(this.religionPropertySheet);
@@ -784,8 +785,7 @@ public class SavePropertySheet extends VBox {
                  });
 
         if (!this.religionPropertySheet.getItems().isEmpty()) {
-            items.add(new PropertySheetItem(this.save.getGame()
-                                                     .getLocalisation("LEDGER_RELIGIONS"), this.religionPropertySheet));
+            items.add(new PropertySheetItem(this.save.getGame().getLocalisation("LEDGER_RELIGIONS"), this.religionPropertySheet));
         }
 
         //EVENTS
@@ -1104,7 +1104,7 @@ public class SavePropertySheet extends VBox {
         return validationSupport;
     }
 
-    public PropertySheet getPropertySheet() {
+    public CustomPropertySheet getPropertySheet() {
         return propertySheet;
     }
 }

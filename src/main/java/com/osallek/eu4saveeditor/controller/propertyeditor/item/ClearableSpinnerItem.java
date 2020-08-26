@@ -2,7 +2,9 @@ package com.osallek.eu4saveeditor.controller.propertyeditor.item;
 
 import com.osallek.eu4saveeditor.controller.control.ClearableSpinner;
 import com.osallek.eu4saveeditor.i18n.SheetCategory;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
@@ -17,7 +19,7 @@ public class ClearableSpinnerItem<T> implements CustomItem<Integer> {
 
     private final ClearableSpinner<T> spinner;
 
-    private boolean editable;
+    private final BooleanProperty editable;
 
     public ClearableSpinnerItem(SheetCategory category, String name, ClearableSpinner<T> spinner) {
         this(category.getForDefaultLocale(), name, spinner);
@@ -25,14 +27,14 @@ public class ClearableSpinnerItem<T> implements CustomItem<Integer> {
 
 
     public ClearableSpinnerItem(String category, String name, ClearableSpinner<T> spinner) {
-        this(category, name, spinner, true);
+        this(category, name, spinner, new SimpleBooleanProperty(true));
     }
 
-    public ClearableSpinnerItem(SheetCategory category, String name, ClearableSpinner<T> spinner, boolean editable) {
+    public ClearableSpinnerItem(SheetCategory category, String name, ClearableSpinner<T> spinner, BooleanProperty editable) {
         this(category.getForDefaultLocale(), name, spinner, editable);
     }
 
-    public ClearableSpinnerItem(String category, String name, ClearableSpinner<T> spinner, boolean editable) {
+    public ClearableSpinnerItem(String category, String name, ClearableSpinner<T> spinner, BooleanProperty editable) {
         this.category = category;
         this.name = name;
         this.spinner = spinner;
@@ -80,12 +82,12 @@ public class ClearableSpinnerItem<T> implements CustomItem<Integer> {
     }
 
     @Override
-    public boolean isEditable() {
+    public BooleanProperty isEditable() {
         return this.editable;
     }
 
     public void setEditable(boolean editable) {
-        this.editable = editable;
+        this.editable.set(editable);
     }
 
     public ClearableSpinner<T> getSpinner() {

@@ -11,6 +11,7 @@ import com.osallek.eu4saveeditor.controller.converter.CountryStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.CountryStringConverter;
 import com.osallek.eu4saveeditor.controller.converter.GoldenBullStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.GoldenBullStringConverter;
+import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheetSkin;
 import com.osallek.eu4saveeditor.controller.propertyeditor.CustomPropertyEditorFactory;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.CheckBoxItem;
@@ -40,7 +41,7 @@ public class ReligionPropertySheet extends VBox {
 
     private final SaveReligion religion;
 
-    private final PropertySheet propertySheet;
+    private final CustomPropertySheet propertySheet;
 
     private final ValidationSupport validationSupport;
 
@@ -63,13 +64,13 @@ public class ReligionPropertySheet extends VBox {
     public ReligionPropertySheet(Save save, SaveReligion religion, ObservableList<Country> countriesAlive) {
         this.save = save;
         this.religion = religion;
-        this.propertySheet = new PropertySheet();
+        this.propertySheet = new CustomPropertySheet();
         this.propertySheet.setPropertyEditorFactory(new CustomPropertyEditorFactory());
-        this.propertySheet.setMode(PropertySheet.Mode.CATEGORY);
+        this.propertySheet.setMode(CustomPropertySheet.Mode.CATEGORY);
         this.propertySheet.setModeSwitcherVisible(false);
         this.propertySheet.setSearchBoxVisible(false);
 
-        List<PropertySheet.Item> items = new ArrayList<>();
+        List<CustomPropertySheet.Item> items = new ArrayList<>();
 
         this.propertySheetSkin = new CustomPropertySheetSkin(this.propertySheet);
         this.propertySheet.setSkin(this.propertySheetSkin);
@@ -285,7 +286,7 @@ public class ReligionPropertySheet extends VBox {
         return validationSupport;
     }
 
-    public PropertySheet getPropertySheet() {
+    public CustomPropertySheet getPropertySheet() {
         return propertySheet;
     }
 }

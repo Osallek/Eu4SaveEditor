@@ -2,6 +2,10 @@ package com.osallek.eu4saveeditor.controller.propertyeditor.item;
 
 import com.osallek.eu4saveeditor.controller.control.CustomClearableTextField;
 import com.osallek.eu4saveeditor.i18n.SheetCategory;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanWrapper;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.adapter.JavaBeanBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import org.controlsfx.control.textfield.CustomTextField;
@@ -21,17 +25,17 @@ public class ClearableTextItem implements CustomItem<Void> {
 
     private Supplier<String> supplier;
 
-    private boolean editable;
+    private final BooleanProperty editable;
 
     public ClearableTextItem(SheetCategory category, String name) {
-        this(category, name, null, null, true);
+        this(category, name, null, null, new SimpleBooleanProperty(true) {});
     }
 
     public ClearableTextItem(SheetCategory category, String name, String value, Supplier<String> clearSupplier) {
-        this(category, name, value, clearSupplier, true);
+        this(category, name, value, clearSupplier, new SimpleBooleanProperty(true));
     }
 
-    public ClearableTextItem(SheetCategory category, String name, String value, Supplier<String> clearSupplier, boolean editable) {
+    public ClearableTextItem(SheetCategory category, String name, String value, Supplier<String> clearSupplier, BooleanProperty editable) {
         this.category = category.getForDefaultLocale();
         this.name = name;
         this.textField = CustomClearableTextField.createClearableTextField(clearSupplier);
@@ -81,12 +85,12 @@ public class ClearableTextItem implements CustomItem<Void> {
     }
 
     @Override
-    public boolean isEditable() {
+    public BooleanProperty isEditable() {
         return this.editable;
     }
 
     public void setEditable(boolean editable) {
-        this.editable = editable;
+        this.editable.set(editable);
     }
 
     public void setSupplier(Supplier<String> supplier) {

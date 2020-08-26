@@ -2,6 +2,8 @@ package com.osallek.eu4saveeditor.controller.propertyeditor.item;
 
 import com.osallek.eu4saveeditor.controller.control.ClearableCheckComboBox;
 import com.osallek.eu4saveeditor.i18n.SheetCategory;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -27,7 +29,7 @@ public class ClearableCheckComboBoxItem<U> implements CustomItem<U> {
 
     private final ClearableCheckComboBox<U> checkComboBox;
 
-    private boolean editable;
+    private final BooleanProperty editable;
 
     private EventHandler<ActionEvent> onAction;
 
@@ -36,14 +38,14 @@ public class ClearableCheckComboBoxItem<U> implements CustomItem<U> {
     private Callback<ListView<U>, ListCell<U>> cellFactory;
 
     public ClearableCheckComboBoxItem(SheetCategory category, String name, ObservableList<U> values, ClearableCheckComboBox<U> checkComboBox) {
-        this(category, name, values, null, checkComboBox, true);
+        this(category, name, values, null, checkComboBox, new SimpleBooleanProperty(true));
     }
 
     public ClearableCheckComboBoxItem(SheetCategory category, String name, ObservableList<U> values, ObservableList<U> selectedValues, ClearableCheckComboBox<U> checkComboBox) {
-        this(category, name, values, selectedValues, checkComboBox, true);
+        this(category, name, values, selectedValues, checkComboBox, new SimpleBooleanProperty(true));
     }
 
-    public ClearableCheckComboBoxItem(SheetCategory category, String name, ObservableList<U> values, ObservableList<U> selectedValues, ClearableCheckComboBox<U> checkComboBox, boolean editable) {
+    public ClearableCheckComboBoxItem(SheetCategory category, String name, ObservableList<U> values, ObservableList<U> selectedValues, ClearableCheckComboBox<U> checkComboBox, BooleanProperty editable) {
         this.category = category.getForDefaultLocale();
         this.name = name;
         this.values = values;
@@ -93,12 +95,12 @@ public class ClearableCheckComboBoxItem<U> implements CustomItem<U> {
     }
 
     @Override
-    public boolean isEditable() {
+    public BooleanProperty isEditable() {
         return this.editable;
     }
 
     public void setEditable(boolean editable) {
-        this.editable = editable;
+        this.editable.set(editable);
     }
 
     public ClearableCheckComboBox<U> getCheckComboBox() {

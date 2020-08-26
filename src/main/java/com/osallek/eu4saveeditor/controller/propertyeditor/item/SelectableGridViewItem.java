@@ -2,6 +2,8 @@ package com.osallek.eu4saveeditor.controller.propertyeditor.item;
 
 import com.osallek.eu4saveeditor.controller.control.SelectableGridView;
 import com.osallek.eu4saveeditor.i18n.SheetCategory;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
@@ -20,15 +22,15 @@ public class SelectableGridViewItem<U> implements CustomItem<U> {
 
     private final SelectableGridView<U> selectableGridView;
 
-    private final boolean editable;
+    private final BooleanProperty editable;
 
     private Function<U, String> textFunction;
 
     public SelectableGridViewItem(SheetCategory category, SelectableGridView<U> selectableGridView) {
-        this(category, selectableGridView, true);
+        this(category, selectableGridView, new SimpleBooleanProperty(true));
     }
 
-    public SelectableGridViewItem(SheetCategory category, SelectableGridView<U> selectableGridView, boolean editable) {
+    public SelectableGridViewItem(SheetCategory category, SelectableGridView<U> selectableGridView, BooleanProperty editable) {
         this.category = category.getForDefaultLocale();
         this.values = selectableGridView.getItems();
         this.selectedValues = selectableGridView.getSelectedItems();
@@ -76,7 +78,7 @@ public class SelectableGridViewItem<U> implements CustomItem<U> {
     }
 
     @Override
-    public boolean isEditable() {
+    public BooleanProperty isEditable() {
         return this.editable;
     }
 

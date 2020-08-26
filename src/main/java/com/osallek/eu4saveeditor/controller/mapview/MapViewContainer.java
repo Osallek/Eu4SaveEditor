@@ -6,6 +6,7 @@ import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.SaveReligion;
 import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
+import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -85,7 +86,7 @@ public class MapViewContainer {
         this.titleLabel = new Label();
         this.titleLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 16px");
 
-        this.submitButton = new Button(save.getGame().getLocalisation("DONE"));
+        this.submitButton = new Button(save.getGame().getLocalisation("SM_APPLY"));
         this.submitButton.setStyle("-fx-font-weight: bold");
 
         this.saveButton = new ToggleButton(save.getGame().getLocalisation("SM_GAME"));
@@ -162,7 +163,7 @@ public class MapViewContainer {
         bindSubmitButtonDisableProperty(this.saveSheet.getValidationSupport().invalidProperty());
     }
 
-    public void addSheets(List<PropertySheet> sheets) {
+    public void addSheets(List<CustomPropertySheet> sheets) {
         for (int i = 0; i < sheets.size(); i++) {
             if (!this.editPane.getChildren().contains(sheets.get(i))) {
                 this.editPane.getChildren().add(i + 2, sheets.get(i)); //+2 for buttons and title
@@ -174,7 +175,7 @@ public class MapViewContainer {
         removeSheet(this.saveSheet.getPropertySheet());
     }
 
-    public void removeSheet(PropertySheet propertySheet) {
+    public void removeSheet(CustomPropertySheet propertySheet) {
         this.editPane.getChildren().remove(propertySheet);
     }
 

@@ -1,5 +1,7 @@
 package com.osallek.eu4saveeditor.controller.propertyeditor;
 
+import com.osallek.eu4saveeditor.controller.pane.CustomDefaultPropertyEditorFactory;
+import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ButtonItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.CheckComboBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableCheckComboBoxItem;
@@ -12,14 +14,12 @@ import com.osallek.eu4saveeditor.controller.propertyeditor.item.HBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.PropertySheetItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.SelectableGridViewItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.TextItem;
-import org.controlsfx.control.PropertySheet;
-import org.controlsfx.property.editor.DefaultPropertyEditorFactory;
 import org.controlsfx.property.editor.PropertyEditor;
 
-public class CustomPropertyEditorFactory extends DefaultPropertyEditorFactory {
+public class CustomPropertyEditorFactory extends CustomDefaultPropertyEditorFactory {
 
     @Override
-    public PropertyEditor<?> call(PropertySheet.Item item) {
+    public PropertyEditor<?> call(CustomPropertySheet.Item item) {
         Class<?> type = item.getType();
 
         if (type == TextItem.class) {

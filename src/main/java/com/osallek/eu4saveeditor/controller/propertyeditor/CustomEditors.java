@@ -1,10 +1,9 @@
 package com.osallek.eu4saveeditor.controller.propertyeditor;
 
-import com.osallek.eu4saveeditor.controller.control.ClearableCheckComboBox;
-import com.osallek.eu4saveeditor.controller.control.ClearableComboBox;
-import com.osallek.eu4saveeditor.controller.control.ClearableSlider;
-import com.osallek.eu4saveeditor.controller.control.ClearableSpinner;
-import com.osallek.eu4saveeditor.controller.control.SelectableGridView;
+import com.osallek.eu4saveeditor.controller.pane.AbstractObjectField;
+import com.osallek.eu4saveeditor.controller.pane.AbstractPropertyEditor;
+import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
+import com.osallek.eu4saveeditor.controller.pane.NumericField;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ButtonItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.CheckComboBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableCheckComboBoxItem;
@@ -17,6 +16,8 @@ import com.osallek.eu4saveeditor.controller.propertyeditor.item.HBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.PropertySheetItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.SelectableGridViewItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.TextItem;
+import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SetProperty;
@@ -24,25 +25,36 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleSetProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
-import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.HBox;
-import javafx.scene.text.Text;
-import org.controlsfx.control.CheckComboBox;
-import org.controlsfx.control.PropertySheet;
-import org.controlsfx.property.editor.AbstractPropertyEditor;
+import javafx.scene.control.TextInputControl;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import org.controlsfx.dialog.FontSelectorDialog;
 import org.controlsfx.property.editor.PropertyEditor;
+
+import java.lang.reflect.InvocationTargetException;
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Optional;
 
 public class CustomEditors {
 
     private CustomEditors() {}
 
-    public static PropertyEditor<String> createTextEditor(TextItem textItem) {
+    public static PropertyEditor<?> createTextEditor(CustomPropertySheet.Item property) {
 
-        return new AbstractPropertyEditor<String, Text>(textItem, textItem.getText()) {
+        return new AbstractPropertyEditor<String, TextField>(property, new TextField()) {
+
+            {
+                enableAutoSelectAll(getEditor());
+            }
 
             @Override
             protected StringProperty getObservableValue() {
@@ -54,6 +66,162 @@ public class CustomEditors {
                 getEditor().setText(value);
             }
         };
+    }
+
+    public static PropertyEditor<String> createTextEditor(TextItem textItem) {
+
+        return new AbstractPropertyEditor<>(textItem, textItem.getText()) {
+
+            @Override
+            protected StringProperty getObservableValue() {
+                return getEditor().textProperty();
+            }
+
+            @Override
+            public void setValue(String value) {
+                getEditor().setText(value);
+            }
+        };
+    }
+
+    @SuppressWarnings("unchecked")
+    public static PropertyEditor<?> createNumericEditor(CustomPropertySheet.Item property) {
+
+        return new AbstractPropertyEditor<Number, NumericField>(property, new NumericField((Class<? extends Number>) property.getType())) {
+
+            private Class<? extends Number> sourceClass = (Class<? extends Number>) property.getType(); //Double.class;
+
+            {
+                enableAutoSelectAll(getEditor());
+            }
+
+            @Override
+            protected ObservableValue<Number> getObservableValue() {
+                return getEditor().valueProperty();
+            }
+
+            @Override
+            public Number getValue() {
+                try {
+                    return sourceClass.getConstructor(String.class).newInstance(getEditor().getText());
+                } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+                        | NoSuchMethodException | SecurityException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+
+            @Override
+            public void setValue(Number value) {
+                sourceClass = value.getClass();
+                getEditor().setText(value.toString());
+            }
+
+        };
+    }
+
+    public static PropertyEditor<?> createCheckEditor(CustomPropertySheet.Item property) {
+
+        return new AbstractPropertyEditor<Boolean, CheckBox>(property, new CheckBox()) {
+
+            @Override
+            protected BooleanProperty getObservableValue() {
+                return getEditor().selectedProperty();
+            }
+
+            @Override
+            public void setValue(Boolean value) {
+                getEditor().setSelected(value);
+            }
+        };
+
+    }
+
+    public static <T> PropertyEditor<?> createChoiceEditor(CustomPropertySheet.Item property, final Collection<T> choices) {
+
+        return new AbstractPropertyEditor<T, ComboBox<T>>(property, new ComboBox<T>()) {
+
+            {
+                getEditor().setItems(FXCollections.observableArrayList(choices));
+            }
+
+            @Override
+            protected ObservableValue<T> getObservableValue() {
+                return getEditor().getSelectionModel().selectedItemProperty();
+            }
+
+            @Override
+            public void setValue(T value) {
+                getEditor().getSelectionModel().select(value);
+            }
+        };
+    }
+
+    public static PropertyEditor<?> createColorEditor(CustomPropertySheet.Item property) {
+        return new AbstractPropertyEditor<Color, ColorPicker>(property, new ColorPicker()) {
+
+            @Override
+            protected ObservableValue<Color> getObservableValue() {
+                return getEditor().valueProperty();
+            }
+
+            @Override
+            public void setValue(Color value) {
+                getEditor().setValue((Color) value);
+            }
+        };
+    }
+
+
+    public static PropertyEditor<?> createDateEditor(CustomPropertySheet.Item property) {
+        return new AbstractPropertyEditor<LocalDate, DatePicker>(property, new DatePicker()) {
+
+            //TODO: Provide date picker customization support
+
+            @Override
+            protected ObservableValue<LocalDate> getObservableValue() {
+                return getEditor().valueProperty();
+            }
+
+            @Override
+            public void setValue(LocalDate value) {
+                getEditor().setValue(value);
+            }
+        };
+    }
+
+    public static PropertyEditor<?> createFontEditor(CustomPropertySheet.Item property) {
+
+        return new AbstractPropertyEditor<Font, AbstractObjectField<Font>>(property, new AbstractObjectField<Font>() {
+            @Override
+            protected Class<Font> getType() {
+                return Font.class;
+            }
+
+            @Override
+            protected String objectToString(Font font) {
+                return font == null ? "" : String.format("%s, %.1f", font.getName(), font.getSize()); //$NON-NLS-1$ //$NON-NLS-2$
+            }
+
+            @Override
+            protected Font edit(Font font) {
+                FontSelectorDialog dlg = new FontSelectorDialog(font);
+                Optional<Font> optionalFont = dlg.showAndWait();
+                return optionalFont.orElse(null);
+            }
+        }) {
+
+            @Override
+            protected ObservableValue<Font> getObservableValue() {
+                return getEditor().getObjectProperty();
+            }
+
+            @Override
+            public void setValue(Font value) {
+                getEditor().getObjectProperty().set(value);
+            }
+        };
+
     }
 
     public static PropertyEditor<String> createClearableLabeledTextEditor(ClearableTextItem property) {
@@ -74,7 +242,7 @@ public class CustomEditors {
 
     public static <T> PropertyEditor<T> createClearableSpinnerEditor(ClearableSpinnerItem<T> property) {
 
-        return new AbstractPropertyEditor<T, ClearableSpinner<T>>(property, property.getSpinner()) {
+        return new AbstractPropertyEditor<>(property, property.getSpinner()) {
 
             @Override
             protected ObservableValue<T> getObservableValue() {
@@ -90,7 +258,7 @@ public class CustomEditors {
 
     public static PropertyEditor<Double> createClearableSliderEditor(ClearableSliderItem property) {
 
-        return new AbstractPropertyEditor<Double, ClearableSlider>(property, property.getSlider()) {
+        return new AbstractPropertyEditor<>(property, property.getSlider()) {
 
             @Override
             protected ObservableValue<Double> getObservableValue() {
@@ -106,7 +274,7 @@ public class CustomEditors {
 
     public static <T> PropertyEditor<T> createCustomChoiceEditor(ComboBoxItem<T> comboBoxItem) {
 
-        return new AbstractPropertyEditor<T, ComboBox<T>>(comboBoxItem, comboBoxItem.getComboBox()) {
+        return new AbstractPropertyEditor<>(comboBoxItem, comboBoxItem.getComboBox()) {
             {
                 getEditor().setItems(comboBoxItem.getChoices());
 
@@ -137,7 +305,7 @@ public class CustomEditors {
 
     public static <T> PropertyEditor<T> createClearableComboBoxEditor(ClearableComboBoxItem<T> clearableComboBoxItem) {
 
-        return new AbstractPropertyEditor<T, ClearableComboBox<T>>(clearableComboBoxItem, clearableComboBoxItem.getComboBox()) {
+        return new AbstractPropertyEditor<>(clearableComboBoxItem, clearableComboBoxItem.getComboBox()) {
             {
                 getEditor().setItems(clearableComboBoxItem.getChoices());
 
@@ -168,7 +336,7 @@ public class CustomEditors {
 
     public static <T> PropertyEditor<ObservableList<T>> createCheckComboBoxEditor(CheckComboBoxItem<T> comboBoxItem) {
 
-        return new AbstractPropertyEditor<ObservableList<T>, CheckComboBox<T>>(comboBoxItem, comboBoxItem.getCheckComboBox()) {
+        return new AbstractPropertyEditor<>(comboBoxItem, comboBoxItem.getCheckComboBox()) {
 
             private ListProperty<T> list;
 
@@ -197,7 +365,7 @@ public class CustomEditors {
 
     public static <T> PropertyEditor<ObservableList<T>> createClearableCheckComboBoxEditor(ClearableCheckComboBoxItem<T> comboBoxItem) {
 
-        return new AbstractPropertyEditor<ObservableList<T>, ClearableCheckComboBox<T>>(comboBoxItem, comboBoxItem.getCheckComboBox()) {
+        return new AbstractPropertyEditor<>(comboBoxItem, comboBoxItem.getCheckComboBox()) {
 
             private ListProperty<T> list;
 
@@ -230,7 +398,7 @@ public class CustomEditors {
 
     public static <T> PropertyEditor<ObservableSet<T>> createSelectableGridViewEditor(SelectableGridViewItem<T> selectableGridViewItem) {
 
-        return new AbstractPropertyEditor<ObservableSet<T>, SelectableGridView<T>>(selectableGridViewItem, selectableGridViewItem
+        return new AbstractPropertyEditor<>(selectableGridViewItem, selectableGridViewItem
                 .getSelectableGridView()) {
 
             private SetProperty<T> list = new SimpleSetProperty<>();
@@ -255,7 +423,7 @@ public class CustomEditors {
 
     public static <T> PropertyEditor<T> createHBox(HBoxItem<T> hBoxItem) {
 
-        return new AbstractPropertyEditor<T, HBox>(hBoxItem, hBoxItem.gethBox()) {
+        return new AbstractPropertyEditor<>(hBoxItem, hBoxItem.gethBox()) {
 
             @Override
             protected ObservableValue<T> getObservableValue() {
@@ -270,7 +438,7 @@ public class CustomEditors {
 
     public static PropertyEditor<String> createButton(ButtonItem buttonItem) {
 
-        return new AbstractPropertyEditor<String, Button>(buttonItem, buttonItem.getButton()) {
+        return new AbstractPropertyEditor<>(buttonItem, buttonItem.getButton()) {
 
             @Override
             protected ObservableValue<String> getObservableValue() {
@@ -285,7 +453,7 @@ public class CustomEditors {
 
     public static PropertyEditor<String> createPropertySheet(PropertySheetItem propertySheetItem) {
 
-        return new AbstractPropertyEditor<String, PropertySheet>(propertySheetItem, propertySheetItem.getPropertySheet()) {
+        return new AbstractPropertyEditor<>(propertySheetItem, propertySheetItem.getPropertySheet()) {
 
             @Override
             protected ObservableValue<String> getObservableValue() {
@@ -296,5 +464,13 @@ public class CustomEditors {
             public void setValue(String value) {
             }
         };
+    }
+
+    private static void enableAutoSelectAll(final TextInputControl control) {
+        control.focusedProperty().addListener((ObservableValue<? extends Boolean> o, Boolean oldValue, Boolean newValue) -> {
+            if (Boolean.TRUE.equals(newValue)) {
+                Platform.runLater(control::selectAll);
+            }
+        });
     }
 }

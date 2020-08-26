@@ -1,5 +1,7 @@
 package com.osallek.eu4saveeditor.controller.propertyeditor.item;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -24,7 +26,7 @@ public class CheckComboBoxItem<U> implements CustomItem<U> {
 
     private final CheckComboBox<U> checkComboBox;
 
-    private final boolean editable;
+    private final BooleanProperty editable;
 
     private EventHandler<ActionEvent> onAction;
 
@@ -33,10 +35,10 @@ public class CheckComboBoxItem<U> implements CustomItem<U> {
     private Callback<ListView<U>, ListCell<U>> cellFactory;
 
     public CheckComboBoxItem(String category, String name, ObservableList<U> values, ObservableList<U> selectedValues, CheckComboBox<U> checkComboBox) {
-        this(category, name, values, selectedValues, checkComboBox, true);
+        this(category, name, values, selectedValues, checkComboBox, new SimpleBooleanProperty(true));
     }
 
-    public CheckComboBoxItem(String category, String name, ObservableList<U> values, ObservableList<U> selectedValues, CheckComboBox<U> checkComboBox, boolean editable) {
+    public CheckComboBoxItem(String category, String name, ObservableList<U> values, ObservableList<U> selectedValues, CheckComboBox<U> checkComboBox, BooleanProperty editable) {
         this.category = category;
         this.name = name;
         this.values = values;
@@ -86,7 +88,7 @@ public class CheckComboBoxItem<U> implements CustomItem<U> {
     }
 
     @Override
-    public boolean isEditable() {
+    public BooleanProperty isEditable() {
         return this.editable;
     }
 

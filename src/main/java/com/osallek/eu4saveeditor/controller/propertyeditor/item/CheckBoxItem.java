@@ -1,6 +1,8 @@
 package com.osallek.eu4saveeditor.controller.propertyeditor.item;
 
 import com.osallek.eu4saveeditor.i18n.SheetCategory;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
@@ -16,7 +18,7 @@ public class CheckBoxItem implements CustomItem<Void> {
 
     private boolean value;
 
-    private boolean editable;
+    private BooleanProperty editable;
 
     public CheckBoxItem(SheetCategory category, String name, boolean value) {
         this(category.getForDefaultLocale(), name, value);
@@ -31,14 +33,14 @@ public class CheckBoxItem implements CustomItem<Void> {
     }
 
     public CheckBoxItem(String category, String name, boolean value, String description) {
-        this(category, name, value, description, true);
+        this(category, name, value, description, new SimpleBooleanProperty(true));
     }
 
-    public CheckBoxItem(SheetCategory category, String name, boolean value, String description, boolean editable) {
+    public CheckBoxItem(SheetCategory category, String name, boolean value, String description, BooleanProperty editable) {
         this(category.getForDefaultLocale(), name, value, description, editable);
     }
 
-    public CheckBoxItem(String category, String name, boolean value, String description, boolean editable) {
+    public CheckBoxItem(String category, String name, boolean value, String description, BooleanProperty editable) {
         this.category = category;
         this.name = name;
         this.description = description;
@@ -87,12 +89,12 @@ public class CheckBoxItem implements CustomItem<Void> {
     }
 
     @Override
-    public boolean isEditable() {
+    public BooleanProperty isEditable() {
         return this.editable;
     }
 
     public void setEditable(boolean editable) {
-        this.editable = editable;
+        this.editable.set(editable);
     }
 
     public boolean isSelected() {

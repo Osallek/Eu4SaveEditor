@@ -1,6 +1,8 @@
 package com.osallek.eu4saveeditor.controller.propertyeditor.item;
 
 import com.osallek.eu4saveeditor.i18n.SheetCategory;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -89,8 +91,8 @@ public class ButtonItem implements CustomItem<String> {
     }
 
     @Override
-    public boolean isEditable() {
-        return true;
+    public BooleanProperty isEditable() {
+        return new SimpleBooleanProperty(true);
     }
 
     @Override

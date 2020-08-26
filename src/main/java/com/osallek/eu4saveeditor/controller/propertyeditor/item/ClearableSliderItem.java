@@ -2,6 +2,8 @@ package com.osallek.eu4saveeditor.controller.propertyeditor.item;
 
 import com.osallek.eu4saveeditor.controller.control.ClearableSlider;
 import com.osallek.eu4saveeditor.i18n.SheetCategory;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
@@ -16,7 +18,7 @@ public class ClearableSliderItem implements CustomItem<Integer> {
 
     private final ClearableSlider slider;
 
-    private boolean editable;
+    private final BooleanProperty editable;
 
     public ClearableSliderItem(SheetCategory category, String name, double min, double max) {
         this(category, name, min, max, null, null);
@@ -27,18 +29,18 @@ public class ClearableSliderItem implements CustomItem<Integer> {
     }
 
     public ClearableSliderItem(String category, String name, double min, double max, Double value, DoubleSupplier supplier) {
-        this(category, name, new ClearableSlider(min, max, value, supplier), true);
+        this(category, name, new ClearableSlider(min, max, value, supplier), new SimpleBooleanProperty(true));
     }
 
     public ClearableSliderItem(SheetCategory category, String name, ClearableSlider slider) {
-        this(category, name, slider, true);
+        this(category, name, slider, new SimpleBooleanProperty(true));
     }
 
-    public ClearableSliderItem(SheetCategory category, String name, ClearableSlider slider, boolean editable) {
+    public ClearableSliderItem(SheetCategory category, String name, ClearableSlider slider, BooleanProperty editable) {
         this(category.getForDefaultLocale(), name, slider, editable);
     }
 
-    public ClearableSliderItem(String category, String name, ClearableSlider slider, boolean editable) {
+    public ClearableSliderItem(String category, String name, ClearableSlider slider, BooleanProperty editable) {
         this.category = category;
         this.name = name;
         this.slider = slider;
@@ -86,12 +88,12 @@ public class ClearableSliderItem implements CustomItem<Integer> {
     }
 
     @Override
-    public boolean isEditable() {
+    public BooleanProperty isEditable() {
         return this.editable;
     }
 
     public void setEditable(boolean editable) {
-        this.editable = editable;
+        this.editable.set(editable);
     }
 
     public ClearableSlider getSlider() {

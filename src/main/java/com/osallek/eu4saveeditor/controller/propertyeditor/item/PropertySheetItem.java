@@ -1,22 +1,23 @@
 package com.osallek.eu4saveeditor.controller.propertyeditor.item;
 
+import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
 import com.osallek.eu4saveeditor.i18n.SheetCategory;
 import javafx.beans.value.ObservableValue;
 import org.controlsfx.control.PropertySheet;
 
 import java.util.Optional;
 
-public class PropertySheetItem implements PropertySheet.Item {
+public class PropertySheetItem implements CustomPropertySheet.Item {
 
     private final String category;
 
-    private final PropertySheet propertySheet;
+    private final CustomPropertySheet propertySheet;
 
-    public PropertySheetItem(SheetCategory category, PropertySheet propertySheet) {
+    public PropertySheetItem(SheetCategory category, CustomPropertySheet propertySheet) {
         this(category.getForDefaultLocale(), propertySheet);
     }
 
-    public PropertySheetItem(String category, PropertySheet propertySheet) {
+    public PropertySheetItem(String category, CustomPropertySheet propertySheet) {
         this.category = category;
         this.propertySheet = propertySheet;
     }
@@ -55,7 +56,7 @@ public class PropertySheetItem implements PropertySheet.Item {
         return Optional.empty();
     }
 
-    public PropertySheet getPropertySheet() {
+    public CustomPropertySheet getPropertySheet() {
         return propertySheet;
     }
 }
