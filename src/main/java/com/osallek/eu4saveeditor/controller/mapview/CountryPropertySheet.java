@@ -5,18 +5,23 @@ import com.osallek.eu4parser.model.game.Culture;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.SaveReligion;
 import com.osallek.eu4parser.model.save.country.Country;
-import com.osallek.eu4saveeditor.controller.control.ClearableSpinnerInt;
+import com.osallek.eu4saveeditor.controller.control.ClearableComboBox;
+import com.osallek.eu4saveeditor.controller.control.RequiredComboBox;
+import com.osallek.eu4saveeditor.controller.converter.PairCellFactory;
+import com.osallek.eu4saveeditor.controller.converter.PairConverter;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheetSkin;
 import com.osallek.eu4saveeditor.controller.propertyeditor.CustomPropertyEditorFactory;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.CheckBoxItem;
-import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSpinnerItem;
+import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableComboBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableTextItem;
 import com.osallek.eu4saveeditor.controller.validator.CustomGraphicValidationDecoration;
 import com.osallek.eu4saveeditor.i18n.SheetCategory;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.layout.VBox;
+import org.apache.commons.lang3.tuple.Pair;
 import org.controlsfx.validation.ValidationSupport;
 import org.controlsfx.validation.Validator;
 import org.controlsfx.validation.decoration.CompoundValidationDecoration;
@@ -37,14 +42,15 @@ public class CountryPropertySheet extends VBox {
 
     private final ClearableTextItem nameField;
 
-    private CheckBoxItem wasPlayerField;
+    private final CheckBoxItem wasPlayerField;
 
-    private final ClearableSpinnerItem<Integer> governmentRankField;
+    //    private final ClearableSpinnerItem<Integer> governmentRankField;
 
-    private CustomPropertySheetSkin propertySheetSkin;
+    private final ClearableComboBoxItem<Pair<String, String>> governmentRankField;
 
-    public CountryPropertySheet(Save save, ObservableList<Country> playableCountries, ObservableList<Culture> cultures,
-                                ObservableList<SaveReligion> religions) {
+    private final CustomPropertySheetSkin propertySheetSkin;
+
+    public CountryPropertySheet(Save save, ObservableList<Country> playableCountries, ObservableList<Culture> cultures, ObservableList<SaveReligion> religions) {
         this.propertySheet = new CustomPropertySheet();
         this.propertySheet.setPropertyEditorFactory(new CustomPropertyEditorFactory());
         this.propertySheet.setMode(CustomPropertySheet.Mode.CATEGORY);
@@ -63,10 +69,13 @@ public class CountryPropertySheet extends VBox {
 
         this.wasPlayerField = new CheckBoxItem(SheetCategory.GENERAL, save.getGame().getLocalisationClean("WAS_PLAYER"), false);
 
-        this.governmentRankField = new ClearableSpinnerItem<>(SheetCategory.GENERAL, save.getGame().getLocalisationClean("GOV_RANK"),
-                                                              new ClearableSpinnerInt(1, save.getGame().getMaxGovRank(), 1));
-
         //LEDGER_GOVERNMENT_NAME
+        this.governmentRankField = new ClearableComboBoxItem<>(SheetCategory.COUNTRY_GOVERNMENT,
+                                                               save.getGame().getLocalisation("GOV_RANK"),
+                                                               FXCollections.observableArrayList(),
+                                                               new ClearableComboBox<>(new RequiredComboBox<>()));
+        this.governmentRankField.setConverter(new PairConverter());
+        this.governmentRankField.setCellFactory(new PairCellFactory());
 
         this.validationSupport = new ValidationSupport();
         this.validationSupport.registerValidator(this.nameField.getTextField(), Validator.createEmptyValidator("Text is required"));
@@ -99,8 +108,9 @@ public class CountryPropertySheet extends VBox {
                 this.wasPlayerField.setValue(Boolean.TRUE.equals(this.country.wasPlayer()));
                 items.add(this.wasPlayerField);
 
-                this.governmentRankField.setValue(this.country.getGovernmentRank());
-                this.governmentRankField.setSupplier(this.country::getGovernmentRank);
+                this.governmentRankField.setValues(FXCollections.observableArrayList(this.country.getGovernmentName().getRanks().values()));
+                this.governmentRankField.setValue(this.country.getGovernmentName().getRank(this.country.getGovernmentRank()));
+                this.governmentRankField.setSupplier(() -> this.country.getGovernmentName().getRank(this.country.getGovernmentRank()));
                 items.add(this.governmentRankField);
 
                 this.propertySheet.getItems().setAll(items);
@@ -124,6 +134,10 @@ public class CountryPropertySheet extends VBox {
 
         if (!Objects.equals(this.country.wasPlayer(), this.wasPlayerField.isSelected())) {
             this.country.setWasPlayer(this.wasPlayerField.isSelected());
+        }
+
+        if (!Objects.equals(this.country.getGovernmentName().getRank(this.country.getGovernmentRank()), this.governmentRankField.getSelectedValue())) {
+            this.country.setGovernmentRank(this.governmentRankField.getSelectedValue().getKey());
         }
 
         update(this.country, true);

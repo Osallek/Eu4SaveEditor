@@ -13,6 +13,7 @@
     <java.version>11</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
+    <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
     <main.class>com.osallek.eu4saveeditor.Main</main.class>
     <eu4-parser.version>1.0.0</eu4-parser.version>
     <controlsfx.version>11.0.2</controlsfx.version>
@@ -67,6 +68,7 @@
       <plugins>
         <plugin>
           <artifactId>maven-assembly-plugin</artifactId>
+          <version>${maven-assembly-plugin.version}</version>
           <executions>
             <execution>
               <phase>package</phase>

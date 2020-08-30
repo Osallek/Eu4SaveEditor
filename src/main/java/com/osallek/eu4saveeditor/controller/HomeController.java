@@ -147,8 +147,7 @@ public class HomeController implements Initializable {
             Save save;
 
             try {
-                save = Eu4Parser.loadSave(this.gameDirectory.getValue().getAbsolutePath(), this.saveFile.getValue()
-                                                                                                        .getAbsolutePath());
+                save = Eu4Parser.loadSave(this.gameDirectory.getValue().getAbsolutePath(), this.saveFile.getValue().getAbsolutePath());
             } catch (Exception e) {
                 Main.LOGGER.log(Level.SEVERE, "An error occurred while extracting the save: " + e.getMessage(), e);
                 Platform.runLater(() -> {

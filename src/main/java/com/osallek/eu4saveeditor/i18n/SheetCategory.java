@@ -18,7 +18,8 @@ public enum SheetCategory {
     SAVE_INSTITUTIONS("Institutions", "Institutions", "Institutionen", "Instituciones"),
     SAVE_GOODS("Trade Goods", "Biens commerciaux", "Handelsgüter", "Bienes Comerciales"),
     SAVE_HRE("Holy Roman Empire", "Saint Empire romain germanique", "Heilige Römische Reich", "Sacro Imperio Romano"),
-    SAVE_CELESTIAL_EMPIRE("Empire of China", "Empire de Chine", "Das chinesische Reich", "Emperador de China");
+    SAVE_CELESTIAL_EMPIRE("Empire of China", "Empire de Chine", "Das chinesische Reich", "Emperador de China"),
+    COUNTRY_GOVERNMENT("Government", "Gouvernement", "Regierung", "Gobierno");
 
     final String english;
 

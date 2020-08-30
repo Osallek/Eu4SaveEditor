@@ -113,11 +113,8 @@ public class NumericField extends TextField {
             if (d.endsWith("f") || d.endsWith("d") || d.endsWith("F") || d.endsWith("D")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
                 throw new NumberFormatException("There should be no alpha symbols"); //$NON-NLS-1$
             }
-            return new Double(d);
+            return Double.valueOf(d);
         }
-
-        ;
-
     }
 
 
@@ -141,9 +138,8 @@ public class NumericField extends TextField {
                 return 0L;
             }
             String d = s.trim();
-            return new Long(d);
+            return Long.valueOf(d);
         }
-
     }
 
 

@@ -25,7 +25,7 @@ public class ClearableComboBoxItem<U> implements CustomItem<U> {
 
     private final String description;
 
-    private final ObservableList<U> values;
+    private ObservableList<U> values;
 
     private U value;
 
@@ -118,6 +118,10 @@ public class ClearableComboBoxItem<U> implements CustomItem<U> {
     @Override
     public BooleanProperty isEditable() {
         return this.editable;
+    }
+
+    public void setValues(ObservableList<U> values) {
+        this.values = values;
     }
 
     public void setEditable(boolean editable) {
