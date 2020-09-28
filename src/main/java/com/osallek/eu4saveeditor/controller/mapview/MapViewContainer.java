@@ -16,7 +16,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.VBox;
-import org.controlsfx.control.PropertySheet;
 import org.controlsfx.control.SegmentedButton;
 
 import java.util.Collections;
@@ -80,7 +79,7 @@ public class MapViewContainer {
         this.cultures = cultures;
         this.religions = religions;
         this.tradeGoods = tradeGoods;
-        this.saveSheet = new SavePropertySheet(this.save, this.playableCountries, this.countriesAlive, this.cities);
+        this.saveSheet = new SavePropertySheet(this.save, this.countriesAlive, this.cities);
         this.mapViews = new EnumMap<>(MapViewType.class);
 
         this.titleLabel = new Label();

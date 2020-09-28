@@ -1,6 +1,5 @@
 package com.osallek.eu4saveeditor.controller.control;
 
-import com.osallek.eu4saveeditor.Main;
 import com.osallek.eu4saveeditor.imagereader.ImageReader;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Pos;
@@ -10,14 +9,17 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.stage.PopupWindow;
 import org.controlsfx.control.GridCell;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.function.Function;
-import java.util.logging.Level;
 
 public class SelectableGridCell<T> extends GridCell<T> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SelectableGridCell.class);
 
     private final ColorAdjust notSelectedEffect;
 
@@ -108,7 +110,7 @@ public class SelectableGridCell<T> extends GridCell<T> {
                         }
                     }
                 } catch (IOException e) {
-                    Main.LOGGER.log(Level.SEVERE, e.getMessage(), e);
+                    LOGGER.error(e.getMessage(), e);
                 }
             }
         }

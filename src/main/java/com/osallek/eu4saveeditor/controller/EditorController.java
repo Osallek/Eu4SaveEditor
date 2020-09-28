@@ -8,7 +8,6 @@ import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.SaveReligion;
 import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
-import com.osallek.eu4saveeditor.Main;
 import com.osallek.eu4saveeditor.common.Constants;
 import com.osallek.eu4saveeditor.controller.mapview.DrawableProvince;
 import com.osallek.eu4saveeditor.controller.mapview.MapViewContainer;
@@ -40,6 +39,8 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -51,9 +52,10 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
 
 public class EditorController implements Initializable {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EditorController.class);
 
     public static Country dummyCountry;
 
@@ -188,7 +190,7 @@ public class EditorController implements Initializable {
                     Eu4Parser.writeSave(this.save, file.toString());
                 }
             } catch (IOException e) {
-                Main.LOGGER.log(Level.SEVERE, String.format("Can't write save %s ! ", e.getMessage()), e);
+                LOGGER.error("Can't write save {} ! ", e.getMessage(), e);
                 this.title.setText("Can't write save ! " + e.getLocalizedMessage());
                 this.title.setFill(Paint.valueOf(Color.RED.toString()));
             }
@@ -202,7 +204,7 @@ public class EditorController implements Initializable {
                 this.save.getName().substring(0, extIndex) + "_edit" + this.save.getName().substring(extIndex));
 
         try {
-            this.dummyCountry = this.save.getCountry(Eu4Utils.DEFAULT_TAG);
+            EditorController.dummyCountry = this.save.getCountry(Eu4Utils.DEFAULT_TAG);
             BufferedImage provinceImage = ImageIO.read(this.save.getGame().getProvincesImage());
             setTitle();
 
@@ -264,8 +266,7 @@ public class EditorController implements Initializable {
             this.mapViewContainer.selectMapView(MapViewType.COUNTRIES_MAP_VIEW);
             this.mapViewContainer.draw();
         } catch (IOException e) {
-            Main.LOGGER.log(Level.SEVERE, String.format("Can't load terrain image ! Make sure your game files are not corrupted %s!",
-                                                        e.getMessage()), e);
+            LOGGER.error("Can't load terrain image ! Make sure your game files are not corrupted {} !", e.getMessage(), e);
             this.title.setText("Can't load terrain image ! Make sure your game files are not corrupted !");
             this.title.setFill(Paint.valueOf(Color.RED.toString()));
         }

@@ -57,11 +57,12 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
-import org.controlsfx.control.PropertySheet;
 import org.controlsfx.control.SearchableComboBox;
 import org.controlsfx.validation.ValidationSupport;
 import org.controlsfx.validation.decoration.CompoundValidationDecoration;
 import org.controlsfx.validation.decoration.StyleClassValidationDecoration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -80,7 +81,9 @@ import java.util.stream.Stream;
 
 public class SavePropertySheet extends VBox {
 
-    private Save save;
+    private static final Logger LOGGER = LoggerFactory.getLogger(SavePropertySheet.class);
+
+    private final Save save;
 
     private final CustomPropertySheet propertySheet;
 
@@ -168,16 +171,15 @@ public class SavePropertySheet extends VBox {
 
     private final List<ReligionPropertySheet> religionPropertySheets;
 
-    private ObservableList<Event> firedEvents;
+    private final ObservableList<Event> firedEvents;
 
-    private ObservableList<Event> notFiredEvents;
+    private final ObservableList<Event> notFiredEvents;
 
     private CustomPropertySheetSkin religionPropertySheetSkin;
 
-    private CustomPropertySheetSkin propertySheetSkin;
+    private final CustomPropertySheetSkin propertySheetSkin;
 
-    public SavePropertySheet(Save save, ObservableList<Country> playableCountries, ObservableList<Country> countriesAlive,
-                             ObservableList<SaveProvince> cities) {
+    public SavePropertySheet(Save save, ObservableList<Country> countriesAlive, ObservableList<SaveProvince> cities) {
         this.save = save;
         this.propertySheet = new CustomPropertySheet();
         this.propertySheet.setPropertyEditorFactory(new CustomPropertyEditorFactory());
@@ -435,7 +437,7 @@ public class SavePropertySheet extends VBox {
                 HBox.setHgrow(imageView, Priority.ALWAYS);
                 hBox.getChildren().add(imageView);
             } catch (IOException e) {
-                Main.LOGGER.log(Level.SEVERE, e.getMessage(), e);
+                LOGGER.error(e.getMessage(), e);
             }
 
             hBox.getChildren().add(modifsText);

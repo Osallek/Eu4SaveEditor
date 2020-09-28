@@ -23,6 +23,8 @@ import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URL;
@@ -30,6 +32,8 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 
 public class HomeController implements Initializable {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(HomeController.class);
 
     private final FXMLLoader editorLoader = new FXMLLoader(getClass().getResource(Constants.TEMPLATE_EDITOR));
 
@@ -149,7 +153,7 @@ public class HomeController implements Initializable {
             try {
                 save = Eu4Parser.loadSave(this.gameDirectory.getValue().getAbsolutePath(), this.saveFile.getValue().getAbsolutePath());
             } catch (Exception e) {
-                Main.LOGGER.log(Level.SEVERE, "An error occurred while extracting the save: " + e.getMessage(), e);
+                LOGGER.error("An error occurred while extracting the save: {}", e.getMessage(), e);
                 Platform.runLater(() -> {
                     this.infoText.setFill(Paint.valueOf(Color.RED.toString()));
                     this.infoText.setText("An error occurred while extracting the save: " + e.getMessage());
@@ -166,7 +170,7 @@ public class HomeController implements Initializable {
                     this.startExtractButton.getScene().setRoot(editorNode);
                     ((EditorController) this.editorLoader.getController()).maximize();
                 } catch (IOException e) {
-                    Main.LOGGER.log(Level.SEVERE, "An error occurred while extracting the save: " + e.getMessage(), e);
+                    LOGGER.error("An error occurred while extracting the save: {}", e.getMessage(), e);
                     this.infoText.setFill(Paint.valueOf(Color.RED.toString()));
                     this.infoText.setText("An error occurred while extracting the save: " + e.getMessage());
                     this.canOpenGameDirectoryChoose = true;
