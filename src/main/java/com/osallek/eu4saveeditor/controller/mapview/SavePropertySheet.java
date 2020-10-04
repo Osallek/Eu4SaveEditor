@@ -12,7 +12,6 @@ import com.osallek.eu4parser.model.save.empire.HreReligionStatus;
 import com.osallek.eu4parser.model.save.gameplayoptions.CustomNationDifficulty;
 import com.osallek.eu4parser.model.save.gameplayoptions.Difficulty;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
-import com.osallek.eu4saveeditor.Main;
 import com.osallek.eu4saveeditor.controller.control.ClearableComboBox;
 import com.osallek.eu4saveeditor.controller.control.ListSelectionViewCountry;
 import com.osallek.eu4saveeditor.controller.control.ListSelectionViewEvent;
@@ -75,7 +74,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -429,9 +427,7 @@ public class SavePropertySheet extends VBox {
             hBox.getChildren().add(priceText);
 
             try {
-                ImageView imageView = new ImageView(
-                        SwingFXUtils.toFXImage(ImageReader.convertFileToImage(this.save.getGame().getGoldImage()),
-                                               null));
+                ImageView imageView = new ImageView(SwingFXUtils.toFXImage(ImageReader.convertFileToImage(this.save.getGame().getGoldImage()), null));
                 imageView.setFitWidth(17);
                 imageView.setFitHeight(17);
                 HBox.setHgrow(imageView, Priority.ALWAYS);
@@ -451,10 +447,8 @@ public class SavePropertySheet extends VBox {
             this.hreEmperor = new ClearableComboBoxItem<>(SheetCategory.SAVE_HRE,
                                                           save.getGame().getLocalisation("HINT_EMPEROR_TITLE"),
                                                           new FilteredList<>(countriesAlive,
-                                                                             country ->
-                                                                                     country.getCapital().getContinent()
-                                                                                     == this.save.getHre()
-                                                                                                 .getContinent()),
+                                                                             country -> country.getCapital().getContinent()
+                                                                                               .equals(this.save.getHre().getContinent())),
                                                           this.save.getHre().getEmperor(),
                                                           new ClearableComboBox<>(new SearchableComboBox<>(),
                                                                                   () -> this.save.getHre()
@@ -858,8 +852,7 @@ public class SavePropertySheet extends VBox {
         this.goodsChangePrices.clear();
         this.save.getChangePrices()
                  .getGoods()
-                 .forEach((name, changePriceGood) -> this.goodsChangePrices.put(name, new ArrayList<>(
-                         changePriceGood.getChangePrices())));
+                 .forEach((name, changePriceGood) -> this.goodsChangePrices.put(name, new ArrayList<>(changePriceGood.getChangePrices())));
 
         //HRE
         if (!this.save.getHre().dismantled()) {

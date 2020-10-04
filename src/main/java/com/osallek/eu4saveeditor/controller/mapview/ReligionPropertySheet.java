@@ -24,7 +24,6 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.scene.layout.VBox;
-import org.controlsfx.control.PropertySheet;
 import org.controlsfx.control.SearchableComboBox;
 import org.controlsfx.validation.ValidationSupport;
 import org.controlsfx.validation.decoration.CompoundValidationDecoration;
@@ -99,7 +98,8 @@ public class ReligionPropertySheet extends VBox {
                                                                                            .equals(religion.getReligionGroup()))
                                                                 .collect(Collectors.toList()));
 
-        FilteredList<Country> possibleDefenders = countries.filtered(country -> country.getOverlord() == null && !EditorController.dummyCountry.equals(country));
+        FilteredList<Country> possibleDefenders = countries.filtered(
+                country -> country.getOverlord() == null && !EditorController.dummyCountry.equals(country));
         if (this.religion.hasDefenderOfFaith() && !possibleDefenders.isEmpty()) {
             if (!countries.contains(EditorController.dummyCountry)) {
                 countries.add(0, EditorController.dummyCountry);
@@ -121,7 +121,7 @@ public class ReligionPropertySheet extends VBox {
 
         if (this.religion.hasPapacy() && Boolean.TRUE.equals(this.religion.getPapacy().getPapacyActive())) {
             FilteredList<Country> possibleControllers = countries.filtered(country -> country.getCapital() != null
-                                                                                      && country.getCapital().getContinent() == 0
+                                                                                      && country.getCapital().getContinent() != null
                                                                                       && !EditorController.dummyCountry.equals(country));
 
             if (!possibleControllers.isEmpty()) {

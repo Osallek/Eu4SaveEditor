@@ -2,6 +2,7 @@ package com.osallek.eu4saveeditor.controller.mapview;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.eu4parser.model.game.Culture;
+import com.osallek.eu4parser.model.game.FetishistCult;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.SaveReligion;
 import com.osallek.eu4parser.model.save.country.Country;
@@ -26,13 +27,18 @@ import org.controlsfx.validation.ValidationSupport;
 import org.controlsfx.validation.Validator;
 import org.controlsfx.validation.decoration.CompoundValidationDecoration;
 import org.controlsfx.validation.decoration.StyleClassValidationDecoration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class CountryPropertySheet extends VBox {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CountryPropertySheet.class);
 
     private Country country;
 
@@ -50,7 +56,8 @@ public class CountryPropertySheet extends VBox {
 
     private final CustomPropertySheetSkin propertySheetSkin;
 
-    public CountryPropertySheet(Save save, ObservableList<Country> playableCountries, ObservableList<Culture> cultures, ObservableList<SaveReligion> religions) {
+    public CountryPropertySheet(Save save, ObservableList<Country> playableCountries, ObservableList<Culture> cultures,
+                                ObservableList<SaveReligion> religions) {
         this.propertySheet = new CustomPropertySheet();
         this.propertySheet.setPropertyEditorFactory(new CustomPropertyEditorFactory());
         this.propertySheet.setMode(CustomPropertySheet.Mode.CATEGORY);
