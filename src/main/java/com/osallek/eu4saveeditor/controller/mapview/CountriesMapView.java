@@ -9,7 +9,6 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.paint.Color;
-import org.controlsfx.control.PropertySheet;
 
 import java.util.Collections;
 

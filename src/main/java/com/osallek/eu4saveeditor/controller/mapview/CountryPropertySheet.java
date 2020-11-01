@@ -2,7 +2,6 @@ package com.osallek.eu4saveeditor.controller.mapview;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.eu4parser.model.game.Culture;
-import com.osallek.eu4parser.model.game.FetishistCult;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.SaveReligion;
 import com.osallek.eu4parser.model.save.country.Country;
@@ -34,7 +33,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class CountryPropertySheet extends VBox {
 

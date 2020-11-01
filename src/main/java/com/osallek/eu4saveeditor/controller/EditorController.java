@@ -47,8 +47,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -59,7 +58,7 @@ public class EditorController implements Initializable {
 
     public static Country dummyCountry;
 
-    private static final DateFormat PRETTY_DATE_FORMAT = new SimpleDateFormat("dd MMMM yyyy");
+    private static final DateTimeFormatter PRETTY_DATE_FORMAT = DateTimeFormatter.ofPattern("dd MMMM yyyy");
 
     private final FileChooser saveFileChooser = new FileChooser();
 

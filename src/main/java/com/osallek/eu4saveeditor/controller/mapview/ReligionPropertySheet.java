@@ -76,12 +76,10 @@ public class ReligionPropertySheet extends VBox {
 
         this.validationSupport = new ValidationSupport();
         this.validationSupport.setValidationDecorator(
-                new CompoundValidationDecoration(new CustomGraphicValidationDecoration(),
-                                                 new StyleClassValidationDecoration("validation-error", null)));
+                new CompoundValidationDecoration(new CustomGraphicValidationDecoration(), new StyleClassValidationDecoration("validation-error", null)));
 
         if (this.religion.hasDate() && this.religion.getEnable() == null) {
-            this.enableField = new CheckBoxItem(this.religion.getLocalizedName(),
-                                                this.save.getGame().getLocalisation("ENABLE"),
+            this.enableField = new CheckBoxItem(this.religion.getLocalizedName(), this.save.getGame().getLocalisation("ENABLE"),
                                                 this.religion.getEnable() != null);
             items.add(this.enableField);
         }

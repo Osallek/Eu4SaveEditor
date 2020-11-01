@@ -4,7 +4,6 @@ import com.osallek.eu4parser.model.save.province.SaveProvince;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
-import org.controlsfx.control.PropertySheet;
 
 public abstract class AbstractMapView {
 

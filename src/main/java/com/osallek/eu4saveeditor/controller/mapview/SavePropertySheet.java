@@ -66,9 +66,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -396,10 +396,8 @@ public class SavePropertySheet extends VBox {
 
             buttonItem.getButton().setOnAction(event -> {
                 Supplier<ChangePrice> supplier = () -> {
-                    ChangePrice changePrice = new ChangePrice(
-                            good.getName() + "_modifier_" + (this.goodsChangePrices.get(good.getName()).size() + 1),
-                            0,
-                            new Date());
+                    ChangePrice changePrice = new ChangePrice(good.getName() + "_modifier_" + (this.goodsChangePrices.get(good.getName()).size() + 1), 0,
+                                                              LocalDate.now());
                     this.goodsChangePrices.get(good.getName()).add(changePrice);
                     return changePrice;
                 };
@@ -769,9 +767,7 @@ public class SavePropertySheet extends VBox {
                  .stream()
                  .filter(SaveReligion::hasSpecialAttribute)
                  .forEach(religion -> {
-                     ReligionPropertySheet relPropertySheet = new ReligionPropertySheet(this.save,
-                                                                                        religion,
-                                                                                        countriesAlive);
+                     ReligionPropertySheet relPropertySheet = new ReligionPropertySheet(this.save, religion, countriesAlive);
 
                      if (!relPropertySheet.getPropertySheet().getItems().isEmpty()) {
                          this.religionPropertySheets.add(relPropertySheet);

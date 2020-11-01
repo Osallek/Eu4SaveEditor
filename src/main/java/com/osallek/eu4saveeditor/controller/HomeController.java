@@ -2,7 +2,6 @@ package com.osallek.eu4saveeditor.controller;
 
 import com.osallek.eu4parser.Eu4Parser;
 import com.osallek.eu4parser.model.save.Save;
-import com.osallek.eu4saveeditor.Main;
 import com.osallek.eu4saveeditor.common.Config;
 import com.osallek.eu4saveeditor.common.Constants;
 import com.osallek.eu4saveeditor.common.FileProperty;
@@ -29,7 +28,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
 
 public class HomeController implements Initializable {
 

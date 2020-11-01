@@ -10,10 +10,7 @@ import javafx.scene.layout.Priority;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
 
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.function.Supplier;
 
 public class ClearableDatePicker extends HBox {
@@ -21,13 +18,13 @@ public class ClearableDatePicker extends HBox {
     private final DatePicker datePicker;
     private final Button button;
 
-    private final Supplier<Date> clearSupplier;
+    private final Supplier<LocalDate> clearSupplier;
 
-    public ClearableDatePicker(Date date) {
+    public ClearableDatePicker(LocalDate date) {
         this(date, null);
     }
 
-    public ClearableDatePicker(Date date, Supplier<Date> clearSupplier) {
+    public ClearableDatePicker(LocalDate date, Supplier<LocalDate> clearSupplier) {
         this.datePicker = date == null ? new DatePicker() : new DatePicker(dateToLocalDate(date));
         this.datePicker.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(this.datePicker, Priority.ALWAYS);
@@ -48,15 +45,15 @@ public class ClearableDatePicker extends HBox {
         return datePicker;
     }
 
-    public Date getValue() {
-        return Date.from(Instant.from(this.datePicker.getValue().atStartOfDay(ZoneId.systemDefault())));
+    public LocalDate getValue() {
+        return this.datePicker.getValue();
     }
 
-    public void setValue(Date date) {
+    public void setValue(LocalDate date) {
         this.datePicker.setValue(dateToLocalDate(date));
     }
 
-    public void setSupplier(Supplier<Date> clearSupplier) {
+    public void setSupplier(Supplier<LocalDate> clearSupplier) {
         if (clearSupplier != null) {
             this.button.setOnMouseReleased(e -> this.setValue(clearSupplier.get()));
         }
@@ -70,7 +67,7 @@ public class ClearableDatePicker extends HBox {
         this.datePicker.setOnAction(onAction);
     }
 
-    public Supplier<Date> getClearSupplier() {
+    public Supplier<LocalDate> getClearSupplier() {
         return clearSupplier;
     }
 
@@ -78,7 +75,7 @@ public class ClearableDatePicker extends HBox {
         this.setValue(clearSupplier.get());
     }
 
-    private LocalDate dateToLocalDate(Date date) {
-        return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    private LocalDate dateToLocalDate(LocalDate date) {
+        return date;
     }
 }

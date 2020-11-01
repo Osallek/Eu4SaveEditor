@@ -12,10 +12,10 @@ import javafx.collections.FXCollections;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.util.converter.DateStringConverter;
+import javafx.util.converter.LocalDateStringConverter;
 
+import java.time.LocalDate;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 public class TableView2ChangePrice extends TableView<ChangePrice> {
@@ -35,11 +35,9 @@ public class TableView2ChangePrice extends TableView<ChangePrice> {
         value.setOnEditCommit(event -> event.getRowValue().setValue(event.getNewValue()));
         value.setPrefWidth(100);
 
-        TableColumn<ChangePrice, Date> expiryDate = new TableColumn<>(save.getGame()
-                                                                          .getLocalisationCleanNoPunctuation("EXPIRES_ON"));
-        expiryDate.setCellValueFactory(p -> p.getValue() == null ? null :
-                                            new ReadOnlyObjectWrapper<>(p.getValue().getExpiryDate()));
-        expiryDate.setCellFactory(TextFieldTableCell.forTableColumn(new DateStringConverter(ClausewitzUtils.DATE_FORMAT)));
+        TableColumn<ChangePrice, LocalDate> expiryDate = new TableColumn<>(save.getGame().getLocalisationCleanNoPunctuation("EXPIRES_ON"));
+        expiryDate.setCellValueFactory(p -> p.getValue() == null ? null : new ReadOnlyObjectWrapper<>(p.getValue().getExpiryDate()));
+        expiryDate.setCellFactory(TextFieldTableCell.forTableColumn(new LocalDateStringConverter(ClausewitzUtils.DATE_FORMAT, ClausewitzUtils.DATE_FORMAT)));
         expiryDate.setOnEditCommit(event -> event.getRowValue().setExpiryDate(event.getNewValue()));
         expiryDate.setPrefWidth(100);
 

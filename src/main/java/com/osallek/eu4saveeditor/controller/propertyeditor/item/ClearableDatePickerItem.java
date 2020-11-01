@@ -5,7 +5,7 @@ import com.osallek.eu4saveeditor.i18n.SheetCategory;
 import javafx.beans.value.ObservableValue;
 import org.controlsfx.control.PropertySheet;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Optional;
 
 public class ClearableDatePickerItem implements PropertySheet.Item {
@@ -63,7 +63,7 @@ public class ClearableDatePickerItem implements PropertySheet.Item {
 
     @Override
     public void setValue(Object value) {
-        this.datePicker.setValue((Date) value);
+        this.datePicker.setValue((LocalDate) value);
     }
 
     @Override
@@ -84,11 +84,11 @@ public class ClearableDatePickerItem implements PropertySheet.Item {
         return this.datePicker;
     }
 
-    public Date getTrueValue() {
+    public LocalDate getTrueValue() {
         return this.datePicker.getValue();
     }
 
-    public void setValue(Date date) {
+    public void setValue(LocalDate date) {
         this.datePicker.setValue(date);
     }
 }
