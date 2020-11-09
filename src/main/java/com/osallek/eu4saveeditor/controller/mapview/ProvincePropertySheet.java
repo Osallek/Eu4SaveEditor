@@ -411,8 +411,8 @@ public class ProvincePropertySheet extends VBox {
             this.latentTradeGoodField.setEditable(true);
             items.add(this.latentTradeGoodField);
 
-            this.cotField.setValue(this.province.getCenterOfTrade());
-            this.cotField.setSupplier(this.province::getCenterOfTrade);
+            this.cotField.setValue(this.province.getCenterOfTradeLevel());
+            this.cotField.setSupplier(this.province::getCenterOfTradeLevel);
             this.cotField.setEditable(true);
             items.add(this.cotField);
 
@@ -614,7 +614,7 @@ public class ProvincePropertySheet extends VBox {
         }
 
         if (this.cotField.isEditable().getValue()) {
-            if (!Objects.deepEquals(this.province.getCenterOfTrade(), this.cotField.getTrueValue())) {
+            if (!Objects.deepEquals(this.province.getCenterOfTradeLevel(), this.cotField.getTrueValue())) {
                 this.province.setCenterOfTrade(this.cotField.getTrueValue());
             }
         }

@@ -170,15 +170,12 @@ public class ReligionPropertySheet extends VBox {
                                                                  save.getGame()
                                                                      .getLocalisationCleanNoPunctuation("CURIA_TREASURY"),
                                                                  new ClearableSpinnerDouble(0, 100000,
-                                                                                            this.religion.getPapacy()
-                                                                                                         .getCuriaTreasury(),
+                                                                                            this.religion.getPapacy().getCuriaTreasury(),
                                                                                             100,
-                                                                                            () -> this.religion.getPapacy()
-                                                                                                               .getCuriaTreasury()));
+                                                                                            () -> this.religion.getPapacy().getCuriaTreasury()));
             items.add(this.curiaTreasuryField);
 
-            ObservableList<GoldenBull> goldenBulls = FXCollections.observableArrayList(this.save.getGame()
-                                                                                                .getGoldenBulls());
+            ObservableList<GoldenBull> goldenBulls = FXCollections.observableArrayList(this.save.getGame().getGoldenBulls());
             goldenBulls.add(0, new GoldenBull((String) null));
 
             this.goldenBullField = new ClearableComboBoxItem<>(this.religion.getLocalizedName(),
@@ -187,8 +184,7 @@ public class ReligionPropertySheet extends VBox {
                                                                goldenBulls,
                                                                this.religion.getPapacy().getGoldenBull(),
                                                                new ClearableComboBox<>(new SearchableComboBox<>(),
-                                                                                       () -> this.religion.getPapacy()
-                                                                                                          .getGoldenBull()));
+                                                                                       () -> this.religion.getPapacy().getGoldenBull()));
             this.goldenBullField.setConverter(new GoldenBullStringConverter());
             this.goldenBullField.setCellFactory(new GoldenBullStringCellFactory());
             items.add(this.goldenBullField);

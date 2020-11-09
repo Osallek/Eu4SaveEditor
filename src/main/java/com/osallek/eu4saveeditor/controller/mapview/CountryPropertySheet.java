@@ -110,12 +110,12 @@ public class CountryPropertySheet extends VBox {
                 this.nameField.setEditable(this.country.isNameEditable());
                 items.add(this.nameField);
 
-                this.wasPlayerField.setValue(Boolean.TRUE.equals(this.country.wasPlayer()));
+                this.wasPlayerField.setValue(this.country.wasPlayer());
                 items.add(this.wasPlayerField);
 
                 this.governmentRankField.setValues(FXCollections.observableArrayList(this.country.getGovernmentName().getRanks().values()));
-                this.governmentRankField.setValue(this.country.getGovernmentName().getRank(this.country.getGovernmentRank()));
-                this.governmentRankField.setSupplier(() -> this.country.getGovernmentName().getRank(this.country.getGovernmentRank()));
+                this.governmentRankField.setValue(this.country.getGovernmentName().getRank(this.country.getGovernmentLevel()));
+                this.governmentRankField.setSupplier(() -> this.country.getGovernmentName().getRank(this.country.getGovernmentLevel()));
                 items.add(this.governmentRankField);
 
                 this.propertySheet.getItems().setAll(items);
@@ -141,7 +141,7 @@ public class CountryPropertySheet extends VBox {
             this.country.setWasPlayer(this.wasPlayerField.isSelected());
         }
 
-        if (!Objects.equals(this.country.getGovernmentName().getRank(this.country.getGovernmentRank()), this.governmentRankField.getSelectedValue())) {
+        if (!Objects.equals(this.country.getGovernmentName().getRank(this.country.getGovernmentLevel()), this.governmentRankField.getSelectedValue())) {
             this.country.setGovernmentRank(this.governmentRankField.getSelectedValue().getKey());
         }
 
