@@ -1,13 +1,13 @@
 package com.osallek.eu4saveeditor.controller;
 
-import com.osallek.eu4parser.Eu4Parser;
-import com.osallek.eu4parser.model.save.Save;
+import com.osallek.eu4parser.model.game.localisation.Eu4Language;
 import com.osallek.eu4saveeditor.common.Config;
 import com.osallek.eu4saveeditor.common.Constants;
 import com.osallek.eu4saveeditor.common.FileProperty;
+import com.osallek.eu4saveeditor.common.ReadSaveTask;
 import com.osallek.eu4saveeditor.controller.converter.FileStringConverter;
 import com.osallek.eu4saveeditor.i18n.MenusI18n;
-import javafx.application.Platform;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -15,6 +15,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -27,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class HomeController implements Initializable {
@@ -85,6 +87,9 @@ public class HomeController implements Initializable {
 
     @FXML
     private Text infoText;
+
+    @FXML
+    private ProgressBar progressBar;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -178,51 +183,49 @@ public class HomeController implements Initializable {
     }
 
     @FXML
-    private void handleStartExtract(ActionEvent event) {
+    private void handleStartExtract(ActionEvent actionEvent) {
         this.startExtractButton.setDisable(true);
         this.canOpenGameDirectoryChoose = false;
         this.canOpenModDirectoryChoose = false;
         this.canOpenSaveFileChooser = false;
-        this.infoText.setVisible(true);
-        this.infoText.setText(MenusI18n.EXTRACTING.getForDefaultLocale());
         Config.setGameFolder(this.gameDirectory.getValue());
         Config.setSaveFile(this.saveFile.getValue());
 
-        new Thread(() -> {
-            Save save;
+        ReadSaveTask task = new ReadSaveTask(this.gameDirectory, this.modDirectory, this.saveFile, Eu4Language.getByLocale(Locale.getDefault()));
+        task.setOnFailed(event -> {
+            LOGGER.error("An error occurred while extracting the save: {}", task.getException().getMessage(), task.getException());
+            this.infoText.setFill(Paint.valueOf(Color.RED.toString()));
+            this.infoText.textProperty().unbind();
+            this.infoText.setText("An error occurred while extracting the save: " + task.getException().getMessage());
+            this.canOpenGameDirectoryChoose = true;
+            this.canOpenModDirectoryChoose = true;
+            this.canOpenSaveFileChooser = true;
+        });
 
+        task.addEventFilter(WorkerStateEvent.WORKER_STATE_SUCCEEDED, event -> {
             try {
-                save = Eu4Parser.loadSave(this.gameDirectory.getValue().getAbsolutePath(),
-                                          this.modDirectory.getValue().getAbsolutePath(),
-                                          this.saveFile.getValue().getAbsolutePath());
-            } catch (Exception e) {
+                this.progressBar.progressProperty().unbind();
+                this.progressBar.setProgress(1);
+                Parent editorNode = this.editorLoader.load();
+                ((EditorController) this.editorLoader.getController()).load(task.getValue());
+                this.startExtractButton.getScene().setRoot(editorNode);
+                ((EditorController) this.editorLoader.getController()).maximize();
+            } catch (IOException e) {
                 LOGGER.error("An error occurred while extracting the save: {}", e.getMessage(), e);
-                Platform.runLater(() -> {
-                    this.infoText.setFill(Paint.valueOf(Color.RED.toString()));
-                    this.infoText.setText("An error occurred while extracting the save: " + e.getMessage());
-                    this.canOpenGameDirectoryChoose = true;
-                    this.canOpenModDirectoryChoose = true;
-                    this.canOpenSaveFileChooser = true;
-                });
-                return;
+                this.infoText.setFill(Paint.valueOf(Color.RED.toString()));
+                this.infoText.setText("An error occurred while extracting the save: " + e.getMessage());
+                this.canOpenGameDirectoryChoose = true;
+                this.canOpenModDirectoryChoose = true;
+                this.canOpenSaveFileChooser = true;
             }
+        });
 
-            Platform.runLater(() -> {
-                try {
-                    Parent editorNode = this.editorLoader.load();
-                    ((EditorController) this.editorLoader.getController()).load(save);
-                    this.startExtractButton.getScene().setRoot(editorNode);
-                    ((EditorController) this.editorLoader.getController()).maximize();
-                } catch (IOException e) {
-                    LOGGER.error("An error occurred while extracting the save: {}", e.getMessage(), e);
-                    this.infoText.setFill(Paint.valueOf(Color.RED.toString()));
-                    this.infoText.setText("An error occurred while extracting the save: " + e.getMessage());
-                    this.canOpenGameDirectoryChoose = true;
-                    this.canOpenModDirectoryChoose = true;
-                    this.canOpenSaveFileChooser = true;
-                }
-            });
-        }).start();
+        this.infoText.setVisible(true);
+        this.infoText.textProperty().bind(task.titleProperty());
+        this.progressBar.setVisible(true);
+        this.progressBar.progressProperty().bind(task.progressProperty());
+
+        new Thread(task).start();
     }
 
     private void enableStartExtractButton() {
