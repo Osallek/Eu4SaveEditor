@@ -11,6 +11,8 @@ public enum MenusI18n {
     SAVE_AS("Save as...", "Enregistrer sous...", "Speichern unter...", "Guardar como..."),
     SELECT_GAME_FOLDER("EuIV installation folder", "Dossier d'installation de EuIV", "EuIV-Installationsordner", "Carpeta de instalación de EuIV"),
     SELECT_GAME_FOLDER_DESC("EuIV installation folder: ", "Dossier d'installation de EuIV : ", "EuIV-Installationsordner: ", "Carpeta de instalación de EuIV: "),
+    SELECT_MOD_FOLDER("EuIV mods folder", "Dossier des mods de EuIV", "EuIV-Modsordner", "Carpeta de mods de EuIV"),
+    SELECT_MOD_FOLDER_DESC("EuIV mods folder: ", "Dossier des mods de EuIV : ", "EuIV-Modsordner: ", "Carpeta de mods de EuIV: "),
     SELECT_SAVE_FILE("Select a save", "Choisir une sauvegarde", "Wählen Sie eine Sicherung", "Elija una salvaguardia"),
     SELECT_SAVE_FILE_DESC("Select a save file: ", "Choisir une sauvegarde : ", "Wählen Sie eine Sicherung: ", "Elija una salvaguardia: "),
     EU4_EXT_DESC("EuIV save", "Sauvegarde EuIV", "EuIV Sicherung", "EuIV salvaguardia"),

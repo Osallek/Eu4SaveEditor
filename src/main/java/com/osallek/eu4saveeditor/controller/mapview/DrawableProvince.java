@@ -5,7 +5,9 @@ import com.sun.javafx.geom.Rectangle;
 import javafx.geometry.Point2D;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class DrawableProvince {
 
@@ -13,7 +15,7 @@ public class DrawableProvince {
 
     private List<Rectangle> rectangles;
 
-    private List<Point2D> borders;
+    private Set<Point2D> borders;
 
     public DrawableProvince(SaveProvince province) {
         this.province = province;
@@ -29,7 +31,7 @@ public class DrawableProvince {
 
     public void addBorder(int x, int y) {
         if (this.borders == null) {
-            this.borders = new ArrayList<>();
+            this.borders = new HashSet<>();
         }
 
         this.borders.add(new Point2D(x, y));
@@ -40,10 +42,10 @@ public class DrawableProvince {
     }
 
     public List<Rectangle> getRectangles() {
-        return rectangles;
+        return this.rectangles == null ? new ArrayList<>() : this.rectangles;
     }
 
-    public List<Point2D> getBorders() {
-        return borders;
+    public Set<Point2D> getBorders() {
+        return this.borders == null ? new HashSet<>() : this.borders;
     }
 }

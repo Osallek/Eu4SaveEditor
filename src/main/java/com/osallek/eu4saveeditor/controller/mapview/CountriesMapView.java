@@ -75,7 +75,7 @@ public class CountriesMapView extends AbstractMapView {
     public void draw() {
         for (DrawableProvince drawableProvince : this.mapViewContainer.getDrawableProvinces().values()) {
             if (drawableProvince != null) {
-                drawProvince(drawableProvince.getProvince().getId());
+                drawProvince(drawableProvince.getProvince() == null ? null : drawableProvince.getProvince().getId());
             }
         }
     }
@@ -109,13 +109,12 @@ public class CountriesMapView extends AbstractMapView {
     }
 
     @Override
-    public void drawProvince(int provinceId) {
+    public void drawProvince(Integer provinceId) {
         GraphicsContext graphicsContext = this.mapViewContainer.getCanvas().getGraphicsContext2D();
         Color color = getOwnerColor(this.mapViewContainer.getDrawableProvinces().get(provinceId).getProvince());
         graphicsContext.setFill(color);
         this.mapViewContainer.getDrawableProvinces().get(provinceId).getRectangles()
-                             .forEach(rectangle -> graphicsContext.fillRect(rectangle.x, rectangle.y, rectangle
-                                     .width, rectangle.height));
+                             .forEach(rectangle -> graphicsContext.fillRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height));
 
         PixelWriter pixelWriter = graphicsContext.getPixelWriter();
         this.mapViewContainer.getDrawableProvinces().get(provinceId).getBorders()
@@ -189,7 +188,9 @@ public class CountriesMapView extends AbstractMapView {
     }
 
     private Color getOwnerColor(SaveProvince province) {
-        if (province.getOwner() != null) {
+        if (province == null) {
+            return Color.BLACK;
+        } else if (province.getOwner() != null) {
             return countryToMapColor(province.getOwner());
         } else {
             if (province.isOcean() || province.isLake()) {

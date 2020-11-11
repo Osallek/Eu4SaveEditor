@@ -50,6 +50,7 @@ import java.net.URL;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
 public class EditorController implements Initializable {
@@ -121,8 +122,7 @@ public class EditorController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         this.saveFileChooser.setTitle(MenusI18n.SAVE_AS.getForDefaultLocale());
-        this.saveFileChooser.getExtensionFilters()
-                            .add(new FileChooser.ExtensionFilter(MenusI18n.EU4_EXT_DESC.getForDefaultLocale(), "*.eu4"));
+        this.saveFileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(MenusI18n.EU4_EXT_DESC.getForDefaultLocale(), "*.eu4"));
 
         if (Constants.DOCUMENTS_FOLDER.exists()) {
             this.saveFileChooser.setInitialDirectory(Constants.SAVES_FOLDER);
@@ -143,9 +143,11 @@ public class EditorController implements Initializable {
             if (Boolean.FALSE.equals(isNowMoving)) {
                 SaveProvince province = this.provincesMap[(int) this.mouseProvinceImageX][(int) this.mouseProvinceImageY];
 
-                this.tooltip.setText(province.getName() + " (" + province.getId() + ")");
-                this.tooltip.setAnchorX(this.mouseSceneX + 20);
-                this.tooltip.setAnchorY(this.mouseSceneY - 20);
+                if (province != null) {
+                    this.tooltip.setText(province.getName() + " (" + province.getId() + ")");
+                    this.tooltip.setAnchorX(this.mouseSceneX + 20);
+                    this.tooltip.setAnchorY(this.mouseSceneY - 20);
+                }
             }
         });
 
@@ -158,8 +160,12 @@ public class EditorController implements Initializable {
             this.wasDragging = false;
         } else {
             if (MouseButton.PRIMARY.equals(event.getButton())) {
-                this.selectedProvince = this.provincesMap[(int) event.getX()][(int) event.getY()];
-                this.mapViewContainer.onProvinceSelected(this.selectedProvince);
+                SaveProvince province = this.provincesMap[(int) event.getX()][(int) event.getY()];
+
+                if (province != null) {
+                    this.selectedProvince = province;
+                    this.mapViewContainer.onProvinceSelected(this.selectedProvince);
+                }
             }
         }
     }
@@ -235,21 +241,28 @@ public class EditorController implements Initializable {
                 for (int y = 0; y < this.provincesMap[x].length; y++) {
                     SaveProvince province = this.provincesMap[x][y];
                     int startY = y;
-                    while (y < this.provincesMap[x].length && this.provincesMap[x][y].equals(province)) {
+                    while (y < this.provincesMap[x].length && Objects.equals(this.provincesMap[x][y], province)) {
                         y++;
                     }
 
-                    DrawableProvince drawableProvince = this.drawableProvinces.getOrDefault(province.getId(), new DrawableProvince(province));
-                    drawableProvince.addRectangle(x, startY, 1, y - startY);
-                    this.drawableProvinces.put(province.getId(), drawableProvince);
+                    if (province != null) {
+                        DrawableProvince drawableProvince = this.drawableProvinces.getOrDefault(province.getId(), new DrawableProvince(province));
+                        drawableProvince.addRectangle(x, startY, 1, y - startY);
+                        this.drawableProvinces.put(province.getId(), drawableProvince);
+                    } else {
+                        DrawableProvince drawableProvince = this.drawableProvinces.getOrDefault(null, new DrawableProvince(null));
+                        drawableProvince.addRectangle(x, startY, 1, y - startY);
+                        this.drawableProvinces.put(null, drawableProvince);
+                    }
                 }
             }
 
             for (int x = 1; x < this.provincesMap.length; x++) {
                 for (int y = 1; y < this.provincesMap[x].length; y++) {
                     SaveProvince province = this.provincesMap[x][y];
-                    if (!province.equals(this.provincesMap[x - 1][y])
-                        || !province.equals(this.provincesMap[x][y - 1])) {
+
+                    if (province != null
+                        && (!Objects.equals(province, this.provincesMap[x - 1][y]) || !Objects.equals(province, this.provincesMap[x][y - 1]))) {
                         this.drawableProvinces.get(province.getId()).addBorder(x, y);
                     }
                 }

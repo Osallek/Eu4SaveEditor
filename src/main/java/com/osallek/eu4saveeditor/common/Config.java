@@ -20,6 +20,7 @@ public class Config {
 
     private static final String CONFIG_FILE_PATH = "config.txt";
     private static final String GAME_FOLDER_PROP = "game_folder";
+    private static final String MOD_FOLDER_PROP = "mod_folder";
     private static final String SAVE_FOLDER_PROP = "save_folder";
     private static final String SAVE_FILE_PROP = "save_file";
 
@@ -49,6 +50,36 @@ public class Config {
         }
 
         PROPERTIES.setProperty(GAME_FOLDER_PROP, newValue.getAbsolutePath());
+
+        store();
+    }
+
+    public static File getModFolder() {
+        if (!loaded) {
+            load();
+        }
+
+        String modFolderPath = PROPERTIES.getProperty(MOD_FOLDER_PROP);
+
+        if (modFolderPath == null) {
+            return null;
+        }
+
+        File file = new File(modFolderPath);
+
+        if (file.exists() && file.canRead()) {
+            return file;
+        }
+
+        return null;
+    }
+
+    public static void setModFolder(File newValue) {
+        if (!loaded) {
+            load();
+        }
+
+        PROPERTIES.setProperty(MOD_FOLDER_PROP, newValue.getAbsolutePath());
 
         store();
     }
@@ -110,6 +141,9 @@ public class Config {
         if (!file.exists()) {
             if (Constants.DEFAULT_INSTALLATION_FOLDER.exists() && Constants.DEFAULT_INSTALLATION_FOLDER.canRead()) {
                 PROPERTIES.setProperty(GAME_FOLDER_PROP, Constants.DEFAULT_INSTALLATION_FOLDER.getAbsolutePath());
+            }
+            if (Constants.MODS_FOLDER.exists() && Constants.MODS_FOLDER.canRead()) {
+                PROPERTIES.setProperty(MOD_FOLDER_PROP, Constants.MODS_FOLDER.getAbsolutePath());
             }
 
             if (Constants.SAVES_FOLDER.exists() && Constants.SAVES_FOLDER.canRead()) {

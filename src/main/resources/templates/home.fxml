@@ -14,16 +14,20 @@
           <Insets top="-5"/>
         </padding>
         <Text fx:id="selectGameFolderText"/>
+        <Text fx:id="selectModFolderText"/>
         <Text fx:id="selectSaveFileText"/>
       </VBox>
       <VBox spacing="10">
         <TextField fx:id="selectedGameDirectory" prefWidth="550" editable="false">
+        </TextField>
+        <TextField fx:id="selectedModDirectory" prefWidth="550" editable="false">
         </TextField>
         <TextField fx:id="selectedSaveFile" prefWidth="550" editable="false">
         </TextField>
       </VBox>
       <VBox spacing="10">
         <Button fx:id="chooseGameFolderButton" onAction="#handleOpenGameDirectoryChoose" maxWidth="Infinity"/>
+        <Button fx:id="chooseModFolderButton" onAction="#handleOpenModDirectoryChoose" maxWidth="Infinity"/>
         <Button fx:id="chooseSaveFileButton" onAction="#handleOpenSaveFileChoose" maxWidth="Infinity"/>
       </VBox>
     </HBox>
