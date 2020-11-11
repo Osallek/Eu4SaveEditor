@@ -113,7 +113,7 @@ public class CountryPropertySheet extends VBox {
                 this.wasPlayerField.setValue(this.country.wasPlayer());
                 items.add(this.wasPlayerField);
 
-                this.governmentRankField.setValues(FXCollections.observableArrayList(this.country.getGovernmentName().getRanks().values()));
+                this.governmentRankField.getChoices().setAll(this.country.getGovernmentName().getRanks().values());
                 this.governmentRankField.setValue(this.country.getGovernmentName().getRank(this.country.getGovernmentLevel()));
                 this.governmentRankField.setSupplier(() -> this.country.getGovernmentName().getRank(this.country.getGovernmentLevel()));
                 items.add(this.governmentRankField);
