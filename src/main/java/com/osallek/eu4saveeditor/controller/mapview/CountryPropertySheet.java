@@ -2,21 +2,28 @@ package com.osallek.eu4saveeditor.controller.mapview;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.eu4parser.model.game.Culture;
+import com.osallek.eu4parser.model.game.GovernmentReform;
+import com.osallek.eu4parser.model.game.ImperialReform;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.SaveReligion;
 import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4saveeditor.controller.control.ClearableComboBox;
+import com.osallek.eu4saveeditor.controller.control.ListSelectionViewImperialReform;
 import com.osallek.eu4saveeditor.controller.control.RequiredComboBox;
 import com.osallek.eu4saveeditor.controller.converter.PairCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.PairConverter;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheetSkin;
+import com.osallek.eu4saveeditor.controller.pane.GovernmentReformsDialog;
+import com.osallek.eu4saveeditor.controller.pane.ListSelectionViewDialog;
 import com.osallek.eu4saveeditor.controller.propertyeditor.CustomPropertyEditorFactory;
+import com.osallek.eu4saveeditor.controller.propertyeditor.item.ButtonItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.CheckBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableComboBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableTextItem;
 import com.osallek.eu4saveeditor.controller.validator.CustomGraphicValidationDecoration;
 import com.osallek.eu4saveeditor.i18n.SheetCategory;
+import com.sun.javafx.collections.ObservableListWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -33,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class CountryPropertySheet extends VBox {
 
@@ -48,9 +56,11 @@ public class CountryPropertySheet extends VBox {
 
     private final CheckBoxItem wasPlayerField;
 
-    //    private final ClearableSpinnerItem<Integer> governmentRankField;
-
     private final ClearableComboBoxItem<Pair<String, String>> governmentRankField;
+
+    private final ButtonItem governmentReformsButton;
+
+    private final ObservableList<GovernmentReform> governmentReformsField;
 
     private final CustomPropertySheetSkin propertySheetSkin;
 
@@ -81,6 +91,12 @@ public class CountryPropertySheet extends VBox {
                                                                new ClearableComboBox<>(new RequiredComboBox<>()));
         this.governmentRankField.setConverter(new PairConverter());
         this.governmentRankField.setCellFactory(new PairCellFactory());
+
+        this.governmentReformsButton = new ButtonItem(SheetCategory.COUNTRY_GOVERNMENT,
+                                                      null,
+                                                      save.getGame().getLocalisationClean("governmental_reforms"),
+                                                      2);
+        this.governmentReformsField = new ObservableListWrapper<>(new ArrayList<>());
 
         this.validationSupport = new ValidationSupport();
         this.validationSupport.registerValidator(this.nameField.getTextField(), Validator.createEmptyValidator("Text is required"));
@@ -118,6 +134,16 @@ public class CountryPropertySheet extends VBox {
                 this.governmentRankField.setSupplier(() -> this.country.getGovernmentName().getRank(this.country.getGovernmentLevel()));
                 items.add(this.governmentRankField);
 
+                this.governmentReformsField.setAll(this.country.getGovernment().getReforms());
+                this.governmentReformsButton.getButton().setOnAction(event -> {
+                    GovernmentReformsDialog dialog = new GovernmentReformsDialog(this.country, this.governmentReformsField);
+
+                    Optional<List<GovernmentReform>> reforms = dialog.showAndWait();
+
+                    reforms.ifPresent(this.governmentReformsField::setAll);
+                });
+                items.add(this.governmentReformsButton);
+
                 this.propertySheet.getItems().setAll(items);
 
                 if (expandedPaneName != null) {
@@ -143,6 +169,10 @@ public class CountryPropertySheet extends VBox {
 
         if (!Objects.equals(this.country.getGovernmentName().getRank(this.country.getGovernmentLevel()), this.governmentRankField.getSelectedValue())) {
             this.country.setGovernmentRank(this.governmentRankField.getSelectedValue().getKey());
+        }
+
+        if (!Objects.equals(this.country.getGovernment().getReforms(), this.governmentReformsField)) {
+            this.country.getGovernment().setReforms(this.governmentReformsField);
         }
 
         update(this.country, true);

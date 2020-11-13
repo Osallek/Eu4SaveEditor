@@ -5,6 +5,8 @@ import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 
+import java.util.List;
+
 public abstract class AbstractMapView {
 
     protected final MapViewType type;
@@ -44,7 +46,7 @@ public abstract class AbstractMapView {
 
     public abstract void drawProvince(Integer provinceId);
 
-    public abstract CustomPropertySheet[] removeSheets();
+    public abstract List<CustomPropertySheet> removeSheets();
 
     public abstract String updateTitle(SaveProvince selectedProvince);
 

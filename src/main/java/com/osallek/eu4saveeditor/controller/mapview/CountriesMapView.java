@@ -10,7 +10,9 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.paint.Color;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public class CountriesMapView extends AbstractMapView {
 
@@ -122,12 +124,18 @@ public class CountriesMapView extends AbstractMapView {
     }
 
     @Override
-    public CustomPropertySheet[] removeSheets() {
+    public List<CustomPropertySheet> removeSheets() {
+        List<CustomPropertySheet> sheets = new ArrayList<>();
+
         if (this.provinceSheet != null) {
-            return new CustomPropertySheet[] {this.provinceSheet.getPropertySheet()};
+            sheets.add(this.provinceSheet.getPropertySheet());
         }
 
-        return new CustomPropertySheet[] {};
+        if (this.countrySheet != null) {
+            sheets.add(this.countrySheet.getPropertySheet());
+        }
+
+        return sheets;
     }
 
     @Override
