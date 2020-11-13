@@ -87,4 +87,8 @@ public abstract class ClearableSpinner<T> extends HBox {
             getChildren().add(this.button);
         }
     }
+
+    public abstract void setMax(T max);
+
+    public abstract void setMin(T max);
 }

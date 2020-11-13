@@ -54,4 +54,14 @@ public class ClearableSpinnerDouble extends ClearableSpinner<Double> {
     public void setValue(Double value) {
         super.setValue(value == null ? 0 : value);
     }
+
+    @Override
+    public void setMax(Double max) {
+        ((SpinnerValueFactory.DoubleSpinnerValueFactory) this.spinner.getValueFactory()).setMax(max);
+    }
+
+    @Override
+    public void setMin(Double max) {
+        ((SpinnerValueFactory.DoubleSpinnerValueFactory) this.spinner.getValueFactory()).setMax(max);
+    }
 }

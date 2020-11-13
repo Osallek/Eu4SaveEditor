@@ -6,11 +6,14 @@ import com.osallek.eu4saveeditor.common.Constants;
 import com.osallek.eu4saveeditor.controller.control.SelectableGridView;
 import javafx.collections.FXCollections;
 import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TitledPane;
 import javafx.scene.image.Image;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -19,17 +22,21 @@ import java.util.List;
 
 public class GovernmentReformsDialog extends Dialog<List<GovernmentReform>> {
 
+    private final List<GovernmentReform> backUp;
+
     private final List<GovernmentReform> governmentReforms;
 
     private final List<SelectableGridView<GovernmentReform>> selectableGridViews = new ArrayList<>();
 
     public GovernmentReformsDialog(Country country, List<GovernmentReform> governmentReforms) {
         VBox vBox = new VBox(3);
-        vBox.setAlignment(Pos.CENTER_RIGHT);
+        vBox.setAlignment(Pos.TOP_RIGHT);
         vBox.setMaxWidth(Double.MAX_VALUE);
         vBox.setPrefWidth(760);
 
-        this.governmentReforms = new ArrayList<>(governmentReforms);
+        this.backUp = new ArrayList<>(governmentReforms);
+        this.governmentReforms = new ArrayList<>(this.backUp);
+
         country.getGovernment()
                .getAvailableReforms()
                .forEach((s, reforms) -> {
@@ -42,11 +49,32 @@ public class GovernmentReformsDialog extends Dialog<List<GovernmentReform>> {
                    this.selectableGridViews.add(gridView);
                    titledPane.setContent(gridView);
                    vBox.getChildren().add(titledPane);
+                   VBox.setVgrow(gridView, Priority.ALWAYS);
+                   VBox.setVgrow(titledPane, Priority.ALWAYS);
                });
 
+        Pane emptyPane = new Pane();
+        vBox.getChildren().add(emptyPane);
+        VBox.setVgrow(emptyPane, Priority.ALWAYS);
+
+        Button resetButton = new Button(country.getSave().getGame().getLocalisation("PW_RESET"));
+        resetButton.setPrefHeight(20);
+        resetButton.setOnAction(event -> {
+            this.governmentReforms.clear();
+            this.governmentReforms.addAll(this.backUp);
+            this.selectableGridViews.forEach(view -> {
+                List<GovernmentReform> reforms = new ArrayList<>(view.getItems());
+                view.getItems().clear();
+                view.getSelectedItems().clear();
+                view.getItems().addAll(reforms);
+                view.getItems().stream().filter(this.governmentReforms::contains).findFirst().ifPresent(view::select);
+            });
+        });
+        vBox.getChildren().add(resetButton);
 
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setMaxWidth(Double.MAX_VALUE);
+        scrollPane.setFitToHeight(true);
         scrollPane.setContent(vBox);
 
         setTitle(country.getSave().getGame().getLocalisationClean("governmental_reforms"));

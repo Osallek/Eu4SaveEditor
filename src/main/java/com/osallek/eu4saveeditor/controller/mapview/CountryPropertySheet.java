@@ -1,6 +1,7 @@
 package com.osallek.eu4saveeditor.controller.mapview;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
+import com.osallek.eu4parser.model.Power;
 import com.osallek.eu4parser.model.game.Culture;
 import com.osallek.eu4parser.model.game.GovernmentReform;
 import com.osallek.eu4parser.model.game.ImperialReform;
@@ -8,6 +9,7 @@ import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.SaveReligion;
 import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4saveeditor.controller.control.ClearableComboBox;
+import com.osallek.eu4saveeditor.controller.control.ClearableSpinnerInt;
 import com.osallek.eu4saveeditor.controller.control.ListSelectionViewImperialReform;
 import com.osallek.eu4saveeditor.controller.control.RequiredComboBox;
 import com.osallek.eu4saveeditor.controller.converter.PairCellFactory;
@@ -20,6 +22,7 @@ import com.osallek.eu4saveeditor.controller.propertyeditor.CustomPropertyEditorF
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ButtonItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.CheckBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableComboBoxItem;
+import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSpinnerItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableTextItem;
 import com.osallek.eu4saveeditor.controller.validator.CustomGraphicValidationDecoration;
 import com.osallek.eu4saveeditor.i18n.SheetCategory;
@@ -56,6 +59,12 @@ public class CountryPropertySheet extends VBox {
 
     private final CheckBoxItem wasPlayerField;
 
+    private final ClearableSpinnerItem<Integer> admPointField;
+
+    private final ClearableSpinnerItem<Integer> dipPointField;
+
+    private final ClearableSpinnerItem<Integer> milPointField;
+
     private final ClearableComboBoxItem<Pair<String, String>> governmentRankField;
 
     private final ButtonItem governmentReformsButton;
@@ -83,6 +92,18 @@ public class CountryPropertySheet extends VBox {
                       .add(getClass().getClassLoader().getResource("styles/propertySheetsStyle.css").toExternalForm());
 
         this.wasPlayerField = new CheckBoxItem(SheetCategory.GENERAL, save.getGame().getLocalisationClean("WAS_PLAYER"), false);
+
+        this.admPointField = new ClearableSpinnerItem<>(SheetCategory.GENERAL,
+                                                        save.getGame().getLocalisationClean("ADM_POWER"),
+                                                        new ClearableSpinnerInt(0, 999, 1));
+
+        this.dipPointField = new ClearableSpinnerItem<>(SheetCategory.GENERAL,
+                                                        save.getGame().getLocalisationClean("DIP_POWER"),
+                                                        new ClearableSpinnerInt(0, 999, 1));
+
+        this.milPointField = new ClearableSpinnerItem<>(SheetCategory.GENERAL,
+                                                        save.getGame().getLocalisationClean("MIL_POWER"),
+                                                        new ClearableSpinnerInt(0, 999, 1));
 
         //LEDGER_GOVERNMENT_NAME
         this.governmentRankField = new ClearableComboBoxItem<>(SheetCategory.COUNTRY_GOVERNMENT,
@@ -144,6 +165,21 @@ public class CountryPropertySheet extends VBox {
                 });
                 items.add(this.governmentReformsButton);
 
+                this.admPointField.setSupplier(() -> this.country.getPowers().get(Power.ADM));
+                this.admPointField.setMax(Math.max(this.country.getPowers().get(Power.ADM), 999));
+                this.admPointField.setValue(this.country.getPowers().get(Power.ADM));
+                items.add(this.admPointField);
+
+                this.dipPointField.setSupplier(() -> this.country.getPowers().get(Power.DIP));
+                this.dipPointField.setMax(Math.max(this.country.getPowers().get(Power.DIP), 999));
+                this.dipPointField.setValue(this.country.getPowers().get(Power.DIP));
+                items.add(this.dipPointField);
+
+                this.milPointField.setSupplier(() -> this.country.getPowers().get(Power.MIL));
+                this.milPointField.setMax(Math.max(this.country.getPowers().get(Power.MIL), 999));
+                this.milPointField.setValue(this.country.getPowers().get(Power.MIL));
+                items.add(this.milPointField);
+
                 this.propertySheet.getItems().setAll(items);
 
                 if (expandedPaneName != null) {
@@ -173,6 +209,18 @@ public class CountryPropertySheet extends VBox {
 
         if (!Objects.equals(this.country.getGovernment().getReforms(), this.governmentReformsField)) {
             this.country.getGovernment().setReforms(this.governmentReformsField);
+        }
+
+        if (!Objects.equals(this.country.getPowers().get(Power.ADM), this.admPointField.getTrueValue())) {
+            this.country.setPower(Power.ADM, this.admPointField.getTrueValue());
+        }
+
+        if (!Objects.equals(this.country.getPowers().get(Power.DIP), this.dipPointField.getTrueValue())) {
+            this.country.setPower(Power.DIP, this.dipPointField.getTrueValue());
+        }
+
+        if (!Objects.equals(this.country.getPowers().get(Power.MIL), this.milPointField.getTrueValue())) {
+            this.country.setPower(Power.MIL, this.milPointField.getTrueValue());
         }
 
         update(this.country, true);

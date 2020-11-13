@@ -18,24 +18,39 @@ public class SelectableGridView<T> extends GridView<T> {
 
     private boolean anyItemChanged;
 
+    private int size = 48;
+
+
     public SelectableGridView(ObservableList<T> items) {
+        this(items, (Integer) null);
+    }
+
+    public SelectableGridView(ObservableList<T> items, Integer size) {
         super();
-        setCellHeight(48);
-        setCellWidth(48);
+
+        if (size != null) {
+            this.size = size;
+        }
+
+        setCellHeight(this.size);
+        setCellWidth(this.size);
         setHorizontalCellSpacing(3);
         setVerticalCellSpacing(5);
-        itemsProperty().addListener((observable, oldValue, newValue) ->
-                                            setMaxHeight(62 * Math.ceil((double) observable.getValue().size() / 6)));
+        itemsProperty().addListener((observable, oldValue, newValue) -> setMaxHeight(62 * Math.ceil((double) observable.getValue().size() / 6)));
         setItems(items);
     }
 
     public SelectableGridView(ObservableList<T> items, ObservableSet<T> selectedItems) {
-        this(items);
+        this(items, selectedItems, null);
+    }
+
+    public SelectableGridView(ObservableList<T> items, ObservableSet<T> selectedItems, Integer size) {
+        this(items, size);
         this.selection = selectedItems;
     }
 
     public void setCellFactory(Function<T, String> textFunction, Function<T, File> imageFunction) {
-        super.setCellFactory(param -> new SelectableGridCell<>(textFunction, imageFunction));
+        super.setCellFactory(param -> new SelectableGridCell<>(textFunction, imageFunction, this.size));
     }
 
     public void select(T t) {

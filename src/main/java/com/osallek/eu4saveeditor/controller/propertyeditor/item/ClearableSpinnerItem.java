@@ -7,6 +7,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.scene.control.SpinnerValueFactory;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -106,5 +107,13 @@ public class ClearableSpinnerItem<T> implements CustomItem<Integer> {
         if (clearSupplier != null) {
             this.spinner.setSupplier(clearSupplier);
         }
+    }
+
+    public void setMax(T max) {
+        this.spinner.setMax(max);
+    }
+
+    public void setMin(T max) {
+        this.spinner.setMax(max);
     }
 }

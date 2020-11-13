@@ -31,7 +31,10 @@ public class SelectableGridCell<T> extends GridCell<T> {
 
     private Function<T, File> imageFunction;
 
-    public SelectableGridCell(Function<T, String> textFunction, Function<T, File> imageFunction) {
+    private int size;
+
+    public SelectableGridCell(Function<T, String> textFunction, Function<T, File> imageFunction, int size) {
+        this.size = size;
         this.notSelectedEffect = new ColorAdjust();
         this.notSelectedEffect.setSaturation(-1);
 
@@ -87,7 +90,7 @@ public class SelectableGridCell<T> extends GridCell<T> {
             getSelectableGridView().getCells().add(this);
 
             if (this.tooltip != null) {
-                this.tooltip.setText(textFunction.apply(item));
+                this.tooltip.setText(this.textFunction.apply(item));
             }
 
             if (this.imageFunction != null) {
@@ -98,10 +101,10 @@ public class SelectableGridCell<T> extends GridCell<T> {
                         this.imageView.setImage(SwingFXUtils.toFXImage(image, null));
 
                         setGraphic(this.imageView);
-                        setMaxWidth(48);
-                        setMaxHeight(48);
-                        this.imageView.setFitHeight(48);
-                        this.imageView.setFitWidth(48);
+                        setMaxWidth(this.size);
+                        setMaxHeight(this.size);
+                        this.imageView.setFitHeight(this.size);
+                        this.imageView.setFitWidth(this.size);
 
                         if (!selectedProperty().get()) {
                             this.imageView.setEffect(this.notSelectedEffect);

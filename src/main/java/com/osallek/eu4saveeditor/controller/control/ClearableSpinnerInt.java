@@ -2,6 +2,7 @@ package com.osallek.eu4saveeditor.controller.control;
 
 import javafx.scene.Node;
 import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 
@@ -33,5 +34,15 @@ public class ClearableSpinnerInt extends ClearableSpinner<Integer> {
     @Override
     public void setValue(Integer value) {
         super.setValue(value == null ? 0 : value);
+    }
+
+    @Override
+    public void setMax(Integer max) {
+        ((SpinnerValueFactory.IntegerSpinnerValueFactory) this.spinner.getValueFactory()).setMax(max);
+    }
+
+    @Override
+    public void setMin(Integer max) {
+        ((SpinnerValueFactory.IntegerSpinnerValueFactory) this.spinner.getValueFactory()).setMax(max);
     }
 }
