@@ -44,7 +44,7 @@ public class TableView2CountrySubject extends TableView<CountrySubject> {
                                                                                     .getGame()
                                                                                     .getLocalisationCleanNoPunctuation("FE_STARTING_DATE"));
         startDate.setCellValueFactory(p -> p.getValue() == null ? null : new ReadOnlyObjectWrapper<>(p.getValue().getStartDate()));
-        startDate.setCellFactory(column -> new DatePickerCell<>());
+        startDate.setCellFactory(column -> new DatePickerCell<>(country.getSave().getGame().getStartDate(), country.getSave().getDate()));
         startDate.setOnEditCommit(event -> event.getRowValue().setStartDate(event.getNewValue()));
         startDate.setPrefWidth(150);
         startDate.setStyle("-fx-alignment: CENTER-LEFT");
