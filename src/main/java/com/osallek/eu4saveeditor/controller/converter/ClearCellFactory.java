@@ -1,6 +1,5 @@
 package com.osallek.eu4saveeditor.controller.converter;
 
-import com.osallek.eu4parser.model.save.changeprices.ChangePrice;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableCell;
@@ -10,11 +9,11 @@ import javafx.util.Callback;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
 
-public class ChangePriceCellFactory implements Callback<TableColumn<ChangePrice, Void>, TableCell<ChangePrice, Void>> {
+public class ClearCellFactory<T> implements Callback<TableColumn<T, Void>, TableCell<T, Void>> {
 
     @Override
-    public TableCell<ChangePrice, Void> call(TableColumn<ChangePrice, Void> param) {
-        return new TableCell<ChangePrice, Void>() {
+    public TableCell<T, Void> call(TableColumn<T, Void> param) {
+        return new TableCell<>() {
             private final HBox hBox = new HBox();
             private final Button button = new Button("", new Glyph("FontAwesome", FontAwesome.Glyph.CLOSE));
 

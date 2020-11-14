@@ -36,6 +36,10 @@ public class ButtonItem implements CustomItem<String> {
         this(category, name, null, label, null);
     }
 
+    public ButtonItem(String category, String name, String label, Integer colSpan) {
+        this(category, name, null, label, colSpan);
+    }
+
     public ButtonItem(SheetCategory category, String name, String description, String label) {
         this(category.getForDefaultLocale(), name, description, label, null);
     }

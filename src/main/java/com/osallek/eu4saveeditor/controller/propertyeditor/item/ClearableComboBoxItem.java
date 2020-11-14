@@ -47,6 +47,10 @@ public class ClearableComboBoxItem<U> implements CustomItem<U> {
         this(category, name, values, value, null, comboBox);
     }
 
+    public ClearableComboBoxItem(String category, String name, ObservableList<U> values, ClearableComboBox<U> comboBox) {
+        this(category, name, values, null, null, comboBox);
+    }
+
     public ClearableComboBoxItem(String category, String name, ObservableList<U> values, U value, ClearableComboBox<U> comboBox) {
         this(category, name, values, value, null, comboBox);
     }

@@ -81,7 +81,6 @@ public class GovernmentReformsDialog extends Dialog<List<GovernmentReform>> {
         setResizable(true);
         getDialogPane().setMaxWidth(Double.MAX_VALUE);
         getDialogPane().setPrefWidth(800);
-        getDialogPane().setPrefHeight(vBox.getChildren().size() * 100d);
         getDialogPane().setContent(scrollPane);
         getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
         ((Stage) getDialogPane().getScene().getWindow()).getIcons().addAll(new Image(Constants.IMAGE_ICON));

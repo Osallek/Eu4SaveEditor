@@ -1,23 +1,25 @@
 package com.osallek.eu4saveeditor.controller.mapview;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
+import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.model.Power;
 import com.osallek.eu4parser.model.game.Culture;
 import com.osallek.eu4parser.model.game.GovernmentReform;
-import com.osallek.eu4parser.model.game.ImperialReform;
+import com.osallek.eu4parser.model.game.SubjectType;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.SaveReligion;
 import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4saveeditor.controller.control.ClearableComboBox;
 import com.osallek.eu4saveeditor.controller.control.ClearableSpinnerInt;
-import com.osallek.eu4saveeditor.controller.control.ListSelectionViewImperialReform;
 import com.osallek.eu4saveeditor.controller.control.RequiredComboBox;
+import com.osallek.eu4saveeditor.controller.control.TableView2CountrySubject;
 import com.osallek.eu4saveeditor.controller.converter.PairCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.PairConverter;
+import com.osallek.eu4saveeditor.controller.object.CountrySubject;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheetSkin;
 import com.osallek.eu4saveeditor.controller.pane.GovernmentReformsDialog;
-import com.osallek.eu4saveeditor.controller.pane.ListSelectionViewDialog;
+import com.osallek.eu4saveeditor.controller.pane.TableViewDialog;
 import com.osallek.eu4saveeditor.controller.propertyeditor.CustomPropertyEditorFactory;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ButtonItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.CheckBoxItem;
@@ -30,6 +32,7 @@ import com.sun.javafx.collections.ObservableListWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.scene.control.ComboBox;
 import javafx.scene.layout.VBox;
 import org.apache.commons.lang3.tuple.Pair;
 import org.controlsfx.validation.ValidationSupport;
@@ -40,16 +43,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CountryPropertySheet extends VBox {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CountryPropertySheet.class);
 
     private Country country;
+
+    private final ObservableList<Country> countriesAlive;
+
+    private final ObservableList<SubjectType> subjectTypes;
 
     private final CustomPropertySheet propertySheet;
 
@@ -71,14 +83,25 @@ public class CountryPropertySheet extends VBox {
 
     private final ObservableList<GovernmentReform> governmentReformsField;
 
+    private final ButtonItem countrySubjectsButton;
+
+    private Map<Country, CountrySubject> countrySubjectsField;
+
+    private final ClearableComboBoxItem<Country> overlordField;
+
     private final CustomPropertySheetSkin propertySheetSkin;
 
-    public CountryPropertySheet(Save save, ObservableList<Country> playableCountries, ObservableList<Culture> cultures,
-                                ObservableList<SaveReligion> religions) {
+    public CountryPropertySheet(Save save, ObservableList<Country> countriesAlive, ObservableList<Culture> cultures, ObservableList<SaveReligion> religions) {
+        this.countriesAlive = countriesAlive;
+        this.subjectTypes = new ObservableListWrapper<>(save.getGame()
+                                                            .getSubjectTypes()
+                                                            .stream()
+                                                            .filter(type -> !"default".equals(type.getName()))
+                                                            .sorted(Comparator.comparing(SubjectType::getLocalizedName, Eu4Utils.COLLATOR))
+                                                            .collect(Collectors.toList()));
         this.propertySheet = new CustomPropertySheet();
         this.propertySheet.setPropertyEditorFactory(new CustomPropertyEditorFactory());
         this.propertySheet.setMode(CustomPropertySheet.Mode.CATEGORY);
-        this.propertySheet.setCategoryComparator(Comparator.comparing(SheetCategory::getByLocale));
         this.propertySheet.setModeSwitcherVisible(false);
         this.propertySheet.setSearchBoxVisible(false);
 
@@ -119,6 +142,17 @@ public class CountryPropertySheet extends VBox {
                                                       2);
         this.governmentReformsField = new ObservableListWrapper<>(new ArrayList<>());
 
+        this.countrySubjectsButton = new ButtonItem(save.getGame().getLocalisationClean("HEADER_SUBJECTS"),
+                                                    null,
+                                                    save.getGame().getLocalisationClean("HEADER_SUBJECTS"),
+                                                    2);
+
+        this.overlordField = new ClearableComboBoxItem<>(save.getGame().getLocalisationClean("HEADER_SUBJECTS"),
+                                                         save.getGame().getLocalisation("HEADER_OVERLORD"),
+                                                         FXCollections.observableArrayList(new ArrayList<>()),
+                                                         new ClearableComboBox<>(new ComboBox<>()));
+        this.overlordField.setEditable(false);
+
         this.validationSupport = new ValidationSupport();
         this.validationSupport.registerValidator(this.nameField.getTextField(), Validator.createEmptyValidator("Text is required"));
         this.validationSupport.setValidationDecorator(new CompoundValidationDecoration(new CustomGraphicValidationDecoration(),
@@ -150,6 +184,22 @@ public class CountryPropertySheet extends VBox {
                 this.wasPlayerField.setValue(this.country.wasPlayer());
                 items.add(this.wasPlayerField);
 
+                this.admPointField.setSupplier(() -> this.country.getPowers().get(Power.ADM));
+                this.admPointField.setMax(Math.max(this.country.getPowers().get(Power.ADM), 999));
+                this.admPointField.setValue(this.country.getPowers().get(Power.ADM));
+                items.add(this.admPointField);
+
+                this.dipPointField.setSupplier(() -> this.country.getPowers().get(Power.DIP));
+                this.dipPointField.setMax(Math.max(this.country.getPowers().get(Power.DIP), 999));
+                this.dipPointField.setValue(this.country.getPowers().get(Power.DIP));
+                items.add(this.dipPointField);
+
+                this.milPointField.setSupplier(() -> this.country.getPowers().get(Power.MIL));
+                this.milPointField.setMax(Math.max(this.country.getPowers().get(Power.MIL), 999));
+                this.milPointField.setValue(this.country.getPowers().get(Power.MIL));
+                items.add(this.milPointField);
+
+                //Government
                 this.governmentRankField.getChoices().setAll(this.country.getGovernmentName().getRanks().values());
                 this.governmentRankField.setValue(this.country.getGovernmentName().getRank(this.country.getGovernmentLevel()));
                 this.governmentRankField.setSupplier(() -> this.country.getGovernmentName().getRank(this.country.getGovernmentLevel()));
@@ -165,20 +215,43 @@ public class CountryPropertySheet extends VBox {
                 });
                 items.add(this.governmentReformsButton);
 
-                this.admPointField.setSupplier(() -> this.country.getPowers().get(Power.ADM));
-                this.admPointField.setMax(Math.max(this.country.getPowers().get(Power.ADM), 999));
-                this.admPointField.setValue(this.country.getPowers().get(Power.ADM));
-                items.add(this.admPointField);
+                //Subjects
+                this.overlordField.setValues(FXCollections.observableArrayList(this.country.getOverlord()));
+                this.overlordField.setValue(this.country.getOverlord());
+                items.add(this.overlordField);
 
-                this.dipPointField.setSupplier(() -> this.country.getPowers().get(Power.DIP));
-                this.dipPointField.setMax(Math.max(this.country.getPowers().get(Power.DIP), 999));
-                this.dipPointField.setValue(this.country.getPowers().get(Power.DIP));
-                items.add(this.dipPointField);
+                this.countrySubjectsField = this.country.getSubjects()
+                                                        .stream()
+                                                        .map(CountrySubject::new)
+                                                        .collect(Collectors.toMap(CountrySubject::getSubject, Function.identity()));
+                this.countrySubjectsButton.getButton().setOnAction(event -> {
+                    TableViewDialog<CountrySubject> dialog =
+                            new TableViewDialog<>(this.country.getSave(),
+                                                  new TableView2CountrySubject(this.country,
+                                                                               this.countrySubjectsField.values()
+                                                                                                        .stream()
+                                                                                                        .map(CountrySubject::new)
+                                                                                                        .collect(Collectors.toCollection(
+                                                                                                                FXCollections::observableArrayList)),
+                                                                               this.countriesAlive,
+                                                                               this.subjectTypes),
+                                                  this.country.getSave().getGame().getLocalisationClean("HEADER_SUBJECTS"),
+                                                  () -> new CountrySubject(this.country,
+                                                                           this.countriesAlive.get(0),
+                                                                           this.subjectTypes.get(0),
+                                                                           this.country.getSave().getDate()),
+                                                  () -> this.country.getSubjects()
+                                                                    .stream()
+                                                                    .map(CountrySubject::new)
+                                                                    .collect(Collectors.toList()));
+                    Optional<List<CountrySubject>> countrySubjects = dialog.showAndWait();
 
-                this.milPointField.setSupplier(() -> this.country.getPowers().get(Power.MIL));
-                this.milPointField.setMax(Math.max(this.country.getPowers().get(Power.MIL), 999));
-                this.milPointField.setValue(this.country.getPowers().get(Power.MIL));
-                items.add(this.milPointField);
+                    countrySubjects.ifPresent(list -> this.countrySubjectsField = list.stream()
+                                                                                      .map(CountrySubject::new)
+                                                                                      .collect(Collectors.toMap(CountrySubject::getSubject,
+                                                                                                                Function.identity())));
+                });
+                items.add(this.countrySubjectsButton);
 
                 this.propertySheet.getItems().setAll(items);
 
@@ -222,6 +295,19 @@ public class CountryPropertySheet extends VBox {
         if (!Objects.equals(this.country.getPowers().get(Power.MIL), this.milPointField.getTrueValue())) {
             this.country.setPower(Power.MIL, this.milPointField.getTrueValue());
         }
+
+        Stream.concat(this.country.getSubjects().stream(), this.countrySubjectsField.keySet().stream())
+              .distinct()
+              .forEach(subject -> this.countrySubjectsField.compute(subject, (c, countrySubject) -> {
+                  if (countrySubject == null) {
+                      this.country.getSave().getDiplomacy().removeDependency(this.country, subject);
+                  } else if (countrySubject.changed()) {
+                      subject.setOverlord(countrySubject.getOverlord(), countrySubject.getSubjectType(),
+                                          countrySubject.getStartDate());
+                  }
+
+                  return countrySubject;
+              }));
 
         update(this.country, true);
     }

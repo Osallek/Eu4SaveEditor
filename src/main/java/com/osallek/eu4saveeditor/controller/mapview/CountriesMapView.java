@@ -38,7 +38,7 @@ public class CountriesMapView extends AbstractMapView {
         });
 
         this.countrySheet = new CountryPropertySheet(this.mapViewContainer.getSave(),
-                                                     this.mapViewContainer.getPlayableCountries(),
+                                                     this.mapViewContainer.getCountriesAlive(),
                                                      this.mapViewContainer.getCultures(),
                                                      this.mapViewContainer.getReligions());
 

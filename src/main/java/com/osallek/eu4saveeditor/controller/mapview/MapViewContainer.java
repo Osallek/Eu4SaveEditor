@@ -233,6 +233,10 @@ public class MapViewContainer {
         return playableCountries;
     }
 
+    public ObservableList<Country> getCountriesAlive() {
+        return countriesAlive;
+    }
+
     public ObservableList<Culture> getCultures() {
         return cultures;
     }
