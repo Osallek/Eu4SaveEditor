@@ -216,7 +216,7 @@ public class CountryPropertySheet extends VBox {
                 items.add(this.governmentReformsButton);
 
                 //Subjects
-                this.overlordField.setValues(FXCollections.observableArrayList(this.country.getOverlord()));
+                this.overlordField.getChoices().setAll(this.country.getOverlord());
                 this.overlordField.setValue(this.country.getOverlord());
                 items.add(this.overlordField);
 
