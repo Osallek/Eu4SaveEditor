@@ -2,22 +2,27 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
-<BorderPane xmlns:fx="http://javafx.com/fxml" fx:id="pane" fx:controller="com.osallek.eu4saveeditor.controller.EditorController">
-  <top>
-    <HBox alignment="CENTER" spacing="10">
-      <HBox alignment="CENTER">
-        <Text fx:id="title" textAlignment="CENTER" style="-fx-font-size: 16px; -fx-font-weight: bold"/>
+<?import org.controlsfx.control.MaskerPane?>
+<StackPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.osallek.eu4saveeditor.controller.EditorController">
+  <BorderPane fx:id="pane">
+    <top>
+      <HBox alignment="CENTER" spacing="10">
+        <HBox alignment="CENTER">
+          <Text fx:id="title" textAlignment="CENTER" style="-fx-font-size: 16px; -fx-font-weight: bold"/>
+        </HBox>
+        <Button fx:id="saveButton" onMouseClicked="#onClickExportButton" style="-fx-font-weight: bold"/>
       </HBox>
-      <Button fx:id="saveButton" onMouseClicked="#onClickExportButton" style="-fx-font-weight: bold"/>
-    </HBox>
-  </top>
-  <right>
-    <VBox fx:id="editPane" alignment="TOP_CENTER" spacing="5" minWidth="300" prefWidth="600" maxWidth="600">
-      <padding>
-        <Insets right="5" left="10" top="5" bottom="5"/>
-      </padding>
-    </VBox>
-  </right>
-</BorderPane>
+    </top>
+    <right>
+      <VBox fx:id="editPane" alignment="TOP_CENTER" spacing="5" minWidth="300" prefWidth="600" maxWidth="600">
+        <padding>
+          <Insets right="5" left="10" top="5" bottom="5"/>
+        </padding>
+      </VBox>
+    </right>
+  </BorderPane>
+  <MaskerPane fx:id="masker" visible="false"/>
+</StackPane>

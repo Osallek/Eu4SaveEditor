@@ -1,14 +1,15 @@
 package com.osallek.eu4saveeditor.controller;
 
-import com.osallek.eu4parser.Eu4Parser;
 import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.model.game.Culture;
 import com.osallek.eu4parser.model.game.TradeGood;
+import com.osallek.eu4parser.model.game.localisation.Eu4Language;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.SaveReligion;
 import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
 import com.osallek.eu4saveeditor.common.Constants;
+import com.osallek.eu4saveeditor.common.WriteSaveTask;
 import com.osallek.eu4saveeditor.controller.mapview.DrawableProvince;
 import com.osallek.eu4saveeditor.controller.mapview.MapViewContainer;
 import com.osallek.eu4saveeditor.controller.mapview.MapViewType;
@@ -21,6 +22,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.ImageCursor;
@@ -39,6 +41,7 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import org.controlsfx.control.MaskerPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +52,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ResourceBundle;
@@ -119,6 +123,9 @@ public class EditorController implements Initializable {
     @FXML
     private BorderPane pane;
 
+    @FXML
+    private MaskerPane masker;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         this.saveFileChooser.setTitle(MenusI18n.SAVE_AS.getForDefaultLocale());
@@ -186,18 +193,32 @@ public class EditorController implements Initializable {
     }
 
     @FXML
-    public void onClickExportButton(MouseEvent event) {
-        if (MouseButton.PRIMARY.equals(event.getButton())) {
-            try {
-                File file = this.saveFileChooser.showSaveDialog(((Node) event.getSource()).getScene().getWindow());
+    public void onClickExportButton(MouseEvent mouseEvent) {
+        if (MouseButton.PRIMARY.equals(mouseEvent.getButton())) {
+            File file = this.saveFileChooser.showSaveDialog(((Node) mouseEvent.getSource()).getScene().getWindow());
 
-                if (file != null) {
-                    Eu4Parser.writeSave(this.save, file.toString());
-                }
-            } catch (IOException e) {
-                LOGGER.error("Can't write save {} ! ", e.getMessage(), e);
-                this.title.setText("Can't write save ! " + e.getLocalizedMessage());
-                this.title.setFill(Paint.valueOf(Color.RED.toString()));
+            if (file != null) {
+                WriteSaveTask task = new WriteSaveTask(this.save, file, Eu4Language.getByLocale(Locale.getDefault()));
+
+                task.setOnFailed(event -> {
+                    LOGGER.error("Can't write save {} ! ", task.getException().getMessage(), task.getException());
+                    this.title.setText("Can't write save ! " + task.getException().getLocalizedMessage());
+                    this.title.setFill(Paint.valueOf(Color.RED.toString()));
+                });
+
+                task.addEventFilter(WorkerStateEvent.WORKER_STATE_SUCCEEDED, event -> {
+                    this.masker.setVisible(false);
+                    this.masker.textProperty().unbind();
+                    this.masker.progressProperty().unbind();
+                    this.masker.setText("Please Wait...");
+                    this.masker.setProgress(-1.0);
+                });
+
+                this.masker.setVisible(true);
+                this.masker.textProperty().bind(task.titleProperty());
+                this.masker.progressProperty().bind(task.progressProperty());
+
+                new Thread(task).start();
             }
         }
     }
@@ -205,8 +226,7 @@ public class EditorController implements Initializable {
     public void load(Save save) {
         this.save = save;
         int extIndex = this.save.getName().lastIndexOf('.');
-        this.saveFileChooser.setInitialFileName(
-                this.save.getName().substring(0, extIndex) + "_edit" + this.save.getName().substring(extIndex));
+        this.saveFileChooser.setInitialFileName(this.save.getName().substring(0, extIndex) + "_edit" + this.save.getName().substring(extIndex));
 
         try {
             EditorController.dummyCountry = this.save.getCountry(Eu4Utils.DEFAULT_TAG);
