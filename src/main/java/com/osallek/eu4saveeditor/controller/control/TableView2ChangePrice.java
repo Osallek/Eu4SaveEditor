@@ -22,8 +22,7 @@ public class TableView2ChangePrice extends TableView<ChangePrice> {
 
     public TableView2ChangePrice(List<ChangePrice> changePrices, Save save) {
         TableColumn<ChangePrice, String> name = new TableColumn<>(save.getGame().getLocalisation("LEDGER_NAME"));
-        name.setCellValueFactory(p -> p.getValue() == null ? null :
-                                      new SimpleStringProperty(p.getValue().getLocalizedName()));
+        name.setCellValueFactory(p -> p.getValue() == null ? null : new SimpleStringProperty(p.getValue().getLocalizedName()));
         name.setCellFactory(TextFieldTableCell.forTableColumn());
         name.setEditable(false);
         name.setPrefWidth(500);

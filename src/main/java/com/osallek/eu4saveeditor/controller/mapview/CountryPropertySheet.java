@@ -14,9 +14,11 @@ import com.osallek.eu4saveeditor.controller.control.ClearableSpinnerDouble;
 import com.osallek.eu4saveeditor.controller.control.ClearableSpinnerInt;
 import com.osallek.eu4saveeditor.controller.control.RequiredComboBox;
 import com.osallek.eu4saveeditor.controller.control.TableView2CountrySubject;
+import com.osallek.eu4saveeditor.controller.control.TableView2Loan;
 import com.osallek.eu4saveeditor.controller.converter.PairCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.PairConverter;
 import com.osallek.eu4saveeditor.controller.object.CountrySubject;
+import com.osallek.eu4saveeditor.controller.object.Loan;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheetSkin;
 import com.osallek.eu4saveeditor.controller.pane.GovernmentReformsDialog;
@@ -30,7 +32,6 @@ import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSpinner
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableTextItem;
 import com.osallek.eu4saveeditor.controller.validator.CustomGraphicValidationDecoration;
 import com.osallek.eu4saveeditor.i18n.SheetCategory;
-import com.sun.javafx.collections.ObservableListWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -94,16 +95,20 @@ public class CountryPropertySheet extends VBox {
 
     private final ClearableSliderItem corruptionField;
 
+    private final ButtonItem loansButton;
+
+    private final ObservableList<Loan> loans;
+
     private final CustomPropertySheetSkin propertySheetSkin;
 
     public CountryPropertySheet(Save save, ObservableList<Country> countriesAlive, ObservableList<Culture> cultures, ObservableList<SaveReligion> religions) {
         this.countriesAlive = countriesAlive;
-        this.subjectTypes = new ObservableListWrapper<>(save.getGame()
-                                                            .getSubjectTypes()
-                                                            .stream()
-                                                            .filter(type -> !"default".equals(type.getName()))
-                                                            .sorted(Comparator.comparing(SubjectType::getLocalizedName, Eu4Utils.COLLATOR))
-                                                            .collect(Collectors.toList()));
+        this.subjectTypes = save.getGame()
+                                .getSubjectTypes()
+                                .stream()
+                                .filter(type -> !"default".equals(type.getName()))
+                                .sorted(Comparator.comparing(SubjectType::getLocalizedName, Eu4Utils.COLLATOR))
+                                .collect(Collectors.toCollection(FXCollections::observableArrayList));
         this.propertySheet = new CustomPropertySheet();
         this.propertySheet.setPropertyEditorFactory(new CustomPropertyEditorFactory());
         this.propertySheet.setMode(CustomPropertySheet.Mode.CATEGORY);
@@ -142,6 +147,9 @@ public class CountryPropertySheet extends VBox {
                                                        save.getGame().getLocalisation("corruption"),
                                                        0, 100);
 
+        this.loansButton = new ButtonItem(SheetCategory.ECONOMY, null, save.getGame().getLocalisationClean("AI_LOANS"), 2);
+        this.loans = FXCollections.observableArrayList();
+
         //LEDGER_GOVERNMENT_NAME
         this.governmentRankField = new ClearableComboBoxItem<>(SheetCategory.COUNTRY_GOVERNMENT,
                                                                save.getGame().getLocalisation("GOV_RANK"),
@@ -154,7 +162,7 @@ public class CountryPropertySheet extends VBox {
                                                       null,
                                                       save.getGame().getLocalisationClean("governmental_reforms"),
                                                       2);
-        this.governmentReformsField = new ObservableListWrapper<>(new ArrayList<>());
+        this.governmentReformsField = FXCollections.observableArrayList();
 
         this.countrySubjectsButton = new ButtonItem(save.getGame().getLocalisationClean("HEADER_SUBJECTS"),
                                                     null,
@@ -221,6 +229,19 @@ public class CountryPropertySheet extends VBox {
                 this.corruptionField.setValue(this.country.getCorruption());
                 this.corruptionField.setSupplier(this.country::getCorruption);
                 items.add(this.corruptionField);
+
+                this.loans.setAll(this.country.getLoans().stream().map(Loan::new).collect(Collectors.toList()));
+                this.loansButton.getButton().setOnAction(event -> {
+                    TableViewDialog<Loan> dialog = new TableViewDialog<>(this.country.getSave(),
+                                                                         new TableView2Loan(this.country, this.loans),
+                                                                         this.country.getSave().getGame().getLocalisationClean("AI_LOANS"),
+                                                                         () -> new Loan(300, 4, this.country.getSave().getDate().plusYears(5)),
+                                                                         () -> this.loans);
+                    Optional<List<Loan>> countrySubjects = dialog.showAndWait();
+
+                    countrySubjects.ifPresent(this.loans::setAll);
+                });
+                items.add(this.loansButton);
 
                 //Government
                 this.governmentRankField.getChoices().setAll(this.country.getGovernmentName().getRanks().values());
@@ -299,12 +320,34 @@ public class CountryPropertySheet extends VBox {
             this.country.setWasPlayer(this.wasPlayerField.isSelected());
         }
 
+        if (!Objects.equals(this.country.getTreasury(), this.treasuryField.getTrueValue())) {
+            this.country.setTreasury(this.treasuryField.getTrueValue());
+        }
+
         if (!Objects.equals(this.country.getCorruption(), this.corruptionField.getDoubleValue())) {
             this.country.setCorruption(this.corruptionField.getDoubleValue());
         }
 
-        if (!Objects.equals(this.country.getTreasury(), this.treasuryField.getTrueValue())) {
-            this.country.setTreasury(this.treasuryField.getTrueValue());
+        if (this.country.getLoans().size() != this.loans.size() || this.loans.stream().anyMatch(Loan::isChanged)) {
+            this.country.getLoans().forEach(loan -> this.loans.stream()
+                                                              .filter(l -> loan.getId().getId().equals(l.getId()))
+                                                              .findFirst()
+                                                              .ifPresentOrElse(l -> {
+                                                                                   if (l.getAmount() != loan.getAmount()) {
+                                                                                       loan.setAmount(l.getAmount());
+                                                                                   }
+
+                                                                                   if (l.getInterest() != loan.getInterest()) {
+                                                                                       loan.setInterest(l.getInterest());
+                                                                                   }
+
+                                                                                   if (!Objects.equals(l.getExpiryDate(), loan.getExpiryDate())) {
+                                                                                       loan.setExpiryDate(l.getExpiryDate());
+                                                                                   }
+                                                                                   this.loans.remove(l);
+                                                                               },
+                                                                               () -> this.country.removeLoan(loan.getId().getId())));
+            this.loans.forEach(l -> this.country.addLoan(l.getInterest(), l.getAmount(), l.getExpiryDate()));
         }
 
         if (!Objects.equals(this.country.getGovernmentName().getRank(this.country.getGovernmentLevel()), this.governmentRankField.getSelectedValue())) {
