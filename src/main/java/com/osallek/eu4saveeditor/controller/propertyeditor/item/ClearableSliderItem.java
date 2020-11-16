@@ -6,6 +6,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.util.converter.NumberStringConverter;
 
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
@@ -29,7 +30,7 @@ public class ClearableSliderItem implements CustomItem<Integer> {
     }
 
     public ClearableSliderItem(String category, String name, double min, double max, Double value, DoubleSupplier supplier) {
-        this(category, name, new ClearableSlider(min, max, value, supplier), new SimpleBooleanProperty(true));
+        this(category, name, new ClearableSlider(min, max, value, supplier, new NumberStringConverter("###.###")), new SimpleBooleanProperty(true));
     }
 
     public ClearableSliderItem(SheetCategory category, String name, ClearableSlider slider) {

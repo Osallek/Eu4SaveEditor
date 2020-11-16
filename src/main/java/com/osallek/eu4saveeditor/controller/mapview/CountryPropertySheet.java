@@ -10,6 +10,7 @@ import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.SaveReligion;
 import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4saveeditor.controller.control.ClearableComboBox;
+import com.osallek.eu4saveeditor.controller.control.ClearableSpinnerDouble;
 import com.osallek.eu4saveeditor.controller.control.ClearableSpinnerInt;
 import com.osallek.eu4saveeditor.controller.control.RequiredComboBox;
 import com.osallek.eu4saveeditor.controller.control.TableView2CountrySubject;
@@ -24,6 +25,7 @@ import com.osallek.eu4saveeditor.controller.propertyeditor.CustomPropertyEditorF
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ButtonItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.CheckBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableComboBoxItem;
+import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSpinnerItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableTextItem;
 import com.osallek.eu4saveeditor.controller.validator.CustomGraphicValidationDecoration;
@@ -43,7 +45,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -89,6 +90,10 @@ public class CountryPropertySheet extends VBox {
 
     private final ClearableComboBoxItem<Country> overlordField;
 
+    private final ClearableSpinnerItem<Double> treasuryField;
+
+    private final ClearableSliderItem corruptionField;
+
     private final CustomPropertySheetSkin propertySheetSkin;
 
     public CountryPropertySheet(Save save, ObservableList<Country> countriesAlive, ObservableList<Culture> cultures, ObservableList<SaveReligion> religions) {
@@ -127,6 +132,15 @@ public class CountryPropertySheet extends VBox {
         this.milPointField = new ClearableSpinnerItem<>(SheetCategory.GENERAL,
                                                         save.getGame().getLocalisationClean("MIL_POWER"),
                                                         new ClearableSpinnerInt(0, 999, 1));
+
+        //Economy
+        this.treasuryField = new ClearableSpinnerItem<>(SheetCategory.ECONOMY,
+                                                        save.getGame().getLocalisationClean("TECH_TRESURY_TITLE"),
+                                                        new ClearableSpinnerDouble(0, 1000000, 100));
+
+        this.corruptionField = new ClearableSliderItem(SheetCategory.ECONOMY,
+                                                       save.getGame().getLocalisation("corruption"),
+                                                       0, 100);
 
         //LEDGER_GOVERNMENT_NAME
         this.governmentRankField = new ClearableComboBoxItem<>(SheetCategory.COUNTRY_GOVERNMENT,
@@ -198,6 +212,15 @@ public class CountryPropertySheet extends VBox {
                 this.milPointField.setMax(Math.max(this.country.getPowers().get(Power.MIL), 999));
                 this.milPointField.setValue(this.country.getPowers().get(Power.MIL));
                 items.add(this.milPointField);
+
+                //Economy
+                this.treasuryField.setValue(this.country.getTreasury());
+                this.treasuryField.setSupplier(this.country::getTreasury);
+                items.add(this.treasuryField);
+
+                this.corruptionField.setValue(this.country.getCorruption());
+                this.corruptionField.setSupplier(this.country::getCorruption);
+                items.add(this.corruptionField);
 
                 //Government
                 this.governmentRankField.getChoices().setAll(this.country.getGovernmentName().getRanks().values());
@@ -274,6 +297,14 @@ public class CountryPropertySheet extends VBox {
 
         if (!Objects.equals(this.country.wasPlayer(), this.wasPlayerField.isSelected())) {
             this.country.setWasPlayer(this.wasPlayerField.isSelected());
+        }
+
+        if (!Objects.equals(this.country.getCorruption(), this.corruptionField.getDoubleValue())) {
+            this.country.setCorruption(this.corruptionField.getDoubleValue());
+        }
+
+        if (!Objects.equals(this.country.getTreasury(), this.treasuryField.getTrueValue())) {
+            this.country.setTreasury(this.treasuryField.getTrueValue());
         }
 
         if (!Objects.equals(this.country.getGovernmentName().getRank(this.country.getGovernmentLevel()), this.governmentRankField.getSelectedValue())) {

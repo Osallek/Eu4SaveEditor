@@ -22,8 +22,9 @@ public class ClearableSlider extends HBox {
 
     private final Button button;
 
-    public ClearableSlider(double min, double max, Double value, DoubleSupplier clearSupplier) {
-        this.spinner = new Spinner<>(min, max, value == null ? 0 : value);
+    public ClearableSlider(double min, double max, Double value, DoubleSupplier clearSupplier, StringConverter<Number> stringConverter) {
+        this.spinner = new Spinner<>(new NumberSpinnerValueFactory(min, max, value == null ? 0 : value));
+        this.spinner.getValueFactory().setConverter(stringConverter);
         this.spinner.setEditable(true);
         this.spinner.focusedProperty().addListener((observable, oldValue, newValue) -> {
             //Force commit
@@ -46,7 +47,18 @@ public class ClearableSlider extends HBox {
         HBox.setHgrow(this.spinner, Priority.ALWAYS);
 
         this.slider = new Slider(min, max, value == null ? 0 : value);
-        this.slider.valueProperty().bindBidirectional(this.spinner.getValueFactory().valueProperty());
+
+        this.slider.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (!oldValue.equals(newValue)) {
+                this.spinner.getValueFactory().setValue(newValue);
+            }
+        });
+        this.spinner.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (!oldValue.equals(newValue)) {
+                this.slider.setValue(newValue.doubleValue());
+            }
+        });
+//        this.slider.valueProperty().bindBidirectional(this.spinner.getValueFactory().valueProperty());
         HBox.setHgrow(this.slider, Priority.ALWAYS);
 
 

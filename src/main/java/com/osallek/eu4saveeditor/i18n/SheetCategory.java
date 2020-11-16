@@ -10,7 +10,7 @@ import java.util.Map;
 public enum SheetCategory {
     GENERAL("General", "Général", "Allgemein", "General"),
     PROVINCE_POLITICAL("Political", "Politique", "Politik", "Política"),
-    PROVINCE_ECONOMY("Economy", "Économie", "Wirtschaft", "Economía"),
+    ECONOMY("Economy", "Économie", "Wirtschaft", "Economía"),
     PROVINCE_INSTITUTIONS("Institutions", "Institutions", "Institutionen", "Instituciones"),
     PROVINCE_BUILDINGS("Buildings", "Bâtiments", "Gebäude", "Edificios"),
     PROVINCE_COLONY("Colonization", "Colonisation", "Kolonisierung", "Colonización"),

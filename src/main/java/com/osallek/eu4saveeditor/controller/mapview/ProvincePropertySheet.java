@@ -213,26 +213,26 @@ public class ProvincePropertySheet extends VBox {
                                                        save.getGame().getLocalisation("LEDGER_POPULATION"),
                                                        0, 1000);
 
-        this.baseTaxField = new ClearableSpinnerItem<>(SheetCategory.PROVINCE_ECONOMY,
+        this.baseTaxField = new ClearableSpinnerItem<>(SheetCategory.ECONOMY,
                                                        save.getGame().getLocalisation("LEDGER_TAX"),
                                                        new ClearableSpinnerDouble(1, 999, 1));
 
-        this.baseProdField = new ClearableSpinnerItem<>(SheetCategory.PROVINCE_ECONOMY,
+        this.baseProdField = new ClearableSpinnerItem<>(SheetCategory.ECONOMY,
                                                         save.getGame().getLocalisation("LEDGER_PRODUCTION"),
                                                         new ClearableSpinnerDouble(1, 999, 1));
 
-        this.baseMPField = new ClearableSpinnerItem<>(SheetCategory.PROVINCE_ECONOMY,
+        this.baseMPField = new ClearableSpinnerItem<>(SheetCategory.ECONOMY,
                                                       save.getGame().getLocalisation("LEDGER_MANPOWER"),
                                                       new ClearableSpinnerDouble(1, 999, 1));
 
-        this.tradeGoodField = new ClearableComboBoxItem<>(SheetCategory.PROVINCE_ECONOMY,
+        this.tradeGoodField = new ClearableComboBoxItem<>(SheetCategory.ECONOMY,
                                                           save.getGame().getLocalisation("LEDGER_GOODS"),
                                                           tradeGoods,
                                                           new ClearableComboBox<>(new SearchableComboBox<>()));
         this.tradeGoodField.setConverter(new TradeGoodStringConverter());
         this.tradeGoodField.setCellFactory(new TradeGoodStringCellFactory());
 
-        this.latentTradeGoodField = new ClearableComboBoxItem<>(SheetCategory.PROVINCE_ECONOMY,
+        this.latentTradeGoodField = new ClearableComboBoxItem<>(SheetCategory.ECONOMY,
                                                                 save.getGame()
                                                                     .getLocalisationClean("LATENT_TRADE_GOODS_TOOLTIP_HEADER"),
                                                                 tradeGoods,
@@ -240,15 +240,15 @@ public class ProvincePropertySheet extends VBox {
         this.latentTradeGoodField.setConverter(new TradeGoodStringConverter());
         this.latentTradeGoodField.setCellFactory(new TradeGoodStringCellFactory());
 
-        this.cotField = new ClearableSpinnerItem<>(SheetCategory.PROVINCE_ECONOMY,
+        this.cotField = new ClearableSpinnerItem<>(SheetCategory.ECONOMY,
                                                    save.getGame().getLocalisationClean("EST_VAL_COT"),
                                                    new ClearableSpinnerInt(0, 3, 1));
 
-        this.autonomyField = new ClearableSliderItem(SheetCategory.PROVINCE_ECONOMY,
+        this.autonomyField = new ClearableSliderItem(SheetCategory.ECONOMY,
                                                      save.getGame().getLocalisation("local_autonomy"),
                                                      0, 100);
 
-        this.devastationField = new ClearableSliderItem(SheetCategory.PROVINCE_ECONOMY,
+        this.devastationField = new ClearableSliderItem(SheetCategory.ECONOMY,
                                                         save.getGame().getLocalisation("LEDGER_DEVASTATION"),
                                                         0, 100);
 
