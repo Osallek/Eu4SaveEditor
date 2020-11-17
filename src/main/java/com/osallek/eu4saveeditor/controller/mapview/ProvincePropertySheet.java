@@ -506,6 +506,12 @@ public class ProvincePropertySheet extends VBox {
             }
         }
 
+        if (this.controllerComboBox.isEditable().getValue()) {
+            if (!Objects.deepEquals(this.province.getController(), this.controllerComboBox.getSelectedValue())) {
+                this.province.setController(this.controllerComboBox.getSelectedValue());
+            }
+        }
+
         if (this.ownerComboBox.isEditable().getValue()) {
             if (!Objects.deepEquals(this.province.getOwner(), this.ownerComboBox.getValue())) {
                 this.province.setOwner(this.ownerComboBox.getSelectedValue());
@@ -513,27 +519,15 @@ public class ProvincePropertySheet extends VBox {
             }
         }
 
-        if (this.controllerComboBox.isEditable().getValue()) {
-            if (!Objects.deepEquals(this.province.getController(), this.controllerComboBox.getSelectedValue())) {
-                this.province.setController(this.controllerComboBox.getSelectedValue());
-            }
-        }
-
         if (this.coresField.isEditable().getValue()) {
             if (!Objects.deepEquals(this.province.getCores(), this.coresField.getSelectedValues())) {
-                this.province.setCores(this.coresField.getSelectedValues()
-                                                      .stream()
-                                                      .map(Country::getTag)
-                                                      .collect(Collectors.toList()));
+                this.province.setCores(new ArrayList<>(this.coresField.getSelectedValues()));
             }
         }
 
         if (this.claimsField.isEditable().getValue()) {
             if (!Objects.deepEquals(this.province.getClaims(), this.claimsField.getSelectedValues())) {
-                this.province.setClaims(this.claimsField.getSelectedValues()
-                                                        .stream()
-                                                        .map(Country::getTag)
-                                                        .collect(Collectors.toList()));
+                this.province.setClaims(new ArrayList<>(this.claimsField.getSelectedValues()));
             }
         }
 
