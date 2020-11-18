@@ -790,16 +790,14 @@ public class SavePropertySheet extends VBox {
         this.notFiredEvents.removeIf(this.firedEvents::contains);
 
         firedEventsButtonItem.setOnAction(event -> {
-            ListSelectionViewEvent listSelectionView = new ListSelectionViewEvent(this.notFiredEvents,
-                                                                                  this.firedEvents);
+            ListSelectionViewEvent listSelectionView = new ListSelectionViewEvent(this.notFiredEvents, this.firedEvents);
 
             ObservableList<Event> tmpFiredEvents = FXCollections.observableArrayList(this.firedEvents);
             ObservableList<Event> tmpNotFiredEvents = FXCollections.observableArrayList(this.notFiredEvents);
 
             ListSelectionViewDialog<Event> dialog = new ListSelectionViewDialog<>(this.save,
                                                                                   listSelectionView,
-                                                                                  this.save.getGame()
-                                                                                           .getLocalisation("MENU_MESSAGES_EVENTS"),
+                                                                                  this.save.getGame().getLocalisation("MENU_MESSAGES_EVENTS"),
                                                                                   () -> tmpNotFiredEvents,
                                                                                   () -> tmpFiredEvents);
             Optional<List<Event>> newLeftBranchReforms = dialog.showAndWait();

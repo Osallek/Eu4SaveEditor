@@ -79,6 +79,12 @@ public class CountryPropertySheet extends VBox {
 
     private final ClearableSpinnerItem<Integer> milPointField;
 
+    private final ClearableSpinnerItem<Integer> stabilityField;
+
+    private final ClearableSpinnerItem<Double> prestigeField;
+
+    private final ClearableSpinnerItem<Double> governmentReformProgressField;
+
     private final ClearableComboBoxItem<Pair<String, String>> governmentRankField;
 
     private final ButtonItem governmentReformsButton;
@@ -94,6 +100,16 @@ public class CountryPropertySheet extends VBox {
     private final ClearableSpinnerItem<Double> treasuryField;
 
     private final ClearableSliderItem corruptionField;
+
+    private final ClearableSpinnerItem<Double> manpowerField;
+
+    private final ClearableSpinnerItem<Double> sailorsField;
+
+    private final ClearableSliderItem armyTraditionField;
+
+    private final ClearableSliderItem navyTraditionField;
+
+    private final ClearableSliderItem armyProfessionalismField;
 
     private final ButtonItem loansButton;
 
@@ -138,10 +154,18 @@ public class CountryPropertySheet extends VBox {
                                                         save.getGame().getLocalisationClean("MIL_POWER"),
                                                         new ClearableSpinnerInt(0, 999, 1));
 
+        this.stabilityField = new ClearableSpinnerItem<>(SheetCategory.GENERAL,
+                                                         save.getGame().getLocalisationClean("stability"),
+                                                         new ClearableSpinnerInt(-3, 3, 1));
+
+        this.prestigeField = new ClearableSpinnerItem<>(SheetCategory.GENERAL,
+                                                        save.getGame().getLocalisationClean("prestige"),
+                                                        new ClearableSpinnerDouble(-100, 100, 1));
+
         //Economy
         this.treasuryField = new ClearableSpinnerItem<>(SheetCategory.ECONOMY,
                                                         save.getGame().getLocalisationClean("TECH_TRESURY_TITLE"),
-                                                        new ClearableSpinnerDouble(0, 1000000, 100));
+                                                        new ClearableSpinnerDouble(-1000000, 1000000, 100));
 
         this.corruptionField = new ClearableSliderItem(SheetCategory.ECONOMY,
                                                        save.getGame().getLocalisation("corruption"),
@@ -157,6 +181,10 @@ public class CountryPropertySheet extends VBox {
                                                                new ClearableComboBox<>(new RequiredComboBox<>()));
         this.governmentRankField.setConverter(new PairConverter());
         this.governmentRankField.setCellFactory(new PairCellFactory());
+
+        this.governmentReformProgressField = new ClearableSpinnerItem<>(SheetCategory.COUNTRY_GOVERNMENT,
+                                                                        save.getGame().getLocalisationCleanNoPunctuation("CHANGE_GOVERNMENT_REFORM_PROGRESS"),
+                                                                        new ClearableSpinnerDouble(0, Double.MAX_VALUE, 10));
 
         this.governmentReformsButton = new ButtonItem(SheetCategory.COUNTRY_GOVERNMENT,
                                                       null,
@@ -174,6 +202,26 @@ public class CountryPropertySheet extends VBox {
                                                          FXCollections.observableArrayList(new ArrayList<>()),
                                                          new ClearableComboBox<>(new ComboBox<>()));
         this.overlordField.setEditable(false);
+
+        this.manpowerField = new ClearableSpinnerItem<>(SheetCategory.COUNTRY_MILITARY,
+                                                        save.getGame().getLocalisationCleanNoPunctuation("HINT_MANPOWER_TITLE"),
+                                                        new ClearableSpinnerDouble(0, Double.MAX_VALUE, 1000));
+
+        this.sailorsField = new ClearableSpinnerItem<>(SheetCategory.COUNTRY_MILITARY,
+                                                       save.getGame().getLocalisationCleanNoPunctuation("LEDGER_SAILORS"),
+                                                       new ClearableSpinnerDouble(0, Double.MAX_VALUE, 1000));
+
+        this.armyTraditionField = new ClearableSliderItem(SheetCategory.COUNTRY_MILITARY,
+                                                          save.getGame().getLocalisation("army_tradition"),
+                                                          0, 100);
+
+        this.navyTraditionField = new ClearableSliderItem(SheetCategory.COUNTRY_MILITARY,
+                                                          save.getGame().getLocalisation("navy_tradition"),
+                                                          0, 100);
+
+        this.armyProfessionalismField = new ClearableSliderItem(SheetCategory.COUNTRY_MILITARY,
+                                                                save.getGame().getLocalisation("army_professionalism"),
+                                                                0, save.getGame().getMaxArmyProfessionalism());
 
         this.validationSupport = new ValidationSupport();
         this.validationSupport.registerValidator(this.nameField.getTextField(), Validator.createEmptyValidator("Text is required"));
@@ -221,6 +269,14 @@ public class CountryPropertySheet extends VBox {
                 this.milPointField.setValue(this.country.getPowers().get(Power.MIL));
                 items.add(this.milPointField);
 
+                this.stabilityField.setSupplier(this.country::getStability);
+                this.stabilityField.setValue(this.country.getStability());
+                items.add(this.stabilityField);
+
+                this.prestigeField.setValue(this.country.getPrestige());
+                this.prestigeField.setSupplier(this.country::getPrestige);
+                items.add(this.prestigeField);
+
                 //Economy
                 this.treasuryField.setValue(this.country.getTreasury());
                 this.treasuryField.setSupplier(this.country::getTreasury);
@@ -248,6 +304,10 @@ public class CountryPropertySheet extends VBox {
                 this.governmentRankField.setValue(this.country.getGovernmentName().getRank(this.country.getGovernmentLevel()));
                 this.governmentRankField.setSupplier(() -> this.country.getGovernmentName().getRank(this.country.getGovernmentLevel()));
                 items.add(this.governmentRankField);
+
+                this.governmentReformProgressField.setSupplier(this.country::getGovernmentReformProgress);
+                this.governmentReformProgressField.setValue(this.country.getGovernmentReformProgress());
+                items.add(this.governmentReformProgressField);
 
                 this.governmentReformsField.setAll(this.country.getGovernment().getReforms());
                 this.governmentReformsButton.getButton().setOnAction(event -> {
@@ -296,6 +356,27 @@ public class CountryPropertySheet extends VBox {
                                                                                                                 Function.identity())));
                 });
                 items.add(this.countrySubjectsButton);
+
+                //Military
+                this.manpowerField.setSupplier(() -> this.country.getManpower() * 1000);
+                this.manpowerField.setValue(this.country.getManpower() * 1000);
+                items.add(this.manpowerField);
+
+                this.sailorsField.setSupplier(this.country::getSailors);
+                this.sailorsField.setValue(this.country.getSailors());
+                items.add(this.sailorsField);
+
+                this.armyTraditionField.setValue(this.country.getArmyTradition());
+                this.armyTraditionField.setSupplier(this.country::getArmyTradition);
+                items.add(this.armyTraditionField);
+
+                this.navyTraditionField.setValue(this.country.getNavyTradition());
+                this.navyTraditionField.setSupplier(this.country::getNavyTradition);
+                items.add(this.navyTraditionField);
+
+                this.armyProfessionalismField.setValue(this.country.getArmyProfessionalism());
+                this.armyProfessionalismField.setSupplier(this.country::getArmyProfessionalism);
+                items.add(this.armyProfessionalismField);
 
                 this.propertySheet.getItems().setAll(items);
 
@@ -368,6 +449,38 @@ public class CountryPropertySheet extends VBox {
 
         if (!Objects.equals(this.country.getPowers().get(Power.MIL), this.milPointField.getTrueValue())) {
             this.country.setPower(Power.MIL, this.milPointField.getTrueValue());
+        }
+
+        if (!Objects.equals(this.country.getStability(), this.stabilityField.getTrueValue())) {
+            this.country.setStability(this.stabilityField.getTrueValue());
+        }
+
+        if (!Objects.equals(this.country.getPrestige(), this.prestigeField.getTrueValue())) {
+            this.country.setPrestige(this.prestigeField.getTrueValue());
+        }
+
+        if (!Objects.equals(this.country.getGovernmentReformProgress(), this.governmentReformProgressField.getTrueValue())) {
+            this.country.setGovernmentReformProgress(this.governmentReformProgressField.getTrueValue());
+        }
+
+        if (!Objects.equals(this.country.getManpower() * 1000, this.manpowerField.getTrueValue())) {
+            this.country.setManpower(this.manpowerField.getTrueValue() / 1000);
+        }
+
+        if (!Objects.equals(this.country.getSailors(), this.sailorsField.getTrueValue())) {
+            this.country.setSailors(this.sailorsField.getTrueValue());
+        }
+
+        if (!Objects.equals(this.country.getArmyTradition(), this.armyTraditionField.getDoubleValue())) {
+            this.country.setArmyTradition(this.armyTraditionField.getDoubleValue());
+        }
+
+        if (!Objects.equals(this.country.getNavyTradition(), this.navyTraditionField.getDoubleValue())) {
+            this.country.setNavyTradition(this.navyTraditionField.getDoubleValue());
+        }
+
+        if (!Objects.equals(this.country.getArmyProfessionalism(), this.armyProfessionalismField.getDoubleValue())) {
+            this.country.setArmyProfessionalism(this.armyProfessionalismField.getDoubleValue());
         }
 
         Stream.concat(this.country.getSubjects().stream(), this.countrySubjectsField.keySet().stream())
