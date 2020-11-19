@@ -1,5 +1,6 @@
 package com.osallek.eu4saveeditor.controller.mapview;
 
+import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.model.game.Decree;
 import com.osallek.eu4parser.model.game.Event;
 import com.osallek.eu4parser.model.game.ImperialReform;
@@ -69,6 +70,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -766,6 +768,7 @@ public class SavePropertySheet extends VBox {
                  .values()
                  .stream()
                  .filter(SaveReligion::hasSpecialAttribute)
+                 .sorted(Comparator.comparing(SaveReligion::getLocalizedName, Eu4Utils.COLLATOR))
                  .forEach(religion -> {
                      ReligionPropertySheet relPropertySheet = new ReligionPropertySheet(this.save, religion, countriesAlive);
 

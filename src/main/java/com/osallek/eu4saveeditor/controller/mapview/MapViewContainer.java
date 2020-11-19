@@ -49,6 +49,8 @@ public class MapViewContainer {
 
     private final ObservableList<SaveReligion> religions;
 
+    private final ObservableList<SaveReligion> playableReligions;
+
     private final ObservableList<TradeGood> tradeGoods;
 
     private final ObservableList<SaveProvince> cities;
@@ -63,10 +65,9 @@ public class MapViewContainer {
 
     private final Button submitButton;
 
-    public MapViewContainer(SaveProvince[][] provincesMap, Map<Integer, DrawableProvince> drawableProvinces,
-                            Canvas canvas, VBox editPane, Save save, ObservableList<Country> playableCountries,
-                            ObservableList<Country> countriesAlive, ObservableList<Culture> cultures,
-                            ObservableList<SaveReligion> religions, ObservableList<TradeGood> tradeGoods,
+    public MapViewContainer(SaveProvince[][] provincesMap, Map<Integer, DrawableProvince> drawableProvinces, Canvas canvas, VBox editPane, Save save,
+                            ObservableList<Country> playableCountries, ObservableList<Country> countriesAlive, ObservableList<Culture> cultures,
+                            ObservableList<SaveReligion> religions, ObservableList<SaveReligion> playableReligions, ObservableList<TradeGood> tradeGoods,
                             ObservableList<SaveProvince> cities) {
         this.provincesMap = provincesMap;
         this.drawableProvinces = drawableProvinces;
@@ -78,6 +79,7 @@ public class MapViewContainer {
         this.countriesAlive = countriesAlive;
         this.cultures = cultures;
         this.religions = religions;
+        this.playableReligions = playableReligions;
         this.tradeGoods = tradeGoods;
         this.saveSheet = new SavePropertySheet(this.save, this.countriesAlive, this.cities);
         this.mapViews = new EnumMap<>(MapViewType.class);
@@ -243,6 +245,10 @@ public class MapViewContainer {
 
     public ObservableList<SaveReligion> getReligions() {
         return religions;
+    }
+
+    public ObservableList<SaveReligion> getPlayableReligions() {
+        return playableReligions;
     }
 
     public ObservableList<TradeGood> getTradeGoods() {

@@ -51,11 +51,13 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class EditorController implements Initializable {
 
@@ -108,6 +110,8 @@ public class EditorController implements Initializable {
     private ObservableList<Culture> cultures;
 
     private ObservableList<SaveReligion> religions;
+
+    private ObservableList<SaveReligion> playableReligions;
 
     private ObservableList<TradeGood> tradeGoods;
 
@@ -253,8 +257,20 @@ public class EditorController implements Initializable {
 
             this.countriesAlive = new FilteredList<>(this.playableCountries, Country::isAlive);
             this.cultures = FXCollections.observableArrayList(this.save.getGame().getCultures());
-            this.religions = FXCollections.observableArrayList(this.save.getReligions().getReligions().values());
             this.tradeGoods = FXCollections.observableArrayList(this.save.getGame().getTradeGoods());
+            this.religions = this.save.getReligions()
+                                      .getReligions()
+                                      .values()
+                                      .stream()
+                                      .sorted(Comparator.comparing(SaveReligion::getLocalizedName, Eu4Utils.COLLATOR))
+                                      .collect(Collectors.toCollection(FXCollections::observableArrayList));
+            this.playableReligions = this.save.getReligions()
+                                              .getReligions()
+                                              .values()
+                                              .stream()
+                                              .filter(saveReligion -> saveReligion.getGameReligion() != null)
+                                              .sorted(Comparator.comparing(r -> r.getGameReligion().getLocalizedName(), Eu4Utils.COLLATOR))
+                                              .collect(Collectors.toCollection(FXCollections::observableArrayList));
 
             this.drawableProvinces = new HashMap<>();
             for (int x = 0; x < this.provincesMap.length; x++) {
@@ -290,9 +306,8 @@ public class EditorController implements Initializable {
 
             this.saveButton.setText(this.save.getGame().getLocalisation("SAVE"));
 
-            this.mapViewContainer = new MapViewContainer(this.provincesMap, this.drawableProvinces, this.provincesCanvas,
-                                                         this.editPane, this.save, this.playableCountries,
-                                                         this.countriesAlive, this.cultures, this.religions,
+            this.mapViewContainer = new MapViewContainer(this.provincesMap, this.drawableProvinces, this.provincesCanvas, this.editPane, this.save,
+                                                         this.playableCountries, this.countriesAlive, this.cultures, this.religions, this.playableReligions,
                                                          this.tradeGoods, this.cities);
             this.mapViewContainer.registerMapView(MapViewType.COUNTRIES_MAP_VIEW);
             this.mapViewContainer.selectMapView(MapViewType.COUNTRIES_MAP_VIEW);

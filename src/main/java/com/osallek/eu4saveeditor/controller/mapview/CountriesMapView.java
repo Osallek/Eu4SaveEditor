@@ -29,7 +29,7 @@ public class CountriesMapView extends AbstractMapView {
         this.provinceSheet = new ProvincePropertySheet(this.mapViewContainer.getSave(),
                                                        this.mapViewContainer.getPlayableCountries(),
                                                        this.mapViewContainer.getCultures(),
-                                                       this.mapViewContainer.getReligions(),
+                                                       this.mapViewContainer.getPlayableReligions(),
                                                        this.mapViewContainer.getTradeGoods());
         this.provinceSheet.countryChangedProperty().addListener((observable, oldValue, newValue) -> {
             if (Boolean.FALSE.equals(oldValue) && Boolean.TRUE.equals(newValue)) {

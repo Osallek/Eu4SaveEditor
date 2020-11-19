@@ -119,8 +119,7 @@ public class ProvincePropertySheet extends VBox {
 
     private CustomPropertySheetSkin propertySheetSkin;
 
-    public ProvincePropertySheet(Save save, ObservableList<Country> playableCountries,
-                                 ObservableList<Culture> cultures, ObservableList<SaveReligion> religions,
+    public ProvincePropertySheet(Save save, ObservableList<Country> playableCountries, ObservableList<Culture> cultures, ObservableList<SaveReligion> religions,
                                  ObservableList<TradeGood> tradeGoods) {
         this.propertySheet = new CustomPropertySheet();
         this.propertySheet.setPropertyEditorFactory(new CustomPropertyEditorFactory());
