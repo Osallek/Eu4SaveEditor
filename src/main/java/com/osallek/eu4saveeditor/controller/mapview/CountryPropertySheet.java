@@ -27,6 +27,7 @@ import com.osallek.eu4saveeditor.controller.propertyeditor.CustomPropertyEditorF
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ButtonItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.CheckBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableComboBoxItem;
+import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderIntItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSpinnerItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableTextItem;
@@ -37,6 +38,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.control.ComboBox;
 import javafx.scene.layout.VBox;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.controlsfx.validation.ValidationSupport;
 import org.controlsfx.validation.Validator;
@@ -83,6 +85,8 @@ public class CountryPropertySheet extends VBox {
 
     private final ClearableSpinnerItem<Double> prestigeField;
 
+    private final ClearableSpinnerItem<Integer> absolutismField;
+
     private final ClearableSpinnerItem<Double> governmentReformProgressField;
 
     private final ClearableComboBoxItem<Pair<String, String>> governmentRankField;
@@ -99,7 +103,11 @@ public class CountryPropertySheet extends VBox {
 
     private final ClearableSpinnerItem<Double> treasuryField;
 
+    private final ClearableSpinnerItem<Double> inflationField;
+
     private final ClearableSliderItem corruptionField;
+
+    private final ClearableSliderIntItem mercantilismField;
 
     private final ClearableSpinnerItem<Double> manpowerField;
 
@@ -110,6 +118,8 @@ public class CountryPropertySheet extends VBox {
     private final ClearableSliderItem navyTraditionField;
 
     private final ClearableSliderItem armyProfessionalismField;
+
+    private final ClearableSliderItem warEhaustionField;
 
     private final ButtonItem loansButton;
 
@@ -162,14 +172,26 @@ public class CountryPropertySheet extends VBox {
                                                         save.getGame().getLocalisationClean("prestige"),
                                                         new ClearableSpinnerDouble(-100, 100, 1));
 
+        this.absolutismField = new ClearableSpinnerItem<>(SheetCategory.GENERAL,
+                                                          save.getGame().getLocalisationClean("absolutism"),
+                                                          new ClearableSpinnerInt(0, 100, 1));
+
         //Economy
         this.treasuryField = new ClearableSpinnerItem<>(SheetCategory.ECONOMY,
                                                         save.getGame().getLocalisationClean("TECH_TRESURY_TITLE"),
                                                         new ClearableSpinnerDouble(-1000000, 1000000, 100));
 
+        this.inflationField = new ClearableSpinnerItem<>(SheetCategory.ECONOMY,
+                                                         save.getGame().getLocalisationClean("inflation"),
+                                                         new ClearableSpinnerDouble(0, Integer.MAX_VALUE / 1000, 1));
+
         this.corruptionField = new ClearableSliderItem(SheetCategory.ECONOMY,
                                                        save.getGame().getLocalisation("corruption"),
                                                        0, 100);
+
+        this.mercantilismField = new ClearableSliderIntItem(SheetCategory.ECONOMY,
+                                                            save.getGame().getLocalisation("mercantilism"),
+                                                            0, 100);
 
         this.loansButton = new ButtonItem(SheetCategory.ECONOMY, null, save.getGame().getLocalisationClean("AI_LOANS"), 2);
         this.loans = FXCollections.observableArrayList();
@@ -222,6 +244,10 @@ public class CountryPropertySheet extends VBox {
         this.armyProfessionalismField = new ClearableSliderItem(SheetCategory.COUNTRY_MILITARY,
                                                                 save.getGame().getLocalisation("army_professionalism"),
                                                                 0, save.getGame().getMaxArmyProfessionalism());
+
+        this.warEhaustionField = new ClearableSliderItem(SheetCategory.COUNTRY_MILITARY,
+                                                         save.getGame().getLocalisation("war_exhaustion"),
+                                                         0, 20);
 
         this.validationSupport = new ValidationSupport();
         this.validationSupport.registerValidator(this.nameField.getTextField(), Validator.createEmptyValidator("Text is required"));
@@ -277,14 +303,29 @@ public class CountryPropertySheet extends VBox {
                 this.prestigeField.setSupplier(this.country::getPrestige);
                 items.add(this.prestigeField);
 
+                this.absolutismField.setValue(this.country.getAbsolutism());
+                this.absolutismField.setSupplier(this.country::getAbsolutism);
+
+                if (MapUtils.isNotEmpty(this.country.getSave().getCurrentAge().getAbsolutism())) {
+                    items.add(this.absolutismField);
+                }
+
                 //Economy
                 this.treasuryField.setValue(this.country.getTreasury());
                 this.treasuryField.setSupplier(this.country::getTreasury);
                 items.add(this.treasuryField);
 
+                this.inflationField.setValue(this.country.getInflation());
+                this.inflationField.setSupplier(this.country::getInflation);
+                items.add(this.inflationField);
+
                 this.corruptionField.setValue(this.country.getCorruption());
                 this.corruptionField.setSupplier(this.country::getCorruption);
                 items.add(this.corruptionField);
+
+                this.mercantilismField.setValue(this.country.getMercantilism());
+                this.mercantilismField.setSupplier(this.country::getMercantilism);
+                items.add(this.mercantilismField);
 
                 this.loans.setAll(this.country.getLoans().stream().map(Loan::new).collect(Collectors.toList()));
                 this.loansButton.getButton().setOnAction(event -> {
@@ -378,6 +419,10 @@ public class CountryPropertySheet extends VBox {
                 this.armyProfessionalismField.setSupplier(this.country::getArmyProfessionalism);
                 items.add(this.armyProfessionalismField);
 
+                this.warEhaustionField.setValue(this.country.getWarExhaustion());
+                this.warEhaustionField.setSupplier(this.country::getWarExhaustion);
+                items.add(this.warEhaustionField);
+
                 this.propertySheet.getItems().setAll(items);
 
                 if (expandedPaneName != null) {
@@ -407,6 +452,10 @@ public class CountryPropertySheet extends VBox {
 
         if (!Objects.equals(this.country.getCorruption(), this.corruptionField.getDoubleValue())) {
             this.country.setCorruption(this.corruptionField.getDoubleValue());
+        }
+
+        if (!Objects.equals(this.country.getMercantilism(), this.mercantilismField.getIntValue())) {
+            this.country.setMercantilism(this.mercantilismField.getIntValue());
         }
 
         if (this.country.getLoans().size() != this.loans.size() || this.loans.stream().anyMatch(Loan::isChanged)) {
@@ -457,6 +506,12 @@ public class CountryPropertySheet extends VBox {
 
         if (!Objects.equals(this.country.getPrestige(), this.prestigeField.getTrueValue())) {
             this.country.setPrestige(this.prestigeField.getTrueValue());
+        }
+
+        if (MapUtils.isNotEmpty(this.country.getSave().getCurrentAge().getAbsolutism())) {
+            if (!Objects.equals(this.country.getAbsolutism(), this.absolutismField.getTrueValue())) {
+                this.country.setAbsolutism(this.absolutismField.getTrueValue());
+            }
         }
 
         if (!Objects.equals(this.country.getGovernmentReformProgress(), this.governmentReformProgressField.getTrueValue())) {

@@ -8,6 +8,7 @@ import com.osallek.eu4saveeditor.controller.propertyeditor.item.ButtonItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.CheckComboBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableCheckComboBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableComboBoxItem;
+import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderIntItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSpinnerItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableTextItem;
@@ -267,6 +268,22 @@ public class CustomEditors {
 
             @Override
             public void setValue(Double value) {
+                getEditor().setValue(value);
+            }
+        };
+    }
+
+    public static PropertyEditor<Integer> createClearableSliderEditor(ClearableSliderIntItem property) {
+
+        return new AbstractPropertyEditor<>(property, property.getSlider()) {
+
+            @Override
+            protected ObservableValue<Integer> getObservableValue() {
+                return getEditor().getObservableValue();
+            }
+
+            @Override
+            public void setValue(Integer value) {
                 getEditor().setValue(value);
             }
         };

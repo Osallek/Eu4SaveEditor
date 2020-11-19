@@ -6,6 +6,7 @@ import com.osallek.eu4saveeditor.controller.propertyeditor.item.ButtonItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.CheckComboBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableCheckComboBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableComboBoxItem;
+import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderIntItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSpinnerItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableTextItem;
@@ -52,6 +53,10 @@ public class CustomPropertyEditorFactory extends CustomDefaultPropertyEditorFact
 
         if (type == ClearableSliderItem.class) {
             return CustomEditors.createClearableSliderEditor((ClearableSliderItem) item);
+        }
+
+        if (type == ClearableSliderIntItem.class) {
+            return CustomEditors.createClearableSliderEditor((ClearableSliderIntItem) item);
         }
 
         if (type == SelectableGridViewItem.class) {
