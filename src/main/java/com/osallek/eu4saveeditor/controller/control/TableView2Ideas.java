@@ -58,7 +58,7 @@ public class TableView2Ideas extends TableView<Idea> {
         TableColumn<Idea, Integer> amount = new TableColumn<>(country.getSave().getGame().getLocalisationCleanNoPunctuation("LEDGER_IDEASUNLOCKED"));
         amount.setCellValueFactory(p -> p.getValue() == null ? null : new ReadOnlyObjectWrapper<>(p.getValue().getLevel()));
         amount.setCellFactory(SpinnerTableCell.forTableColumn(0, ideaGroups.stream().mapToInt(i -> i.getIdeas().size()).max().orElse(0), 1,
-                                                              new IntegerStringConverter(), idea -> idea.getIdeaGroup().isFree()));
+                                                              new IntegerStringConverter(), idea -> idea == null || idea.getIdeaGroup().isFree()));
         amount.setOnEditCommit(event -> event.getRowValue().setLevel(event.getNewValue()));
         amount.setPrefWidth(250);
         amount.setEditable(true);
@@ -67,7 +67,7 @@ public class TableView2Ideas extends TableView<Idea> {
         TableColumn<Idea, Void> remove = new TableColumn<>();
         remove.setPrefWidth(48);
         remove.setEditable(false);
-        remove.setCellFactory(ClearCellFactory.forTableColumn(idea -> idea.getIdeaGroup().isFree()));
+        remove.setCellFactory(ClearCellFactory.forTableColumn(idea -> idea == null || idea.getIdeaGroup().isFree()));
 
         setFixedCellSize(40);
         setPrefWidth(550);
@@ -82,10 +82,11 @@ public class TableView2Ideas extends TableView<Idea> {
         this.ideasMapSource.forEach((idea, ideas) ->
                                             this.ideasMap.put(idea, ideas.sorted(Comparator.comparing(IdeaGroup::getLocalizedName, Eu4Utils.COLLATOR))));
 
-        this.disableAddProperty = new SimpleBooleanProperty(false);
+        this.disableAddProperty = new SimpleBooleanProperty(getItems().stream().filter(idea -> !idea.getIdeaGroup().isFree()).count()
+                                                            >= country.getAllowedIdeaGroups());
 
         getItems().addListener((ListChangeListener<? super Idea>) c -> {
-            this.disableAddProperty.setValue(c.getList().size() >= country.getSave().getGame().getIdeaGroups().size());
+            this.disableAddProperty.setValue(c.getList().stream().filter(idea -> !idea.getIdeaGroup().isFree()).count() >= country.getAllowedIdeaGroups());
 
             while (c.next()) {
                 c.getRemoved().forEach(idea -> {
