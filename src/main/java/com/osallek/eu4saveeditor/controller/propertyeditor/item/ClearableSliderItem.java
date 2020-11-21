@@ -26,6 +26,10 @@ public class ClearableSliderItem implements CustomItem<Integer> {
         this(category, name, min, max, null, null);
     }
 
+    public ClearableSliderItem(String category, String name, double min, double max) {
+        this(category, name, min, max, null, null);
+    }
+
     public ClearableSliderItem(SheetCategory category, String name, double min, double max, Double value, DoubleSupplier supplier) {
         this(category.getForDefaultLocale(), name, min, max, value, supplier);
     }

@@ -3,7 +3,6 @@ package com.osallek.eu4saveeditor.controller.control;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.changeprices.ChangePrice;
-import com.osallek.eu4saveeditor.controller.converter.ClearCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.PercentStringConverter;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -43,7 +42,7 @@ public class TableView2ChangePrice extends TableView<ChangePrice> {
         TableColumn<ChangePrice, Void> remove = new TableColumn<>();
         remove.setPrefWidth(48);
         remove.setEditable(false);
-        remove.setCellFactory(new ClearCellFactory<>());
+        remove.setCellFactory(ClearCellFactory.forTableColumn());
 
         setFixedCellSize(40);
         setPrefWidth(750);

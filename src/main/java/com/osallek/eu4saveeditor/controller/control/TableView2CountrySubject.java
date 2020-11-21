@@ -2,7 +2,6 @@ package com.osallek.eu4saveeditor.controller.control;
 
 import com.osallek.eu4parser.model.game.SubjectType;
 import com.osallek.eu4parser.model.save.country.Country;
-import com.osallek.eu4saveeditor.controller.converter.ClearCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.CountryStringConverter;
 import com.osallek.eu4saveeditor.controller.converter.SubjectTypeStringConverter;
 import com.osallek.eu4saveeditor.controller.object.CountrySubject;
@@ -52,7 +51,7 @@ public class TableView2CountrySubject extends TableView<CountrySubject> {
         TableColumn<CountrySubject, Void> remove = new TableColumn<>();
         remove.setPrefWidth(48);
         remove.setEditable(false);
-        remove.setCellFactory(new ClearCellFactory<>());
+        remove.setCellFactory(ClearCellFactory.forTableColumn());
 
         setFixedCellSize(40);
         setPrefWidth(650);

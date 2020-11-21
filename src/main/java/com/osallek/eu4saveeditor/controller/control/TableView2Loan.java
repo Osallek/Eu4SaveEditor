@@ -1,7 +1,6 @@
 package com.osallek.eu4saveeditor.controller.control;
 
 import com.osallek.eu4parser.model.save.country.Country;
-import com.osallek.eu4saveeditor.controller.converter.ClearCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.DoubleStringConverter;
 import com.osallek.eu4saveeditor.controller.object.Loan;
 import com.osallek.eu4saveeditor.controller.pane.DatePickerCell;
@@ -43,7 +42,7 @@ public class TableView2Loan extends TableView<Loan> {
         TableColumn<Loan, Void> remove = new TableColumn<>();
         remove.setPrefWidth(48);
         remove.setEditable(false);
-        remove.setCellFactory(new ClearCellFactory<>());
+        remove.setCellFactory(ClearCellFactory.forTableColumn());
 
         setFixedCellSize(40);
         setPrefWidth(500);

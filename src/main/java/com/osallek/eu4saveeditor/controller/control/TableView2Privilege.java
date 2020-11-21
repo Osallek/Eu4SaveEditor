@@ -4,7 +4,6 @@ import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.model.game.EstatePrivilege;
 import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.country.SaveEstate;
-import com.osallek.eu4saveeditor.controller.converter.ClearCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.EstatePrivilegeStringConverter;
 import com.osallek.eu4saveeditor.controller.object.Privilege;
 import com.osallek.eu4saveeditor.controller.pane.DatePickerCell;
@@ -73,7 +72,7 @@ public class TableView2Privilege extends TableView<Privilege> {
         TableColumn<Privilege, Void> remove = new TableColumn<>();
         remove.setPrefWidth(48);
         remove.setEditable(false);
-        remove.setCellFactory(new ClearCellFactory<>());
+        remove.setCellFactory(ClearCellFactory.forTableColumn());
 
         setFixedCellSize(40);
         setPrefWidth(550);

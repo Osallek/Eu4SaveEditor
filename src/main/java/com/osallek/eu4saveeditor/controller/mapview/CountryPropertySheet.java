@@ -14,10 +14,12 @@ import com.osallek.eu4saveeditor.controller.control.ClearableSpinnerDouble;
 import com.osallek.eu4saveeditor.controller.control.ClearableSpinnerInt;
 import com.osallek.eu4saveeditor.controller.control.RequiredComboBox;
 import com.osallek.eu4saveeditor.controller.control.TableView2CountrySubject;
+import com.osallek.eu4saveeditor.controller.control.TableView2Ideas;
 import com.osallek.eu4saveeditor.controller.control.TableView2Loan;
 import com.osallek.eu4saveeditor.controller.converter.PairCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.PairConverter;
 import com.osallek.eu4saveeditor.controller.object.CountrySubject;
+import com.osallek.eu4saveeditor.controller.object.Idea;
 import com.osallek.eu4saveeditor.controller.object.Loan;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheetSkin;
@@ -131,6 +133,18 @@ public class CountryPropertySheet extends VBox {
     private final List<EstatePropertySheet> estatePropertySheets;
 
     private CustomPropertySheetSkin estatesPropertySheetSkin;
+
+    private final ClearableSpinnerItem<Integer> admTechField;
+
+    private final ClearableSpinnerItem<Integer> dipTechField;
+
+    private final ClearableSpinnerItem<Integer> milTechField;
+
+    private final ClearableSliderItem innovativenessField;
+
+    private final ButtonItem ideasButton;
+
+    private final ObservableList<Idea> ideas;
 
     private final CustomPropertySheetSkin propertySheetSkin;
 
@@ -266,6 +280,27 @@ public class CountryPropertySheet extends VBox {
         this.estatesPropertySheet.setSkin(this.estatesPropertySheetSkin);
 
         this.estatePropertySheets = new ArrayList<>();
+
+        //TECHNOLOGY
+        this.admTechField = new ClearableSpinnerItem<>(save.getGame().getLocalisationClean("HEADER_TECHNOLOGY"),
+                                                       save.getGame().getLocalisationClean("adm_tech"),
+                                                       new ClearableSpinnerInt(0, save.getGame().getTechnologies(Power.ADM).size(), 1));
+
+        this.dipTechField = new ClearableSpinnerItem<>(save.getGame().getLocalisationClean("HEADER_TECHNOLOGY"),
+                                                       save.getGame().getLocalisationClean("dip_tech"),
+                                                       new ClearableSpinnerInt(0, save.getGame().getTechnologies(Power.DIP).size(), 1));
+
+        this.milTechField = new ClearableSpinnerItem<>(save.getGame().getLocalisationClean("HEADER_TECHNOLOGY"),
+                                                       save.getGame().getLocalisationClean("mil_tech"),
+                                                       new ClearableSpinnerInt(0, save.getGame().getTechnologies(Power.MIL).size(), 1));
+
+        this.innovativenessField = new ClearableSliderItem(save.getGame().getLocalisationClean("HEADER_TECHNOLOGY"),
+                                                           save.getGame().getLocalisation("innovativeness"),
+                                                           0, save.getGame().getInnovativenessMax());
+
+        this.ideas = FXCollections.observableArrayList();
+        this.ideasButton = new ButtonItem(save.getGame().getLocalisationClean("HEADER_TECHNOLOGY"), null,
+                                          save.getGame().getLocalisationClean("HEADER_IDEAS"), 2);
 
         this.validationSupport = new ValidationSupport();
         this.validationSupport.registerValidator(this.nameField.getTextField(), Validator.createEmptyValidator("Text is required"));
@@ -467,6 +502,53 @@ public class CountryPropertySheet extends VBox {
                     items.add(new PropertySheetItem(this.country.getSave().getGame().getLocalisation("HEADER_ESTATES"), this.estatesPropertySheet));
                 }
 
+                //Technology
+                this.admTechField.setSupplier(() -> this.country.getTech().getAdm());
+                this.admTechField.setValue(this.country.getTech().getAdm());
+                items.add(this.admTechField);
+
+                this.dipTechField.setSupplier(() -> this.country.getTech().getDip());
+                this.dipTechField.setValue(this.country.getTech().getDip());
+                items.add(this.dipTechField);
+
+                this.milTechField.setSupplier(() -> this.country.getTech().getMil());
+                this.milTechField.setValue(this.country.getTech().getMil());
+                items.add(this.milTechField);
+
+                this.innovativenessField.setValue(this.country.getInnovativeness());
+                this.innovativenessField.setSupplier(this.country::getInnovativeness);
+                items.add(this.innovativenessField);
+
+                this.ideas.setAll(this.country.getIdeaGroups().getIdeaGroups().entrySet().stream().map(Idea::new).collect(Collectors.toList()));
+                this.ideasButton.getButton().setOnAction(event -> {
+                    TableView2Ideas tableView2Ideas = new TableView2Ideas(this.country, this.ideas, this.country.getSave()
+                                                                                                                .getGame()
+                                                                                                                .getIdeaGroups()
+                                                                                                                .stream()
+                                                                                                                .collect(Collectors.toCollection(
+                                                                                                                        FXCollections::observableArrayList)));
+                    TableViewDialog<Idea> dialog =
+                            new TableViewDialog<>(this.country.getSave(),
+                                                  tableView2Ideas,
+                                                  this.country.getSave().getGame().getLocalisationClean("HEADER_IDEAS"),
+                                                  (list) -> new Idea(this.country.getSave()
+                                                                                 .getGame()
+                                                                                 .getIdeaGroups()
+                                                                                 .stream()
+                                                                                 .filter(ideaGroup -> list.stream()
+                                                                                                          .noneMatch(i -> i.getIdeaGroup().equals(ideaGroup)))
+                                                                                 .filter(ideaGroup -> list.isEmpty() == ideaGroup.isFree())
+                                                                                 .findFirst()
+                                                                                 .get(),
+                                                                     0),
+                                                  () -> this.ideas);
+                    dialog.setDisableAddProperty(tableView2Ideas.disableAddPropertyProperty());
+                    Optional<List<Idea>> ideas = dialog.showAndWait();
+
+                    ideas.ifPresent(this.ideas::setAll);
+                });
+                items.add(this.ideasButton);
+
                 this.propertySheet.getItems().setAll(items);
 
                 if (expandedPaneName != null) {
@@ -605,6 +687,39 @@ public class CountryPropertySheet extends VBox {
               }));
 
         this.estatePropertySheets.forEach(sheet -> sheet.validate(actionEvent));
+
+        if (!Objects.equals(this.country.getTech().getAdm(), this.admTechField.getTrueValue())) {
+            this.country.getTech().setAdm(this.admTechField.getTrueValue());
+        }
+
+        if (!Objects.equals(this.country.getTech().getDip(), this.dipTechField.getTrueValue())) {
+            this.country.getTech().setDip(this.dipTechField.getTrueValue());
+        }
+
+        if (!Objects.equals(this.country.getTech().getMil(), this.milTechField.getTrueValue())) {
+            this.country.getTech().setMil(this.milTechField.getTrueValue());
+        }
+
+        if (!Objects.equals(this.country.getInnovativeness(), this.innovativenessField.getDoubleValue())) {
+            this.country.setInnovativeness(this.innovativenessField.getDoubleValue());
+        }
+
+        if (this.country.getIdeaGroups().getIdeaGroups().size() != this.ideas.size() || this.ideas.stream().anyMatch(Idea::isChanged)) {
+            this.country.getIdeaGroups()
+                        .getIdeaGroups()
+                        .forEach((ideaGroup, integer) -> this.ideas.stream()
+                                                                   .filter(p -> ideaGroup.equals(p.getIdeaGroup()))
+                                                                   .findFirst()
+                                                                   .ifPresentOrElse(p -> {
+                                                                                        if (!Objects.equals(p.getLevel(), integer)) {
+                                                                                            this.country.getIdeaGroups().setIdeaGroup(ideaGroup, p.getLevel());
+                                                                                        }
+
+                                                                                        this.ideas.remove(p);
+                                                                                    },
+                                                                                    () -> this.country.getIdeaGroups().removeIdeaGroup(ideaGroup)));
+            this.ideas.forEach(idea -> this.country.getIdeaGroups().setIdeaGroup(idea.getIdeaGroup(), idea.getLevel()));
+        }
 
         update(this.country, true);
     }
