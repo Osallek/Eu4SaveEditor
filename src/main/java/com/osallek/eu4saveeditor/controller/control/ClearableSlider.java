@@ -1,5 +1,6 @@
 package com.osallek.eu4saveeditor.controller.control;
 
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -88,8 +89,8 @@ public class ClearableSlider extends HBox {
         this.slider.setValue(value);
     }
 
-    public ObservableValue<Double> getObservableValue() {
-        return this.slider.valueProperty().asObject();
+    public DoubleProperty getDoubleProperty() {
+        return this.slider.valueProperty();
     }
 
     public void setSupplier(DoubleSupplier clearSupplier) {

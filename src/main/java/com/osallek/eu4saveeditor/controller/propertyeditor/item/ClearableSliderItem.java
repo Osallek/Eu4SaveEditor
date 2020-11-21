@@ -3,6 +3,7 @@ package com.osallek.eu4saveeditor.controller.propertyeditor.item;
 import com.osallek.eu4saveeditor.controller.control.ClearableSlider;
 import com.osallek.eu4saveeditor.i18n.SheetCategory;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -99,6 +100,10 @@ public class ClearableSliderItem implements CustomItem<Integer> {
 
     public ClearableSlider getSlider() {
         return this.slider;
+    }
+
+    public DoubleProperty getObservableDoubleValue() {
+        return this.slider.getDoubleProperty();
     }
 
     public double getDoubleValue() {

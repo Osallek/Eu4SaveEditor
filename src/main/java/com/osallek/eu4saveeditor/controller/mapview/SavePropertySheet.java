@@ -75,7 +75,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -397,7 +397,7 @@ public class SavePropertySheet extends VBox {
                                                        .getLocalisationClean("TSI_CURR_MOD_BY"));
 
             buttonItem.getButton().setOnAction(event -> {
-                Supplier<ChangePrice> supplier = () -> {
+                Function<ObservableList<ChangePrice>, ChangePrice> supplier = (list) -> {
                     ChangePrice changePrice = new ChangePrice(good.getName() + "_modifier_" + (this.goodsChangePrices.get(good.getName()).size() + 1), 0,
                                                               LocalDate.now());
                     this.goodsChangePrices.get(good.getName()).add(changePrice);

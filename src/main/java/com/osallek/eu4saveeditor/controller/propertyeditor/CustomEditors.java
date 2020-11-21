@@ -263,7 +263,7 @@ public class CustomEditors {
 
             @Override
             protected ObservableValue<Double> getObservableValue() {
-                return getEditor().getObservableValue();
+                return getEditor().getDoubleProperty().asObject();
             }
 
             @Override

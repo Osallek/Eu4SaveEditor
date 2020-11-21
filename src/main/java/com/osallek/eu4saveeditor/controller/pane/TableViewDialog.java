@@ -2,6 +2,8 @@ package com.osallek.eu4saveeditor.controller.pane;
 
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4saveeditor.common.Constants;
+import javafx.beans.property.BooleanProperty;
+import javafx.collections.ObservableList;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
@@ -17,15 +19,24 @@ import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class TableViewDialog<S> extends Dialog<List<S>> {
 
     private final TableView<S> tableView2;
 
-    public TableViewDialog(Save save, TableView<S> tableView2, String title, Supplier<S> supplier, Supplier<List<S>> clearSupplier) {
+    private final Button addButton;
+
+    private BooleanProperty disableAddProperty;
+
+    public TableViewDialog(Save save, TableView<S> tableView2, String title, Function<ObservableList<S>, S> supplier, Supplier<List<S>> clearSupplier) {
+        this(save, tableView2, title, supplier, clearSupplier, null);
+    }
+
+    public TableViewDialog(Save save, TableView<S> tableView2, String title, Function<ObservableList<S>, S> supplier, Supplier<List<S>> clearSupplier, BooleanProperty disableAdd) {
         this.tableView2 = tableView2;
-        Button addButton = new Button("", new Glyph("FontAwesome", FontAwesome.Glyph.PLUS));
+        this.addButton = new Button("", new Glyph("FontAwesome", FontAwesome.Glyph.PLUS));
         Button resetButton = new Button(save.getGame().getLocalisation("PW_RESET"));
         final DialogPane dialogPane = getDialogPane();
 
@@ -38,11 +49,13 @@ public class TableViewDialog<S> extends Dialog<List<S>> {
         hBox.getChildren().add(spacer);
         HBox.setHgrow(spacer, Priority.ALWAYS);
         hBox.getChildren().add(resetButton);
-        hBox.getChildren().add(addButton);
+        hBox.getChildren().add(this.addButton);
         vBox.getChildren().add(hBox);
 
         resetButton.setOnAction(event -> this.tableView2.getItems().setAll(clearSupplier.get()));
-        addButton.setOnAction(event -> this.tableView2.getItems().add(supplier.get()));
+        this.addButton.setOnAction(event -> this.tableView2.getItems().add(supplier.apply(getItems())));
+
+        setDisableAddProperty(disableAdd);
 
         setTitle(title);
         setResizable(true);
@@ -57,5 +70,26 @@ public class TableViewDialog<S> extends Dialog<List<S>> {
 
             return null;
         });
+    }
+
+    public ObservableList<S> getItems() {
+        return this.tableView2.getItems();
+    }
+
+    public TableView<S> getTableView2() {
+        return tableView2;
+    }
+
+    public BooleanProperty disableAddPropertyProperty() {
+        return disableAddProperty;
+    }
+
+    public void setDisableAddProperty(BooleanProperty disableAddProperty) {
+        this.disableAddProperty = disableAddProperty;
+
+        this.addButton.disableProperty().unbind();
+        if (this.disableAddProperty != null) {
+            this.addButton.disableProperty().bind(this.disableAddProperty);
+        }
     }
 }

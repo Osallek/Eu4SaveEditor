@@ -31,6 +31,7 @@ import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderI
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSpinnerItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableTextItem;
+import com.osallek.eu4saveeditor.controller.propertyeditor.item.PropertySheetItem;
 import com.osallek.eu4saveeditor.controller.validator.CustomGraphicValidationDecoration;
 import com.osallek.eu4saveeditor.i18n.SheetCategory;
 import javafx.collections.FXCollections;
@@ -125,6 +126,12 @@ public class CountryPropertySheet extends VBox {
 
     private final ObservableList<Loan> loans;
 
+    private final CustomPropertySheet estatesPropertySheet;
+
+    private final List<EstatePropertySheet> estatePropertySheets;
+
+    private CustomPropertySheetSkin estatesPropertySheetSkin;
+
     private final CustomPropertySheetSkin propertySheetSkin;
 
     public CountryPropertySheet(Save save, ObservableList<Country> countriesAlive, ObservableList<Culture> cultures, ObservableList<SaveReligion> religions) {
@@ -190,7 +197,7 @@ public class CountryPropertySheet extends VBox {
                                                        0, 100);
 
         this.mercantilismField = new ClearableSliderIntItem(SheetCategory.ECONOMY,
-                                                            save.getGame().getLocalisation("mercantilism"),
+                                                            save.getGame().getLocalisation("MERCANTILISM_LABEL"),
                                                             0, 100);
 
         this.loansButton = new ButtonItem(SheetCategory.ECONOMY, null, save.getGame().getLocalisationClean("AI_LOANS"), 2);
@@ -246,8 +253,19 @@ public class CountryPropertySheet extends VBox {
                                                                 0, save.getGame().getMaxArmyProfessionalism());
 
         this.warEhaustionField = new ClearableSliderItem(SheetCategory.COUNTRY_MILITARY,
-                                                         save.getGame().getLocalisation("war_exhaustion"),
+                                                         save.getGame().getLocalisation("WAR_EXHAUSTION"),
                                                          0, 20);
+
+        //ESTATES
+        this.estatesPropertySheet = new CustomPropertySheet();
+        this.estatesPropertySheet.setPropertyEditorFactory(new CustomPropertyEditorFactory());
+        this.estatesPropertySheet.setMode(CustomPropertySheet.Mode.CATEGORY);
+        this.estatesPropertySheet.setModeSwitcherVisible(false);
+        this.estatesPropertySheet.setSearchBoxVisible(false);
+        this.estatesPropertySheetSkin = new CustomPropertySheetSkin(this.estatesPropertySheet);
+        this.estatesPropertySheet.setSkin(this.estatesPropertySheetSkin);
+
+        this.estatePropertySheets = new ArrayList<>();
 
         this.validationSupport = new ValidationSupport();
         this.validationSupport.registerValidator(this.nameField.getTextField(), Validator.createEmptyValidator("Text is required"));
@@ -268,6 +286,9 @@ public class CountryPropertySheet extends VBox {
             } else {
                 String expandedPaneName = this.propertySheetSkin.getAccordion().getExpandedPane() == null ? null :
                                           this.propertySheetSkin.getAccordion().getExpandedPane().getText();
+
+                String estateExpandedPaneName = this.estatesPropertySheetSkin.getAccordion().getExpandedPane() == null ? null :
+                                                this.estatesPropertySheetSkin.getAccordion().getExpandedPane().getText();
 
                 List<CustomPropertySheet.Item> items = new ArrayList<>();
 
@@ -332,7 +353,7 @@ public class CountryPropertySheet extends VBox {
                     TableViewDialog<Loan> dialog = new TableViewDialog<>(this.country.getSave(),
                                                                          new TableView2Loan(this.country, this.loans),
                                                                          this.country.getSave().getGame().getLocalisationClean("AI_LOANS"),
-                                                                         () -> new Loan(300, 4, this.country.getSave().getDate().plusYears(5)),
+                                                                         (list) -> new Loan(300, 4, this.country.getSave().getDate().plusYears(5)),
                                                                          () -> this.loans);
                     Optional<List<Loan>> countrySubjects = dialog.showAndWait();
 
@@ -381,10 +402,10 @@ public class CountryPropertySheet extends VBox {
                                                                                this.countriesAlive,
                                                                                this.subjectTypes),
                                                   this.country.getSave().getGame().getLocalisationClean("HEADER_SUBJECTS"),
-                                                  () -> new CountrySubject(this.country,
-                                                                           this.countriesAlive.get(0),
-                                                                           this.subjectTypes.get(0),
-                                                                           this.country.getSave().getDate()),
+                                                  (list) -> new CountrySubject(this.country,
+                                                                               this.countriesAlive.get(0),
+                                                                               this.subjectTypes.get(0),
+                                                                               this.country.getSave().getDate()),
                                                   () -> this.country.getSubjects()
                                                                     .stream()
                                                                     .map(CountrySubject::new)
@@ -423,6 +444,29 @@ public class CountryPropertySheet extends VBox {
                 this.warEhaustionField.setSupplier(this.country::getWarExhaustion);
                 items.add(this.warEhaustionField);
 
+                //Estates
+                this.estatePropertySheets.clear();
+                this.estatesPropertySheet.getItems().clear();
+                this.country.getEstates()
+                            .stream()
+                            .sorted(Comparator.comparing(estate -> estate.getEstateGame().getLocalizedName(), Eu4Utils.COLLATOR))
+                            .forEach(estate -> {
+                                EstatePropertySheet estatePropertySheet = new EstatePropertySheet(this.country, estate);
+
+                                if (!estatePropertySheet.getPropertySheet().getItems().isEmpty()) {
+                                    this.estatePropertySheets.add(estatePropertySheet);
+                                    this.estatesPropertySheet.getItems().addAll(estatePropertySheet.getPropertySheet().getItems());
+                                }
+                            });
+                this.estatePropertySheets.forEach(sheet -> this.estatePropertySheets.stream()
+                                                                                    .filter(otherSheet -> !otherSheet.equals(sheet))
+                                                                                    .forEach(otherSheet -> sheet.getCountryEstatesTerritory()
+                                                                                                                .add(otherSheet.territoryValue())));
+
+                if (!this.estatesPropertySheet.getItems().isEmpty()) {
+                    items.add(new PropertySheetItem(this.country.getSave().getGame().getLocalisation("HEADER_ESTATES"), this.estatesPropertySheet));
+                }
+
                 this.propertySheet.getItems().setAll(items);
 
                 if (expandedPaneName != null) {
@@ -432,6 +476,15 @@ public class CountryPropertySheet extends VBox {
                                           .filter(titledPane -> titledPane.getText().equals(expandedPaneName))
                                           .findFirst()
                                           .ifPresent(titledPane -> this.propertySheetSkin.getAccordion().setExpandedPane(titledPane));
+                }
+
+                if (estateExpandedPaneName != null) {
+                    this.estatesPropertySheetSkin.getAccordion()
+                                                 .getPanes()
+                                                 .stream()
+                                                 .filter(titledPane -> titledPane.getText().equals(estateExpandedPaneName))
+                                                 .findFirst()
+                                                 .ifPresent(titledPane -> this.estatesPropertySheetSkin.getAccordion().setExpandedPane(titledPane));
                 }
             }
         }
@@ -550,6 +603,8 @@ public class CountryPropertySheet extends VBox {
 
                   return countrySubject;
               }));
+
+        this.estatePropertySheets.forEach(sheet -> sheet.validate(actionEvent));
 
         update(this.country, true);
     }
