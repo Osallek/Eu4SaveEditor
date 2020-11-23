@@ -8,6 +8,7 @@ import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import org.apache.commons.lang3.BooleanUtils;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
 
@@ -29,11 +30,22 @@ public class ClearableDatePicker extends HBox {
     public ClearableDatePicker(LocalDate date, Supplier<LocalDate> clearSupplier, LocalDate startDate, LocalDate endDate) {
         this.datePicker = date == null ? new DatePicker() : new DatePicker(dateToLocalDate(date));
         this.datePicker.setMaxWidth(Double.MAX_VALUE);
+        this.datePicker.setShowWeekNumbers(false);
         this.datePicker.setDayCellFactory(d -> new DateCell() {
             @Override
             public void updateItem(LocalDate item, boolean empty) {
                 super.updateItem(item, empty);
                 setDisable((endDate != null && item.isAfter(endDate)) || (startDate != null && item.isBefore(startDate)));
+            }
+        });
+        this.datePicker.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if ((endDate != null && newValue.isAfter(endDate)) || (startDate != null && newValue.isBefore(startDate))) {
+                this.datePicker.setValue(oldValue);
+            }
+        });
+        this.datePicker.focusedProperty().addListener((observable, oldValue, newValue) -> {
+            if (BooleanUtils.isFalse(newValue) && this.datePicker.isEditable()) {
+                this.datePicker.setValue(this.datePicker.getConverter().fromString(this.datePicker.getEditor().getText()));
             }
         });
 
