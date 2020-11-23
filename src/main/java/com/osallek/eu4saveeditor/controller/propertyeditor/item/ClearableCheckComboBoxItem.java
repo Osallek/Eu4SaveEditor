@@ -38,15 +38,21 @@ public class ClearableCheckComboBoxItem<U> implements CustomItem<U> {
     private Callback<ListView<U>, ListCell<U>> cellFactory;
 
     public ClearableCheckComboBoxItem(SheetCategory category, String name, ObservableList<U> values, ClearableCheckComboBox<U> checkComboBox) {
+        this(category.getForDefaultLocale(), name, values, checkComboBox);
+    }
+
+    public ClearableCheckComboBoxItem(String category, String name, ObservableList<U> values, ClearableCheckComboBox<U> checkComboBox) {
         this(category, name, values, null, checkComboBox, new SimpleBooleanProperty(true));
     }
 
-    public ClearableCheckComboBoxItem(SheetCategory category, String name, ObservableList<U> values, ObservableList<U> selectedValues, ClearableCheckComboBox<U> checkComboBox) {
-        this(category, name, values, selectedValues, checkComboBox, new SimpleBooleanProperty(true));
+    public ClearableCheckComboBoxItem(SheetCategory category, String name, ObservableList<U> values, ObservableList<U> selectedValues,
+                                      ClearableCheckComboBox<U> checkComboBox) {
+        this(category.getForDefaultLocale(), name, values, selectedValues, checkComboBox, new SimpleBooleanProperty(true));
     }
 
-    public ClearableCheckComboBoxItem(SheetCategory category, String name, ObservableList<U> values, ObservableList<U> selectedValues, ClearableCheckComboBox<U> checkComboBox, BooleanProperty editable) {
-        this.category = category.getForDefaultLocale();
+    public ClearableCheckComboBoxItem(String category, String name, ObservableList<U> values, ObservableList<U> selectedValues,
+                                      ClearableCheckComboBox<U> checkComboBox, BooleanProperty editable) {
+        this.category = category;
         this.name = name;
         this.values = values;
         this.selectedValues = selectedValues;

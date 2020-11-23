@@ -6,6 +6,7 @@ import com.osallek.eu4saveeditor.controller.propertyeditor.item.ButtonItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.CheckComboBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableCheckComboBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableComboBoxItem;
+import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableDatePickerItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderIntItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSpinnerItem;
@@ -33,6 +34,10 @@ public class CustomPropertyEditorFactory extends CustomDefaultPropertyEditorFact
 
         if (type == ComboBoxItem.class) {
             return CustomEditors.createCustomChoiceEditor((ComboBoxItem<?>) item);
+        }
+
+        if (type == ClearableDatePickerItem.class) {
+            return CustomEditors.createClearableDatePickerEditor((ClearableDatePickerItem) item);
         }
 
         if (type == ClearableComboBoxItem.class) {

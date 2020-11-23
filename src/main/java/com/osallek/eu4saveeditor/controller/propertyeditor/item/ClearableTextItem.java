@@ -26,15 +26,23 @@ public class ClearableTextItem implements CustomItem<Void> {
     private final BooleanProperty editable;
 
     public ClearableTextItem(SheetCategory category, String name) {
-        this(category, name, null, null, new SimpleBooleanProperty(true) {});
+        this(category.getForDefaultLocale(), name);
+    }
+
+    public ClearableTextItem(String category, String name) {
+        this(category, name, null, null);
     }
 
     public ClearableTextItem(SheetCategory category, String name, String value, Supplier<String> clearSupplier) {
+        this(category.getForDefaultLocale(), name, value, clearSupplier);
+    }
+
+    public ClearableTextItem(String category, String name, String value, Supplier<String> clearSupplier) {
         this(category, name, value, clearSupplier, new SimpleBooleanProperty(true));
     }
 
-    public ClearableTextItem(SheetCategory category, String name, String value, Supplier<String> clearSupplier, BooleanProperty editable) {
-        this.category = category.getForDefaultLocale();
+    public ClearableTextItem(String category, String name, String value, Supplier<String> clearSupplier, BooleanProperty editable) {
+        this.category = category;
         this.name = name;
         this.textField = CustomClearableTextField.createClearableTextField(clearSupplier);
         this.value = value;

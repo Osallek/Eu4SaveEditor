@@ -1,5 +1,6 @@
 package com.osallek.eu4saveeditor.controller.propertyeditor;
 
+import com.osallek.eu4saveeditor.controller.control.ClearableDatePicker;
 import com.osallek.eu4saveeditor.controller.pane.AbstractObjectField;
 import com.osallek.eu4saveeditor.controller.pane.AbstractPropertyEditor;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
@@ -8,6 +9,7 @@ import com.osallek.eu4saveeditor.controller.propertyeditor.item.ButtonItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.CheckComboBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableCheckComboBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableComboBoxItem;
+import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableDatePickerItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderIntItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSpinnerItem;
@@ -237,6 +239,22 @@ public class CustomEditors {
             @Override
             public void setValue(String value) {
                 getEditor().setText(value);
+            }
+        };
+    }
+
+    public static PropertyEditor<LocalDate> createClearableDatePickerEditor(ClearableDatePickerItem property) {
+
+        return new AbstractPropertyEditor<>(property, property.getDatePicker()) {
+
+            @Override
+            protected ObservableValue<LocalDate> getObservableValue() {
+                return getEditor().getDatePicker().valueProperty();
+            }
+
+            @Override
+            public void setValue(LocalDate value) {
+                getEditor().getDatePicker().setValue(value);
             }
         };
     }

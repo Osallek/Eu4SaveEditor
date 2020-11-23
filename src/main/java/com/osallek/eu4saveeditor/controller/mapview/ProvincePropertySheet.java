@@ -416,8 +416,8 @@ public class ProvincePropertySheet extends VBox {
             items.add(this.cotField);
 
             if (this.province.isCity()) {
-                this.autonomyField.setValue(this.province.getLocalAutonomy());
-                this.autonomyField.setSupplier(this.province::getLocalAutonomy);
+                this.autonomyField.setValue(this.province.getTrueLocalAutonomy());
+                this.autonomyField.setSupplier(this.province::getTrueLocalAutonomy);
                 this.autonomyField.setEditable(true);
                 items.add(this.autonomyField);
 
@@ -613,7 +613,7 @@ public class ProvincePropertySheet extends VBox {
         }
 
         if (this.autonomyField.isEditable().getValue()) {
-            if (!Objects.deepEquals(this.province.getLocalAutonomy(), this.autonomyField.getDoubleValue())) {
+            if (!Objects.deepEquals(this.province.getTrueLocalAutonomy(), this.autonomyField.getDoubleValue())) {
                 this.province.setLocalAutonomy(this.autonomyField.getDoubleValue());
             }
         }

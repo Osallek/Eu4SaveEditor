@@ -4,6 +4,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -16,17 +17,26 @@ import java.util.function.Supplier;
 public class ClearableDatePicker extends HBox {
 
     private final DatePicker datePicker;
+
     private final Button button;
 
     private final Supplier<LocalDate> clearSupplier;
 
     public ClearableDatePicker(LocalDate date) {
-        this(date, null);
+        this(date, null, null, null);
     }
 
-    public ClearableDatePicker(LocalDate date, Supplier<LocalDate> clearSupplier) {
+    public ClearableDatePicker(LocalDate date, Supplier<LocalDate> clearSupplier, LocalDate startDate, LocalDate endDate) {
         this.datePicker = date == null ? new DatePicker() : new DatePicker(dateToLocalDate(date));
         this.datePicker.setMaxWidth(Double.MAX_VALUE);
+        this.datePicker.setDayCellFactory(d -> new DateCell() {
+            @Override
+            public void updateItem(LocalDate item, boolean empty) {
+                super.updateItem(item, empty);
+                setDisable((endDate != null && item.isAfter(endDate)) || (startDate != null && item.isBefore(startDate)));
+            }
+        });
+
         HBox.setHgrow(this.datePicker, Priority.ALWAYS);
 
         this.button = new Button("", new Glyph("FontAwesome", FontAwesome.Glyph.CLOSE));

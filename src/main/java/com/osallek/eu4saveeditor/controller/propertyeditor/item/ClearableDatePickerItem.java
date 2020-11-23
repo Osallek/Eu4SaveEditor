@@ -2,13 +2,16 @@ package com.osallek.eu4saveeditor.controller.propertyeditor.item;
 
 import com.osallek.eu4saveeditor.controller.control.ClearableDatePicker;
 import com.osallek.eu4saveeditor.i18n.SheetCategory;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
-import org.controlsfx.control.PropertySheet;
+import javafx.collections.ObservableList;
 
 import java.time.LocalDate;
 import java.util.Optional;
+import java.util.function.Supplier;
 
-public class ClearableDatePickerItem implements PropertySheet.Item {
+public class ClearableDatePickerItem implements CustomItem<LocalDate> {
 
     private final String category;
 
@@ -18,21 +21,26 @@ public class ClearableDatePickerItem implements PropertySheet.Item {
 
     private final ClearableDatePicker datePicker;
 
-    private boolean editable;
+    private final BooleanProperty editable;
 
-    public ClearableDatePickerItem(SheetCategory category, String name, ClearableDatePicker datePicker) {
-        this(category.getForDefaultLocale(), name, datePicker);
+    public ClearableDatePickerItem(SheetCategory category, String name, LocalDate date, Supplier<LocalDate> clearSupplier) {
+        this(category.getForDefaultLocale(), name, date, clearSupplier);
     }
 
-    public ClearableDatePickerItem(String category, String name, ClearableDatePicker datePicker) {
-        this(category, name, null, datePicker, true);
+    public ClearableDatePickerItem(String category, String name, LocalDate date, Supplier<LocalDate> clearSupplier) {
+        this(category, name, null, date, clearSupplier, null, null, new SimpleBooleanProperty(true));
     }
 
-    public ClearableDatePickerItem(String category, String name, String description, ClearableDatePicker datePicker, boolean editable) {
+    public ClearableDatePickerItem(String category, String name, LocalDate date, Supplier<LocalDate> clearSupplier, LocalDate startDate, LocalDate endDate) {
+        this(category, name, null, date, clearSupplier, startDate, endDate, new SimpleBooleanProperty(true));
+    }
+
+    public ClearableDatePickerItem(String category, String name, String description, LocalDate date, Supplier<LocalDate> clearSupplier, LocalDate startDate,
+            LocalDate endDate, BooleanProperty editable) {
         this.category = category;
         this.name = name;
         this.description = description;
-        this.datePicker = datePicker;
+        this.datePicker = new ClearableDatePicker(date, clearSupplier, startDate, endDate);
         this.editable = editable;
     }
 
@@ -72,12 +80,17 @@ public class ClearableDatePickerItem implements PropertySheet.Item {
     }
 
     @Override
-    public boolean isEditable() {
+    public ObservableList<LocalDate> getChoices() {
+        return null;
+    }
+
+    @Override
+    public BooleanProperty isEditable() {
         return this.editable;
     }
 
     public void setEditable(boolean editable) {
-        this.editable = editable;
+        this.editable.set(editable);
     }
 
     public ClearableDatePicker getDatePicker() {

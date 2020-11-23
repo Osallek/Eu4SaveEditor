@@ -9,6 +9,7 @@ import com.osallek.eu4parser.model.game.SubjectType;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.SaveReligion;
 import com.osallek.eu4parser.model.save.country.Country;
+import com.osallek.eu4saveeditor.controller.control.ClearableCheckComboBox;
 import com.osallek.eu4saveeditor.controller.control.ClearableComboBox;
 import com.osallek.eu4saveeditor.controller.control.ClearableSpinnerDouble;
 import com.osallek.eu4saveeditor.controller.control.ClearableSpinnerInt;
@@ -16,6 +17,8 @@ import com.osallek.eu4saveeditor.controller.control.RequiredComboBox;
 import com.osallek.eu4saveeditor.controller.control.TableView2CountrySubject;
 import com.osallek.eu4saveeditor.controller.control.TableView2Ideas;
 import com.osallek.eu4saveeditor.controller.control.TableView2Loan;
+import com.osallek.eu4saveeditor.controller.converter.CultureStringCellFactory;
+import com.osallek.eu4saveeditor.controller.converter.CultureStringConverter;
 import com.osallek.eu4saveeditor.controller.converter.PairCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.PairConverter;
 import com.osallek.eu4saveeditor.controller.object.CountrySubject;
@@ -28,6 +31,7 @@ import com.osallek.eu4saveeditor.controller.pane.TableViewDialog;
 import com.osallek.eu4saveeditor.controller.propertyeditor.CustomPropertyEditorFactory;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ButtonItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.CheckBoxItem;
+import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableCheckComboBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableComboBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderIntItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderItem;
@@ -43,6 +47,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.layout.VBox;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.controlsfx.control.SearchableComboBox;
 import org.controlsfx.validation.ValidationSupport;
 import org.controlsfx.validation.Validator;
 import org.controlsfx.validation.decoration.CompoundValidationDecoration;
@@ -65,6 +70,10 @@ public class CountryPropertySheet extends VBox {
     private static final Logger LOGGER = LoggerFactory.getLogger(CountryPropertySheet.class);
 
     private Country country;
+
+    private final ObservableList<Culture> cultures;
+
+    private final ObservableList<SaveReligion> religions;
 
     private final ObservableList<Country> countriesAlive;
 
@@ -90,6 +99,10 @@ public class CountryPropertySheet extends VBox {
 
     private final ClearableSpinnerItem<Integer> absolutismField;
 
+    private final ClearableComboBoxItem<Culture> cultureField;
+
+    private final ClearableCheckComboBoxItem<Culture> acceptedCulturesField;
+
     private final ClearableSpinnerItem<Double> governmentReformProgressField;
 
     private final ClearableComboBoxItem<Pair<String, String>> governmentRankField;
@@ -97,6 +110,16 @@ public class CountryPropertySheet extends VBox {
     private final ButtonItem governmentReformsButton;
 
     private final ObservableList<GovernmentReform> governmentReformsField;
+
+    private final CustomPropertySheet courtPropertySheet;
+
+    private CustomPropertySheetSkin courtPropertySheetSkin;
+
+    private MonarchPropertySheet monarchPropertySheet;
+
+    private MonarchPropertySheet heirPropertySheet;
+
+    private MonarchPropertySheet queenPropertySheet;
 
     private final ButtonItem countrySubjectsButton;
 
@@ -150,6 +173,8 @@ public class CountryPropertySheet extends VBox {
 
     public CountryPropertySheet(Save save, ObservableList<Country> countriesAlive, ObservableList<Culture> cultures, ObservableList<SaveReligion> religions) {
         this.countriesAlive = countriesAlive;
+        this.cultures = cultures;
+        this.religions = religions;
         this.subjectTypes = save.getGame()
                                 .getSubjectTypes()
                                 .stream()
@@ -197,6 +222,20 @@ public class CountryPropertySheet extends VBox {
                                                           save.getGame().getLocalisationClean("absolutism"),
                                                           new ClearableSpinnerInt(0, 100, 1));
 
+        //Culture
+        this.cultureField = new ClearableComboBoxItem<>(save.getGame().getLocalisation("LEDGER_CULTURE"),
+                                                        save.getGame().getLocalisation("LEDGER_CULTURE"),
+                                                        cultures,
+                                                        new ClearableComboBox<>(new SearchableComboBox<>()));
+        this.cultureField.setConverter(new CultureStringConverter());
+        this.cultureField.setCellFactory(new CultureStringCellFactory());
+
+        this.acceptedCulturesField = new ClearableCheckComboBoxItem<>(save.getGame().getLocalisation("LEDGER_CULTURE"),
+                                                                      save.getGame().getLocalisation("MAPMODE_ACCEPTEDCULTURES"),
+                                                                      cultures,
+                                                                      new ClearableCheckComboBox<>());
+        this.acceptedCulturesField.setConverter(new CultureStringConverter());
+
         //Economy
         this.treasuryField = new ClearableSpinnerItem<>(SheetCategory.ECONOMY,
                                                         save.getGame().getLocalisationClean("TECH_TRESURY_TITLE"),
@@ -217,7 +256,7 @@ public class CountryPropertySheet extends VBox {
         this.loansButton = new ButtonItem(SheetCategory.ECONOMY, null, save.getGame().getLocalisationClean("AI_LOANS"), 2);
         this.loans = FXCollections.observableArrayList();
 
-        //LEDGER_GOVERNMENT_NAME
+        //GOVERNMENT
         this.governmentRankField = new ClearableComboBoxItem<>(SheetCategory.COUNTRY_GOVERNMENT,
                                                                save.getGame().getLocalisation("GOV_RANK"),
                                                                FXCollections.observableArrayList(),
@@ -234,6 +273,15 @@ public class CountryPropertySheet extends VBox {
                                                       save.getGame().getLocalisationClean("governmental_reforms"),
                                                       2);
         this.governmentReformsField = FXCollections.observableArrayList();
+
+        //CATEGORY_COURT
+        this.courtPropertySheet = new CustomPropertySheet();
+        this.courtPropertySheet.setPropertyEditorFactory(new CustomPropertyEditorFactory());
+        this.courtPropertySheet.setMode(CustomPropertySheet.Mode.CATEGORY);
+        this.courtPropertySheet.setModeSwitcherVisible(false);
+        this.courtPropertySheet.setSearchBoxVisible(false);
+        this.courtPropertySheetSkin = new CustomPropertySheetSkin(this.courtPropertySheet);
+        this.courtPropertySheet.setSkin(this.courtPropertySheetSkin);
 
         this.countrySubjectsButton = new ButtonItem(save.getGame().getLocalisationClean("HEADER_SUBJECTS"),
                                                     null,
@@ -325,6 +373,9 @@ public class CountryPropertySheet extends VBox {
                 String estateExpandedPaneName = this.estatesPropertySheetSkin.getAccordion().getExpandedPane() == null ? null :
                                                 this.estatesPropertySheetSkin.getAccordion().getExpandedPane().getText();
 
+                String courtExpandedPaneName = this.courtPropertySheetSkin.getAccordion().getExpandedPane() == null ? null :
+                                               this.courtPropertySheetSkin.getAccordion().getExpandedPane().getText();
+
                 List<CustomPropertySheet.Item> items = new ArrayList<>();
 
                 //GENERAL
@@ -365,6 +416,15 @@ public class CountryPropertySheet extends VBox {
                 if (MapUtils.isNotEmpty(this.country.getSave().getCurrentAge().getAbsolutism())) {
                     items.add(this.absolutismField);
                 }
+
+                //Culture
+                this.cultureField.setValue(this.country.getPrimaryCulture());
+                this.cultureField.setSupplier(this.country::getPrimaryCulture);
+                items.add(this.cultureField);
+
+                this.acceptedCulturesField.setValue(FXCollections.observableArrayList(this.country.getAcceptedCultures()));
+                this.acceptedCulturesField.setSupplier(this.country::getAcceptedCultures);
+                items.add(this.acceptedCulturesField);
 
                 //Economy
                 this.treasuryField.setValue(this.country.getTreasury());
@@ -415,6 +475,51 @@ public class CountryPropertySheet extends VBox {
                     reforms.ifPresent(this.governmentReformsField::setAll);
                 });
                 items.add(this.governmentReformsButton);
+
+                //Court
+                this.courtPropertySheet.getItems().clear();
+                this.monarchPropertySheet = null;
+
+                if (this.country.getMonarch() != null) {
+                    MonarchPropertySheet sheet = new MonarchPropertySheet(this.country, this.country.getMonarch(),
+                                                                          this.country.getSave().getGame().getLocalisationClean("CURRENT_MONARCH"),
+                                                                          this.cultures, this.religions);
+
+                    if (!sheet.getPropertySheet().getItems().isEmpty()) {
+                        this.monarchPropertySheet = sheet;
+                        this.courtPropertySheet.getItems().addAll(sheet.getPropertySheet().getItems());
+                    }
+                }
+
+                this.heirPropertySheet = null;
+
+                if (this.country.getHeir() != null) {
+                    MonarchPropertySheet sheet = new MonarchPropertySheet(this.country, this.country.getHeir(),
+                                                                          this.country.getSave().getGame().getLocalisationClean("HEIR"),
+                                                                          this.cultures, this.religions);
+
+                    if (!sheet.getPropertySheet().getItems().isEmpty()) {
+                        this.heirPropertySheet = sheet;
+                        this.courtPropertySheet.getItems().addAll(sheet.getPropertySheet().getItems());
+                    }
+                }
+
+                this.queenPropertySheet = null;
+
+                if (this.country.getQueen() != null) {
+                    MonarchPropertySheet sheet = new MonarchPropertySheet(this.country, this.country.getQueen(),
+                                                                          this.country.getSave().getGame().getLocalisationClean("CONSORT"),
+                                                                          this.cultures, this.religions);
+
+                    if (!sheet.getPropertySheet().getItems().isEmpty()) {
+                        this.queenPropertySheet = sheet;
+                        this.courtPropertySheet.getItems().addAll(sheet.getPropertySheet().getItems());
+                    }
+                }
+
+                if (!this.courtPropertySheet.getItems().isEmpty()) {
+                    items.add(new PropertySheetItem(this.country.getSave().getGame().getLocalisation("CATEGORY_COURT"), this.courtPropertySheet));
+                }
 
                 //Subjects
                 this.overlordField.getChoices().setAll(this.country.getOverlord());
@@ -568,6 +673,15 @@ public class CountryPropertySheet extends VBox {
                                                  .findFirst()
                                                  .ifPresent(titledPane -> this.estatesPropertySheetSkin.getAccordion().setExpandedPane(titledPane));
                 }
+
+                if (courtExpandedPaneName != null) {
+                    this.courtPropertySheetSkin.getAccordion()
+                                               .getPanes()
+                                               .stream()
+                                               .filter(titledPane -> titledPane.getText().equals(courtExpandedPaneName))
+                                               .findFirst()
+                                               .ifPresent(titledPane -> this.courtPropertySheetSkin.getAccordion().setExpandedPane(titledPane));
+                }
             }
         }
     }
@@ -649,6 +763,14 @@ public class CountryPropertySheet extends VBox {
             }
         }
 
+        if (!Objects.deepEquals(this.country.getPrimaryCulture(), this.cultureField.getSelectedValue())) {
+            this.country.setPrimaryCulture(this.cultureField.getSelectedValue());
+        }
+
+        if (!Objects.deepEquals(this.country.getAcceptedCultures(), this.acceptedCulturesField.getSelectedValues())) {
+            this.country.setAcceptedCulture(new ArrayList<>(this.acceptedCulturesField.getSelectedValues()));
+        }
+
         if (!Objects.equals(this.country.getGovernmentReformProgress(), this.governmentReformProgressField.getTrueValue())) {
             this.country.setGovernmentReformProgress(this.governmentReformProgressField.getTrueValue());
         }
@@ -719,6 +841,18 @@ public class CountryPropertySheet extends VBox {
                                                                                     },
                                                                                     () -> this.country.getIdeaGroups().removeIdeaGroup(ideaGroup)));
             this.ideas.forEach(idea -> this.country.getIdeaGroups().setIdeaGroup(idea.getIdeaGroup(), idea.getLevel()));
+        }
+
+        if (this.monarchPropertySheet != null) {
+            this.monarchPropertySheet.validate(actionEvent);
+        }
+
+        if (this.heirPropertySheet != null) {
+            this.heirPropertySheet.validate(actionEvent);
+        }
+
+        if (this.queenPropertySheet != null) {
+            this.queenPropertySheet.validate(actionEvent);
         }
 
         update(this.country, true);
