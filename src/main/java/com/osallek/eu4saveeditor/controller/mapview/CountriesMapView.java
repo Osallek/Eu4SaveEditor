@@ -40,7 +40,7 @@ public class CountriesMapView extends AbstractMapView {
         this.countrySheet = new CountryPropertySheet(this.mapViewContainer.getSave(),
                                                      this.mapViewContainer.getCountriesAlive(),
                                                      this.mapViewContainer.getCultures(),
-                                                     this.mapViewContainer.getReligions());
+                                                     this.mapViewContainer.getPlayableReligions());
 
         this.countryButton = new ToggleButton(this.mapViewContainer.getSave()
                                                                    .getGame()

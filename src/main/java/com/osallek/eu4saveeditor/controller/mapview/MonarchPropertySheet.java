@@ -91,8 +91,8 @@ public class MonarchPropertySheet extends VBox {
 
         this.nameField = new ClearableTextItem(name, this.country.getSave().getGame().getLocalisation("LEDGER_NAME"));
         this.nameField.getTextField().getStylesheets().add(getClass().getClassLoader().getResource("styles/propertySheetsStyle.css").toExternalForm());
-        this.nameField.setValue(ClausewitzUtils.removeQuotes(this.monarch.getMonarchName()));
-        this.nameField.setSupplier(() -> ClausewitzUtils.removeQuotes(this.monarch.getMonarchName()));
+        this.nameField.setValue(ClausewitzUtils.removeQuotes(this.monarch.getName()));
+        this.nameField.setSupplier(() -> ClausewitzUtils.removeQuotes(this.monarch.getName()));
         items.add(this.nameField);
 
         this.cultureField = new ClearableComboBoxItem<>(name,
@@ -200,7 +200,7 @@ public class MonarchPropertySheet extends VBox {
 
     public void validate(ActionEvent actionEvent) {
         if (!ClausewitzUtils.removeQuotes(this.monarch.getName()).equals(this.nameField.getText())) {
-            this.monarch.setMonarchName(ClausewitzUtils.addQuotes(this.nameField.getText()));
+            this.monarch.setName(ClausewitzUtils.addQuotes(this.nameField.getText()));
         }
 
         if (!Objects.deepEquals(this.monarch.getCulture(), this.cultureField.getSelectedValue())) {
