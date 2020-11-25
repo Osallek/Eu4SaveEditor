@@ -9,6 +9,7 @@ import com.osallek.eu4parser.model.game.SubjectType;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.SaveReligion;
 import com.osallek.eu4parser.model.save.country.Country;
+import com.osallek.eu4parser.model.save.country.LeaderType;
 import com.osallek.eu4saveeditor.controller.control.ClearableCheckComboBox;
 import com.osallek.eu4saveeditor.controller.control.ClearableComboBox;
 import com.osallek.eu4saveeditor.controller.control.ClearableSpinnerDouble;
@@ -16,6 +17,7 @@ import com.osallek.eu4saveeditor.controller.control.ClearableSpinnerInt;
 import com.osallek.eu4saveeditor.controller.control.RequiredComboBox;
 import com.osallek.eu4saveeditor.controller.control.TableView2CountrySubject;
 import com.osallek.eu4saveeditor.controller.control.TableView2Ideas;
+import com.osallek.eu4saveeditor.controller.control.TableView2Leader;
 import com.osallek.eu4saveeditor.controller.control.TableView2Loan;
 import com.osallek.eu4saveeditor.controller.converter.CultureStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.CultureStringConverter;
@@ -23,6 +25,7 @@ import com.osallek.eu4saveeditor.controller.converter.PairCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.PairConverter;
 import com.osallek.eu4saveeditor.controller.object.CountrySubject;
 import com.osallek.eu4saveeditor.controller.object.Idea;
+import com.osallek.eu4saveeditor.controller.object.Leader;
 import com.osallek.eu4saveeditor.controller.object.Loan;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheetSkin;
@@ -146,6 +149,10 @@ public class CountryPropertySheet extends VBox {
     private final ClearableSliderItem armyProfessionalismField;
 
     private final ClearableSliderItem warEhaustionField;
+
+    private final ButtonItem leadersButton;
+
+    private final ObservableList<Leader> leaders;
 
     private final ButtonItem loansButton;
 
@@ -283,6 +290,7 @@ public class CountryPropertySheet extends VBox {
         this.courtPropertySheetSkin = new CustomPropertySheetSkin(this.courtPropertySheet);
         this.courtPropertySheet.setSkin(this.courtPropertySheetSkin);
 
+        //Subject
         this.countrySubjectsButton = new ButtonItem(save.getGame().getLocalisationClean("HEADER_SUBJECTS"),
                                                     null,
                                                     save.getGame().getLocalisationClean("HEADER_SUBJECTS"),
@@ -294,6 +302,7 @@ public class CountryPropertySheet extends VBox {
                                                          new ClearableComboBox<>(new ComboBox<>()));
         this.overlordField.setEditable(false);
 
+        //Military
         this.manpowerField = new ClearableSpinnerItem<>(SheetCategory.COUNTRY_MILITARY,
                                                         save.getGame().getLocalisationCleanNoPunctuation("HINT_MANPOWER_TITLE"),
                                                         new ClearableSpinnerDouble(0, Double.MAX_VALUE, 1000));
@@ -317,6 +326,9 @@ public class CountryPropertySheet extends VBox {
         this.warEhaustionField = new ClearableSliderItem(SheetCategory.COUNTRY_MILITARY,
                                                          save.getGame().getLocalisation("WAR_EXHAUSTION"),
                                                          0, 20);
+
+        this.leadersButton = new ButtonItem(SheetCategory.COUNTRY_MILITARY, null, save.getGame().getLocalisationClean("HEADER_LEADER"), 2);
+        this.leaders = FXCollections.observableArrayList();
 
         //ESTATES
         this.estatesPropertySheet = new CustomPropertySheet();
@@ -584,6 +596,31 @@ public class CountryPropertySheet extends VBox {
                 this.warEhaustionField.setSupplier(this.country::getWarExhaustion);
                 items.add(this.warEhaustionField);
 
+                this.leaders.setAll(this.country.getLeaders().values().stream().map(Leader::new).collect(Collectors.toList()));
+                this.leadersButton.getButton().setOnAction(event -> {
+                    TableViewDialog<Leader> dialog = new TableViewDialog<>(this.country.getSave(),
+                                                                           new TableView2Leader(this.country, this.leaders),
+                                                                           this.country.getSave().getGame().getLocalisationClean("HEADER_LEADER"),
+                                                                           list -> new Leader(this.country,
+                                                                                              "New one",
+                                                                                              LeaderType.GENERAL,
+                                                                                              0,
+                                                                                              0,
+                                                                                              0,
+                                                                                              0,
+                                                                                              null,
+                                                                                              this.country.getSave()
+                                                                                                          .getDate()
+                                                                                                          .minusYears(this.country.getSave()
+                                                                                                                                  .getGame()
+                                                                                                                                  .getAgeOfAdulthood())),
+                                                                           () -> this.leaders);
+                    Optional<List<Leader>> countrySubjects = dialog.showAndWait();
+
+                    countrySubjects.ifPresent(this.leaders::setAll);
+                });
+                items.add(this.leadersButton);
+
                 //Estates
                 this.estatePropertySheets.clear();
                 this.estatesPropertySheet.getItems().clear();
@@ -793,6 +830,52 @@ public class CountryPropertySheet extends VBox {
 
         if (!Objects.equals(this.country.getArmyProfessionalism(), this.armyProfessionalismField.getDoubleValue())) {
             this.country.setArmyProfessionalism(this.armyProfessionalismField.getDoubleValue());
+        }
+
+        if (this.country.getLeaders().size() != this.leaders.size() || this.leaders.stream().anyMatch(Leader::isChanged)) {
+            this.country.getLeaders()
+                        .values()
+                        .forEach(leader -> this.leaders.stream()
+                                                       .filter(l -> leader.getId().getId().equals(l.getId()))
+                                                       .findFirst()
+                                                       .ifPresentOrElse(l -> {
+                                                                            if (!Objects.equals(l.getBirthDate(), leader.getBirthDate())) {
+                                                                                leader.setBirthDate(l.getBirthDate());
+                                                                            }
+
+                                                                            if (!Objects.equals(l.getName(), leader.getName())) {
+                                                                                leader.setName(l.getName());
+                                                                            }
+
+                                                                            if (!Objects.equals(l.getType(), leader.getType())) {
+                                                                                leader.setType(l.getType());
+                                                                            }
+
+                                                                            if (!Objects.equals(l.getManuever(), leader.getManuever())) {
+                                                                                leader.setManuever(l.getManuever());
+                                                                            }
+
+                                                                            if (!Objects.equals(l.getFire(), leader.getFire())) {
+                                                                                leader.setFire(l.getFire());
+                                                                            }
+
+                                                                            if (!Objects.equals(l.getShock(), leader.getShock())) {
+                                                                                leader.setShock(l.getShock());
+                                                                            }
+
+                                                                            if (!Objects.equals(l.getSiege(), leader.getSiege())) {
+                                                                                leader.setSiege(l.getSiege());
+                                                                            }
+
+                                                                            if (!Objects.equals(l.getPersonality(), leader.getPersonality())) {
+                                                                                leader.setPersonality(l.getPersonality());
+                                                                            }
+
+                                                                            this.leaders.remove(l);
+                                                                        },
+                                                                        () -> this.country.removeLeader(leader.getId().getId())));
+            this.leaders.forEach(l -> this.country.addLeader(this.country.getSave().getDate(), l.getBirthDate(), l.getName(), l.getType(), l.getManuever(),
+                                                             l.getFire(), l.getShock(), l.getSiege(), l.getPersonality()));
         }
 
         Stream.concat(this.country.getSubjects().stream(), this.countrySubjectsField.keySet().stream())

@@ -49,17 +49,17 @@ import javafx.util.StringConverter;
 
 import java.util.Map;
 
-public class CustomComboBoxTableCell<S, T> extends TableCell<S, T> {
+public class UniqueComboBoxTableCell<S, T> extends TableCell<S, T> {
 
     public static <S, T> Callback<TableColumn<S, T>, TableCell<S, T>> forTableColumn(final StringConverter<T> converter, final Map<S, SortedList<T>> items) {
-        return list -> new CustomComboBoxTableCell<>(converter, items);
+        return list -> new UniqueComboBoxTableCell<>(converter, items);
     }
 
     private final Map<S, SortedList<T>> items;
 
     private ComboBox<T> comboBox;
 
-    public CustomComboBoxTableCell(StringConverter<T> converter, Map<S, SortedList<T>> items) {
+    public UniqueComboBoxTableCell(StringConverter<T> converter, Map<S, SortedList<T>> items) {
         this.getStyleClass().add("combo-box-table-cell");
         this.items = items;
         setConverter(converter);

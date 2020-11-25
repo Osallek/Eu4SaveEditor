@@ -35,7 +35,7 @@ public class TableView2Ideas extends TableView<Idea> {
         this.ideaGroups = ideaGroups;
         TableColumn<Idea, IdeaGroup> ideaGroup = new TableColumn<>(country.getSave().getGame().getLocalisationCleanNoPunctuation("IDEA_TITLE"));
         ideaGroup.setCellValueFactory(p -> p.getValue() == null ? null : new ReadOnlyObjectWrapper<>(p.getValue().getIdeaGroup()));
-        ideaGroup.setCellFactory(CustomComboBoxTableCell.forTableColumn(new IdeaGroupStringConverter(), this.ideasMap));
+        ideaGroup.setCellFactory(UniqueComboBoxTableCell.forTableColumn(new IdeaGroupStringConverter(), this.ideasMap));
         ideaGroup.setOnEditStart(event -> this.ideasMapSource.get(event.getRowValue()).removeAll(getItems().stream()
                                                                                                            .filter(p -> !p.equals(event.getRowValue()))
                                                                                                            .map(Idea::getIdeaGroup)

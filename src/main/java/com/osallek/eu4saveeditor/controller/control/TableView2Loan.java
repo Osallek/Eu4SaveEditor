@@ -3,7 +3,6 @@ package com.osallek.eu4saveeditor.controller.control;
 import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4saveeditor.controller.converter.DoubleStringConverter;
 import com.osallek.eu4saveeditor.controller.object.Loan;
-import com.osallek.eu4saveeditor.controller.pane.DatePickerCell;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

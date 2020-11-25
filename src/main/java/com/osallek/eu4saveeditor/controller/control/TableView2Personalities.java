@@ -38,7 +38,7 @@ public class TableView2Personalities extends TableView<RulerPersonality> {
                                                                                                     .getGame()
                                                                                                     .getLocalisationCleanNoPunctuation("LEDGER_PERSONALITIES"));
         rulerPersonality.setCellValueFactory(p -> p.getValue() == null ? null : new ReadOnlyObjectWrapper<>(p.getValue()));
-        rulerPersonality.setCellFactory(CustomComboBoxTableCell.forTableColumn(new RulerPersonalityStringConverter(), this.personalitiesMap));
+        rulerPersonality.setCellFactory(UniqueComboBoxTableCell.forTableColumn(new RulerPersonalityStringConverter(), this.personalitiesMap));
         rulerPersonality.setOnEditStart(event -> this.personalitiesMapSource.get(event.getRowValue()).removeAll(getItems().stream()
                                                                                                                           .filter(p -> !p.equals(
                                                                                                                                   event.getRowValue()))

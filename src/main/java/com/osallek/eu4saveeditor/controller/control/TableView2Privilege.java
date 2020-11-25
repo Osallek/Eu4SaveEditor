@@ -6,7 +6,6 @@ import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.country.SaveEstate;
 import com.osallek.eu4saveeditor.controller.converter.EstatePrivilegeStringConverter;
 import com.osallek.eu4saveeditor.controller.object.Privilege;
-import com.osallek.eu4saveeditor.controller.pane.DatePickerCell;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -40,7 +39,7 @@ public class TableView2Privilege extends TableView<Privilege> {
                                                                                 .getGame()
                                                                                 .getLocalisationCleanNoPunctuation("PRIVILEGE_PICKER_TITLE"));
         type.setCellValueFactory(p -> p.getValue() == null ? null : new ReadOnlyObjectWrapper<>(p.getValue().getPrivilege()));
-        type.setCellFactory(CustomComboBoxTableCell.forTableColumn(new EstatePrivilegeStringConverter(), this.privilegesMap));
+        type.setCellFactory(UniqueComboBoxTableCell.forTableColumn(new EstatePrivilegeStringConverter(), this.privilegesMap));
         type.setOnEditStart(event -> this.privilegesMapSource.get(event.getRowValue()).removeAll(getItems().stream()
                                                                                                            .filter(p -> !p.equals(event.getRowValue()))
                                                                                                            .map(Privilege::getPrivilege)

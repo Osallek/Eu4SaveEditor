@@ -5,7 +5,6 @@ import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4saveeditor.controller.converter.CountryStringConverter;
 import com.osallek.eu4saveeditor.controller.converter.SubjectTypeStringConverter;
 import com.osallek.eu4saveeditor.controller.object.CountrySubject;
-import com.osallek.eu4saveeditor.controller.pane.DatePickerCell;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
