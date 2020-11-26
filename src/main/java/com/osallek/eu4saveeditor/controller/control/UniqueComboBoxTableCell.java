@@ -1,28 +1,3 @@
-/*
- * Copyright (c) 2012, 2017, Oracle and/or its affiliates. All rights reserved.
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
- *
- * This code is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
- *
- * This code is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
- * version 2 for more details (a copy is included in the LICENSE file that
- * accompanied this code).
- *
- * You should have received a copy of the GNU General Public License version
- * 2 along with this work; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
- *
- * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
- * or visit www.oracle.com if you need additional information or have any
- * questions.
- */
-
 package com.osallek.eu4saveeditor.controller.control;
 
 import javafx.beans.InvalidationListener;
@@ -31,6 +6,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 import javafx.scene.Node;
@@ -47,22 +23,44 @@ import javafx.scene.input.MouseEvent;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class UniqueComboBoxTableCell<S, T> extends TableCell<S, T> {
 
-    public static <S, T> Callback<TableColumn<S, T>, TableCell<S, T>> forTableColumn(final StringConverter<T> converter, final Map<S, SortedList<T>> items) {
-        return list -> new UniqueComboBoxTableCell<>(converter, items);
+    public static <S, T> Callback<TableColumn<S, T>, TableCell<S, T>> forTableColumn(StringConverter<T> converter,
+                                                                                     Map<S, ObservableList<T>> source,
+                                                                                     Comparator<T> comparator,
+                                                                                     Function<S, T> mapper,
+                                                                                     Supplier<ObservableList<T>> supplier) {
+        return list -> new UniqueComboBoxTableCell<>(converter, source, comparator, mapper, supplier);
     }
 
-    private final Map<S, SortedList<T>> items;
+    private final Map<S, ObservableList<T>> source;
+
+    private final Map<S, SortedList<T>> sorted = new HashMap<>();
+
+    private final Comparator<T> comparator;
+
+    private final Function<S, T> mapper;
+
+    private final Supplier<ObservableList<T>> supplier;
 
     private ComboBox<T> comboBox;
 
-    public UniqueComboBoxTableCell(StringConverter<T> converter, Map<S, SortedList<T>> items) {
+    public UniqueComboBoxTableCell(StringConverter<T> converter, Map<S, ObservableList<T>> source, Comparator<T> comparator, Function<S, T> mapper,
+                                   Supplier<ObservableList<T>> supplier) {
         this.getStyleClass().add("combo-box-table-cell");
-        this.items = items;
+        this.source = source;
+        this.comparator = comparator;
+        this.mapper = mapper;
+        this.supplier = supplier;
         setConverter(converter);
+
+        this.source.forEach((s, ts) -> this.sorted.put(s, ts.sorted(this.comparator)));
     }
 
     private final ObjectProperty<StringConverter<T>> converter = new SimpleObjectProperty<>(this, "converter");
@@ -93,8 +91,8 @@ public class UniqueComboBoxTableCell<S, T> extends TableCell<S, T> {
         return comboBoxEditableProperty().get();
     }
 
-    public Map<S, SortedList<T>> getItems() {
-        return items;
+    public Map<S, ObservableList<T>> getSource() {
+        return source;
     }
 
     /**
@@ -107,20 +105,47 @@ public class UniqueComboBoxTableCell<S, T> extends TableCell<S, T> {
         }
 
         if (this.comboBox == null) {
-            this.comboBox = createComboBox(this, this.items.get(getTableRow().getItem()), converterProperty());
+            this.comboBox = createComboBox(this, this.sorted.get(getTableRow().getItem()), converterProperty());
             this.comboBox.editableProperty().bind(comboBoxEditableProperty());
+
+            getTableView().getItems().addListener((ListChangeListener<? super S>) c -> {
+                while (c.next()) {
+                    c.getRemoved().forEach(s -> {
+                        this.source.remove(s);
+                        this.sorted.remove(s);
+                        this.source.values().forEach(list -> list.add(this.mapper.apply(s)));
+                    });
+                    c.getAddedSubList().forEach(s -> {
+                        this.source.values().forEach(countries -> countries.remove(this.mapper.apply(s)));
+                        this.source.put(s, this.supplier.get());
+                        this.sorted.put(s, this.source.get(s).sorted(this.comparator));
+                    });
+                }
+            });
         }
 
         this.comboBox.getSelectionModel().select(getItem());
 
         super.startEdit();
         setText(null);
-        setGraphic(comboBox);
+        setGraphic(this.comboBox);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
+    public void commitEdit(T newValue) {
+        this.source.forEach((s, ts) -> {
+            if (!ts.contains(getItem())) {
+                ts.add(getItem());
+            }
+
+            if (!s.equals(getTableView().getItems().get(getTableRow().getIndex()))) {
+                ts.remove(newValue);
+            }
+        });
+
+        super.commitEdit(newValue);
+    }
+
     @Override
     public void cancelEdit() {
         super.cancelEdit();
@@ -129,9 +154,6 @@ public class UniqueComboBoxTableCell<S, T> extends TableCell<S, T> {
         setGraphic(null);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void updateItem(T item, boolean empty) {
         super.updateItem(item, empty);

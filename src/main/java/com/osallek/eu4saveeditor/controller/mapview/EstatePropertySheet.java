@@ -90,15 +90,14 @@ public class EstatePropertySheet extends VBox {
                     new TableViewDialog<>(this.country.getSave(),
                                           tableView2Privilege,
                                           this.country.getSave().getGame().getLocalisationClean("PRIVILEGE_PICKER_TITLE"),
-                                          (list) -> new Privilege(this.estate.getEstateGame()
-                                                                             .getPrivileges()
-                                                                             .values()
-                                                                             .stream()
-                                                                             .filter(p -> list.stream()
-                                                                                              .noneMatch(p2 -> p2.getPrivilege().equals(p)))
-                                                                             .findFirst()
-                                                                             .get(),
-                                                                  this.country.getSave().getDate()),
+                                          list -> new Privilege(this.estate.getEstateGame()
+                                                                           .getPrivileges()
+                                                                           .values()
+                                                                           .stream()
+                                                                           .filter(p -> list.stream().noneMatch(p2 -> p2.getPrivilege().equals(p)))
+                                                                           .findFirst()
+                                                                           .get(),
+                                                                this.country.getSave().getDate()),
                                           () -> this.privileges);
             dialog.setDisableAddProperty(tableView2Privilege.disableAddPropertyProperty());
             Optional<List<Privilege>> privilegeList = dialog.showAndWait();

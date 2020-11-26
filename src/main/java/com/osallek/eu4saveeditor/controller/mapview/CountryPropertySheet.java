@@ -19,6 +19,7 @@ import com.osallek.eu4saveeditor.controller.control.TableView2CountrySubject;
 import com.osallek.eu4saveeditor.controller.control.TableView2Ideas;
 import com.osallek.eu4saveeditor.controller.control.TableView2Leader;
 import com.osallek.eu4saveeditor.controller.control.TableView2Loan;
+import com.osallek.eu4saveeditor.controller.control.TableView2Rival;
 import com.osallek.eu4saveeditor.controller.converter.CultureStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.CultureStringConverter;
 import com.osallek.eu4saveeditor.controller.converter.PairCellFactory;
@@ -27,6 +28,7 @@ import com.osallek.eu4saveeditor.controller.object.CountrySubject;
 import com.osallek.eu4saveeditor.controller.object.Idea;
 import com.osallek.eu4saveeditor.controller.object.Leader;
 import com.osallek.eu4saveeditor.controller.object.Loan;
+import com.osallek.eu4saveeditor.controller.object.Rival;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheetSkin;
 import com.osallek.eu4saveeditor.controller.pane.GovernmentReformsDialog;
@@ -129,6 +131,10 @@ public class CountryPropertySheet extends VBox {
     private Map<Country, CountrySubject> countrySubjectsField;
 
     private final ClearableComboBoxItem<Country> overlordField;
+
+    private final ButtonItem rivalsButton;
+
+    private final ObservableList<Rival> rivals;
 
     private final ClearableSpinnerItem<Double> treasuryField;
 
@@ -290,17 +296,21 @@ public class CountryPropertySheet extends VBox {
         this.courtPropertySheetSkin = new CustomPropertySheetSkin(this.courtPropertySheet);
         this.courtPropertySheet.setSkin(this.courtPropertySheetSkin);
 
-        //Subject
-        this.countrySubjectsButton = new ButtonItem(save.getGame().getLocalisationClean("HEADER_SUBJECTS"),
+        //Diplomacy
+        this.countrySubjectsButton = new ButtonItem(save.getGame().getLocalisationClean("HEADER_DIPLOMACY"),
                                                     null,
                                                     save.getGame().getLocalisationClean("HEADER_SUBJECTS"),
                                                     2);
 
-        this.overlordField = new ClearableComboBoxItem<>(save.getGame().getLocalisationClean("HEADER_SUBJECTS"),
+        this.overlordField = new ClearableComboBoxItem<>(save.getGame().getLocalisationClean("HEADER_DIPLOMACY"),
                                                          save.getGame().getLocalisation("HEADER_OVERLORD"),
                                                          FXCollections.observableArrayList(new ArrayList<>()),
                                                          new ClearableComboBox<>(new ComboBox<>()));
         this.overlordField.setEditable(false);
+
+        this.rivalsButton = new ButtonItem(save.getGame().getLocalisationClean("HEADER_DIPLOMACY"), null,
+                                           save.getGame().getLocalisationClean("RIVALS"), 2);
+        this.rivals = FXCollections.observableArrayList();
 
         //Military
         this.manpowerField = new ClearableSpinnerItem<>(SheetCategory.COUNTRY_MILITARY,
@@ -533,7 +543,7 @@ public class CountryPropertySheet extends VBox {
                     items.add(new PropertySheetItem(this.country.getSave().getGame().getLocalisation("CATEGORY_COURT"), this.courtPropertySheet));
                 }
 
-                //Subjects
+                //Diplomacy
                 this.overlordField.getChoices().setAll(this.country.getOverlord());
                 this.overlordField.setValue(this.country.getOverlord());
                 items.add(this.overlordField);
@@ -554,10 +564,10 @@ public class CountryPropertySheet extends VBox {
                                                                                this.countriesAlive,
                                                                                this.subjectTypes),
                                                   this.country.getSave().getGame().getLocalisationClean("HEADER_SUBJECTS"),
-                                                  (list) -> new CountrySubject(this.country,
-                                                                               this.countriesAlive.get(0),
-                                                                               this.subjectTypes.get(0),
-                                                                               this.country.getSave().getDate()),
+                                                  list -> new CountrySubject(this.country,
+                                                                             this.countriesAlive.get(0),
+                                                                             this.subjectTypes.get(0),
+                                                                             this.country.getSave().getDate()),
                                                   () -> this.country.getSubjects()
                                                                     .stream()
                                                                     .map(CountrySubject::new)
@@ -570,6 +580,29 @@ public class CountryPropertySheet extends VBox {
                                                                                                                 Function.identity())));
                 });
                 items.add(this.countrySubjectsButton);
+
+                this.rivals.setAll(this.country.getRivals().values().stream().map(rival -> new Rival(this.country, rival)).collect(Collectors.toList()));
+                this.rivalsButton.getButton().setOnAction(event -> {
+                    TableView2Rival tableView2Rival = new TableView2Rival(this.country, this.rivals, this.countriesAlive);
+                    TableViewDialog<Rival> dialog = new TableViewDialog<>(this.country.getSave(),
+                                                                          tableView2Rival,
+                                                                          this.country.getSave().getGame().getLocalisationClean("RIVALS"),
+                                                                          list -> new Rival(this.country,
+                                                                                            this.countriesAlive.stream()
+                                                                                                               .filter(c -> list.stream()
+                                                                                                                                .noneMatch(r -> c.equals(
+                                                                                                                                        r.getTarget())))
+                                                                                                               .findFirst()
+                                                                                                               .get(),
+                                                                                            this.country.getSave().getDate()),
+
+                                                                          () -> this.rivals);
+                    dialog.setDisableAddProperty(tableView2Rival.disableAddPropertyProperty());
+                    Optional<List<Rival>> rivalList = dialog.showAndWait();
+
+                    rivalList.ifPresent(this.rivals::setAll);
+                });
+                items.add(this.rivalsButton);
 
                 //Military
                 this.manpowerField.setSupplier(() -> this.country.getManpower() * 1000);
@@ -890,6 +923,23 @@ public class CountryPropertySheet extends VBox {
 
                   return countrySubject;
               }));
+
+        if (this.country.getRivals().size() != this.rivals.size() || this.rivals.stream().anyMatch(Rival::isChanged)) {
+            this.country.getRivals()
+                        .values()
+                        .forEach(rival -> this.rivals.stream()
+                                                     .filter(r -> rival.getRival().equals(r.getTarget()))
+                                                     .findFirst()
+                                                     .ifPresentOrElse(r -> {
+                                                                          if (!Objects.equals(r.getDate(), rival.getDate())) {
+                                                                              rival.setDate(r.getDate());
+                                                                          }
+
+                                                                          this.rivals.remove(r);
+                                                                      },
+                                                                      () -> this.country.removeRival(rival.getRival())));
+            this.rivals.forEach(rival -> this.country.addRival(rival.getTarget(), rival.getDate()));
+        }
 
         this.estatePropertySheets.forEach(sheet -> sheet.validate(actionEvent));
 
