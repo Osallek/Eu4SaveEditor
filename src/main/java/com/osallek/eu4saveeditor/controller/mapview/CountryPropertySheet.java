@@ -19,6 +19,7 @@ import com.osallek.eu4saveeditor.controller.control.TableView2CountrySubject;
 import com.osallek.eu4saveeditor.controller.control.TableView2Ideas;
 import com.osallek.eu4saveeditor.controller.control.TableView2Leader;
 import com.osallek.eu4saveeditor.controller.control.TableView2Loan;
+import com.osallek.eu4saveeditor.controller.control.TableView2Modifier;
 import com.osallek.eu4saveeditor.controller.control.TableView2Rival;
 import com.osallek.eu4saveeditor.controller.converter.CultureStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.CultureStringConverter;
@@ -28,6 +29,7 @@ import com.osallek.eu4saveeditor.controller.object.CountrySubject;
 import com.osallek.eu4saveeditor.controller.object.Idea;
 import com.osallek.eu4saveeditor.controller.object.Leader;
 import com.osallek.eu4saveeditor.controller.object.Loan;
+import com.osallek.eu4saveeditor.controller.object.Modifier;
 import com.osallek.eu4saveeditor.controller.object.Rival;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheetSkin;
@@ -45,6 +47,7 @@ import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableTextIte
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.PropertySheetItem;
 import com.osallek.eu4saveeditor.controller.validator.CustomGraphicValidationDecoration;
 import com.osallek.eu4saveeditor.i18n.SheetCategory;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -181,6 +184,10 @@ public class CountryPropertySheet extends VBox {
     private final ButtonItem ideasButton;
 
     private final ObservableList<Idea> ideas;
+
+    private final ButtonItem modifiersButton;
+
+    private final ObservableList<Modifier> modifiers;
 
     private final CustomPropertySheetSkin propertySheetSkin;
 
@@ -371,6 +378,11 @@ public class CountryPropertySheet extends VBox {
         this.ideas = FXCollections.observableArrayList();
         this.ideasButton = new ButtonItem(save.getGame().getLocalisationClean("HEADER_TECHNOLOGY"), null,
                                           save.getGame().getLocalisationClean("HEADER_IDEAS"), 2);
+
+        //Modifiers
+        this.modifiers = FXCollections.observableArrayList();
+        this.modifiersButton = new ButtonItem(save.getGame().getLocalisationClean("DOMESTIC_MODIFIERS"), null,
+                                              save.getGame().getLocalisationClean("DOMESTIC_MODIFIERS"));
 
         this.validationSupport = new ValidationSupport();
         this.validationSupport.registerValidator(this.nameField.getTextField(), Validator.createEmptyValidator("Text is required"));
@@ -724,6 +736,22 @@ public class CountryPropertySheet extends VBox {
                 });
                 items.add(this.ideasButton);
 
+                //Modifiers
+                this.modifiers.setAll(this.country.getModifiers().stream().map(Modifier::new).collect(Collectors.toList()));
+                this.modifiersButton.getButton().setOnAction(event -> {
+                    TableView2Modifier tableView2Modifier = new TableView2Modifier(this.country.getSave(), this.modifiers);
+                    TableViewDialog<Modifier> dialog = new TableViewDialog<>(this.country.getSave(),
+                                                                             tableView2Modifier,
+                                                                             this.country.getSave().getGame().getLocalisationClean("DOMESTIC_MODIFIERS"),
+                                                                             list -> null,
+                                                                             () -> this.modifiers);
+                    dialog.setDisableAddProperty(new SimpleBooleanProperty(true));
+                    Optional<List<Modifier>> modifierList = dialog.showAndWait();
+
+                    modifierList.ifPresent(this.modifiers::setAll);
+                });
+                items.add(this.modifiersButton);
+
                 this.propertySheet.getItems().setAll(items);
 
                 if (expandedPaneName != null) {
@@ -986,6 +1014,21 @@ public class CountryPropertySheet extends VBox {
 
         if (this.queenPropertySheet != null) {
             this.queenPropertySheet.validate(actionEvent);
+        }
+
+        if (this.country.getModifiers().size() != this.modifiers.size() || this.modifiers.stream().anyMatch(Modifier::isChanged)) {
+            this.country.getModifiers()
+                        .forEach(saveModifier -> this.modifiers.stream()
+                                                               .filter(modifier -> saveModifier.getModifier().equals(modifier.getModifier()))
+                                                               .findFirst()
+                                                               .ifPresentOrElse(modifier -> {
+                                                                                    if (!Objects.equals(modifier.getDate(), saveModifier.getDate())) {
+                                                                                        saveModifier.setDate(modifier.getDate());
+                                                                                    }
+
+                                                                                    this.modifiers.remove(modifier);
+                                                                                },
+                                                                                () -> this.country.removeModifier(saveModifier.getModifier())));
         }
 
         update(this.country, true);

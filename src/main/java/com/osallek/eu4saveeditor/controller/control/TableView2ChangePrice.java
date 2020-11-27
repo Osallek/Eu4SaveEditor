@@ -25,6 +25,7 @@ public class TableView2ChangePrice extends TableView<ChangePrice> {
         name.setCellFactory(TextFieldTableCell.forTableColumn());
         name.setEditable(false);
         name.setPrefWidth(500);
+        name.setStyle("-fx-alignment: CENTER-LEFT");
 
         TableColumn<ChangePrice, Integer> value = new TableColumn<>(save.getGame().getLocalisation("LEDGER_VALUE"));
         value.setCellValueFactory(p -> p.getValue() == null ? null :
@@ -32,12 +33,14 @@ public class TableView2ChangePrice extends TableView<ChangePrice> {
         value.setCellFactory(TextFieldTableCell.forTableColumn(new PercentStringConverter()));
         value.setOnEditCommit(event -> event.getRowValue().setValue(event.getNewValue()));
         value.setPrefWidth(100);
+        value.setStyle("-fx-alignment: CENTER-LEFT");
 
         TableColumn<ChangePrice, LocalDate> expiryDate = new TableColumn<>(save.getGame().getLocalisationCleanNoPunctuation("EXPIRES_ON"));
         expiryDate.setCellValueFactory(p -> p.getValue() == null ? null : new ReadOnlyObjectWrapper<>(p.getValue().getExpiryDate()));
         expiryDate.setCellFactory(TextFieldTableCell.forTableColumn(new LocalDateStringConverter(ClausewitzUtils.DATE_FORMAT, ClausewitzUtils.DATE_FORMAT)));
         expiryDate.setOnEditCommit(event -> event.getRowValue().setExpiryDate(event.getNewValue()));
         expiryDate.setPrefWidth(100);
+        expiryDate.setStyle("-fx-alignment: CENTER-LEFT");
 
         TableColumn<ChangePrice, Void> remove = new TableColumn<>();
         remove.setPrefWidth(48);

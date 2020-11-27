@@ -1,11 +1,14 @@
 package com.osallek.eu4saveeditor.controller.control;
 
+import javafx.event.Event;
 import javafx.geometry.Pos;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TablePosition;
+import javafx.scene.control.TableView;
 import javafx.util.Callback;
 import javafx.util.converter.LocalDateStringConverter;
 import org.apache.commons.lang3.BooleanUtils;
@@ -14,6 +17,7 @@ import java.time.LocalDate;
 import java.time.chrono.Chronology;
 import java.time.format.FormatStyle;
 import java.util.Locale;
+import java.util.Objects;
 
 public class DatePickerCell<S> extends TableCell<S, LocalDate> {
 
@@ -49,10 +53,6 @@ public class DatePickerCell<S> extends TableCell<S, LocalDate> {
             setGraphic(null);
         } else {
             if (isEditing()) {
-                if (this.datePicker != null) {
-                    this.datePicker.setValue(getItem());
-                }
-
                 setText(null);
                 setGraphic(this.datePicker);
                 setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
@@ -71,27 +71,43 @@ public class DatePickerCell<S> extends TableCell<S, LocalDate> {
     }
 
     private void createDatePicker() {
-        this.datePicker = new DatePicker(getItem());
-        this.datePicker.setEditable(true);
-        this.datePicker.setShowWeekNumbers(false);
-        this.datePicker.setDayCellFactory(d -> new DateCell() {
-            @Override
-            public void updateItem(LocalDate item, boolean empty) {
-                super.updateItem(item, empty);
-                setDisable((endDate != null && item.isAfter(endDate)) || (startDate != null && item.isBefore(startDate)));
-            }
-        });
-        this.datePicker.valueProperty().addListener((observable, oldValue, newValue) -> {
-            if ((endDate != null && newValue.isAfter(endDate)) || (startDate != null && newValue.isBefore(startDate))) {
-                this.datePicker.setValue(oldValue);
-            }
-        });
-        this.datePicker.focusedProperty().addListener((observable, oldValue, newValue) -> {
-            if (BooleanUtils.isFalse(newValue) && this.datePicker.isEditable()) {
-                this.datePicker.setValue(this.datePicker.getConverter().fromString(this.datePicker.getEditor().getText()));
-                commitEdit(this.datePicker.getValue());
-            }
-        });
+        if (this.datePicker == null) {
+            this.datePicker = new DatePicker(getItem());
+            this.datePicker.setEditable(true);
+            this.datePicker.setShowWeekNumbers(false);
+            this.datePicker.setDayCellFactory(d -> new DateCell() {
+                @Override
+                public void updateItem(LocalDate item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setDisable((endDate != null && item.isAfter(endDate)) || (startDate != null && item.isBefore(startDate)));
+                }
+            });
+            this.datePicker.valueProperty().addListener((observable, oldValue, newValue) -> {
+                if (!Objects.equals(oldValue, newValue) && ((endDate != null && newValue.isAfter(endDate)) || (startDate != null && newValue.isBefore(
+                        startDate)))) {
+                    this.datePicker.setValue(oldValue);
+                }
+            });
+            this.datePicker.focusedProperty().addListener((observable, oldValue, newValue) -> {
+                if (BooleanUtils.isTrue(oldValue) && BooleanUtils.isFalse(newValue) && this.datePicker.isEditable()) {
+                    this.datePicker.setValue(this.datePicker.getConverter().fromString(this.datePicker.getEditor().getText()));
+
+                    final TableView<S> table = getTableView();
+                    if (table != null) {
+                        Event.fireEvent(getTableColumn(),
+                                        new TableColumn.CellEditEvent<>(
+                                                table,
+                                                new TablePosition<>(table, getTableRow().getIndex(), getTableColumn()),
+                                                TableColumn.editCommitEvent(),
+                                                this.datePicker.getValue()
+                                        ));
+                    }
+
+                    updateItem(this.datePicker.getValue(), this.datePicker.getValue() == null);
+                }
+            });
+        }
+
         setAlignment(Pos.CENTER);
     }
 

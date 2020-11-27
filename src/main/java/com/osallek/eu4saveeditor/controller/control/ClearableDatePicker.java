@@ -13,6 +13,7 @@ import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
 
 import java.time.LocalDate;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 public class ClearableDatePicker extends HBox {
@@ -39,7 +40,7 @@ public class ClearableDatePicker extends HBox {
             }
         });
         this.datePicker.valueProperty().addListener((observable, oldValue, newValue) -> {
-            if ((endDate != null && newValue.isAfter(endDate)) || (startDate != null && newValue.isBefore(startDate))) {
+            if (!Objects.equals(oldValue, newValue) && ((endDate != null && newValue.isAfter(endDate)) || (startDate != null && newValue.isBefore(startDate)))) {
                 this.datePicker.setValue(oldValue);
             }
         });

@@ -46,6 +46,7 @@ import com.osallek.eu4saveeditor.controller.validator.CustomGraphicValidationDec
 import com.osallek.eu4saveeditor.i18n.ItemsI18n;
 import com.osallek.eu4saveeditor.i18n.SheetCategory;
 import com.osallek.eu4saveeditor.imagereader.ImageReader;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -407,8 +408,9 @@ public class SavePropertySheet extends VBox {
                 TableViewDialog<ChangePrice> dialog = new TableViewDialog<>(this.save,
                                                                             new TableView2ChangePrice(this.goodsChangePrices.get(good.getName()), this.save),
                                                                             this.save.getGame().getLocalisationClean("TSI_CURR_MOD_BY"),
-                                                                            supplier,
+                                                                            null,
                                                                             good::getChangePrices);
+                dialog.setDisableAddProperty(new SimpleBooleanProperty(true));
                 Optional<List<ChangePrice>> changePrices = dialog.showAndWait();
 
                 if (changePrices.isPresent()) {

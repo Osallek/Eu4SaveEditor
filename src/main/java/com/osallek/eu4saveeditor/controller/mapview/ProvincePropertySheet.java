@@ -13,6 +13,7 @@ import com.osallek.eu4saveeditor.controller.control.ClearableComboBox;
 import com.osallek.eu4saveeditor.controller.control.ClearableSpinnerDouble;
 import com.osallek.eu4saveeditor.controller.control.ClearableSpinnerInt;
 import com.osallek.eu4saveeditor.controller.control.SelectableGridView;
+import com.osallek.eu4saveeditor.controller.control.TableView2Modifier;
 import com.osallek.eu4saveeditor.controller.converter.CountryStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.CountryStringConverter;
 import com.osallek.eu4saveeditor.controller.converter.CultureStringCellFactory;
@@ -21,9 +22,12 @@ import com.osallek.eu4saveeditor.controller.converter.ReligionStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.ReligionStringConverter;
 import com.osallek.eu4saveeditor.controller.converter.TradeGoodStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.TradeGoodStringConverter;
+import com.osallek.eu4saveeditor.controller.object.Modifier;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheetSkin;
+import com.osallek.eu4saveeditor.controller.pane.TableViewDialog;
 import com.osallek.eu4saveeditor.controller.propertyeditor.CustomPropertyEditorFactory;
+import com.osallek.eu4saveeditor.controller.propertyeditor.item.ButtonItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.CheckBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableCheckComboBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableComboBoxItem;
@@ -36,6 +40,7 @@ import com.osallek.eu4saveeditor.controller.validator.CustomGraphicValidationDec
 import com.osallek.eu4saveeditor.i18n.SheetCategory;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -55,6 +60,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ProvincePropertySheet extends VBox {
@@ -113,6 +119,10 @@ public class ProvincePropertySheet extends VBox {
 
     private List<SelectableGridViewItem<Building>> buildingsFields;
 
+    private final ButtonItem modifiersButton;
+
+    private final ObservableList<Modifier> modifiers;
+
     private final ChangeListener<? super Country> ownerChangeListener;
 
     private BooleanProperty countryChanged;
@@ -124,7 +134,6 @@ public class ProvincePropertySheet extends VBox {
         this.propertySheet = new CustomPropertySheet();
         this.propertySheet.setPropertyEditorFactory(new CustomPropertyEditorFactory());
         this.propertySheet.setMode(CustomPropertySheet.Mode.CATEGORY);
-        this.propertySheet.setCategoryComparator(Comparator.comparing(SheetCategory::getByLocale));
         this.propertySheet.setModeSwitcherVisible(false);
         this.propertySheet.setSearchBoxVisible(false);
 
@@ -259,6 +268,11 @@ public class ProvincePropertySheet extends VBox {
         }
 
         this.buildingsFields = new ArrayList<>();
+
+        //Modifiers
+        this.modifiers = FXCollections.observableArrayList();
+        this.modifiersButton = new ButtonItem(save.getGame().getLocalisationClean("DOMESTIC_MODIFIERS"), null,
+                                              save.getGame().getLocalisationClean("DOMESTIC_MODIFIERS"));
 
         this.ownerChangeListener = (observable, oldValue, newValue) -> {
             this.controllerComboBox.select(newValue);
@@ -479,6 +493,22 @@ public class ProvincePropertySheet extends VBox {
             }
         }
 
+        //Modifiers
+        this.modifiers.setAll(this.province.getModifiers().values().stream().map(Modifier::new).collect(Collectors.toList()));
+        this.modifiersButton.getButton().setOnAction(event -> {
+            TableView2Modifier tableView2Modifier = new TableView2Modifier(this.province.getSave(), this.modifiers);
+            TableViewDialog<Modifier> dialog = new TableViewDialog<>(this.province.getSave(),
+                                                                     tableView2Modifier,
+                                                                     this.province.getSave().getGame().getLocalisationClean("DOMESTIC_MODIFIERS"),
+                                                                     list -> null,
+                                                                     () -> this.modifiers);
+            dialog.setDisableAddProperty(new SimpleBooleanProperty(true));
+            Optional<List<Modifier>> modifierList = dialog.showAndWait();
+
+            modifierList.ifPresent(this.modifiers::setAll);
+        });
+        items.add(this.modifiersButton);
+
         this.propertySheet.getItems().setAll(items);
 
         if (expandedPaneName != null) {
@@ -644,6 +674,22 @@ public class ProvincePropertySheet extends VBox {
             if (this.colonizeForField.getSelectedValue() != null) {
                 this.province.colonize(this.colonizeForField.getSelectedValue());
             }
+        }
+
+        if (this.province.getModifiers().size() != this.modifiers.size() || this.modifiers.stream().anyMatch(Modifier::isChanged)) {
+            this.province.getModifiers()
+                         .values()
+                         .forEach(saveModifier -> this.modifiers.stream()
+                                                                .filter(modifier -> saveModifier.getModifier().equals(modifier.getModifier()))
+                                                                .findFirst()
+                                                                .ifPresentOrElse(modifier -> {
+                                                                                     if (!Objects.equals(modifier.getDate(), saveModifier.getDate())) {
+                                                                                         saveModifier.setDate(modifier.getDate());
+                                                                                     }
+
+                                                                                     this.modifiers.remove(modifier);
+                                                                                 },
+                                                                                 () -> this.province.removeModifier(saveModifier.getModifier())));
         }
     }
 
