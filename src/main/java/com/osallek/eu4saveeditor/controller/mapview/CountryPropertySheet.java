@@ -5,6 +5,7 @@ import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.model.Power;
 import com.osallek.eu4parser.model.game.Culture;
 import com.osallek.eu4parser.model.game.GovernmentReform;
+import com.osallek.eu4parser.model.game.Policy;
 import com.osallek.eu4parser.model.game.SubjectType;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.SaveReligion;
@@ -20,11 +21,13 @@ import com.osallek.eu4saveeditor.controller.control.TableView2Ideas;
 import com.osallek.eu4saveeditor.controller.control.TableView2Leader;
 import com.osallek.eu4saveeditor.controller.control.TableView2Loan;
 import com.osallek.eu4saveeditor.controller.control.TableView2Modifier;
+import com.osallek.eu4saveeditor.controller.control.TableView2Policy;
 import com.osallek.eu4saveeditor.controller.control.TableView2Rival;
 import com.osallek.eu4saveeditor.controller.converter.CultureStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.CultureStringConverter;
 import com.osallek.eu4saveeditor.controller.converter.PairCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.PairConverter;
+import com.osallek.eu4saveeditor.controller.object.ActivePolicy;
 import com.osallek.eu4saveeditor.controller.object.CountrySubject;
 import com.osallek.eu4saveeditor.controller.object.Idea;
 import com.osallek.eu4saveeditor.controller.object.Leader;
@@ -53,6 +56,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.control.ComboBox;
 import javafx.scene.layout.VBox;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.controlsfx.control.SearchableComboBox;
@@ -184,6 +188,24 @@ public class CountryPropertySheet extends VBox {
     private final ButtonItem ideasButton;
 
     private final ObservableList<Idea> ideas;
+
+    private final ButtonItem admPoliciesButton;
+
+    private ObservableList<Policy> availableAdmPolicies;
+
+    private final ObservableList<ActivePolicy> admPolicies;
+
+    private final ButtonItem dipPoliciesButton;
+
+    private ObservableList<Policy> availableDipPolicies;
+
+    private final ObservableList<ActivePolicy> dipPolicies;
+
+    private final ButtonItem milPoliciesButton;
+
+    private ObservableList<Policy> availableMilPolicies;
+
+    private final ObservableList<ActivePolicy> milPolicies;
 
     private final ButtonItem modifiersButton;
 
@@ -378,6 +400,18 @@ public class CountryPropertySheet extends VBox {
         this.ideas = FXCollections.observableArrayList();
         this.ideasButton = new ButtonItem(save.getGame().getLocalisationClean("HEADER_TECHNOLOGY"), null,
                                           save.getGame().getLocalisationClean("HEADER_IDEAS"), 2);
+
+        this.admPolicies = FXCollections.observableArrayList();
+        this.admPoliciesButton = new ButtonItem(save.getGame().getLocalisationClean("HEADER_TECHNOLOGY"), null,
+                                                save.getGame().getLocalisationClean("POLICYVIEW_ADMINISTRATIVE"), 2);
+
+        this.dipPolicies = FXCollections.observableArrayList();
+        this.dipPoliciesButton = new ButtonItem(save.getGame().getLocalisationClean("HEADER_TECHNOLOGY"), null,
+                                                save.getGame().getLocalisationClean("POLICYVIEW_DIPLOMATIC"), 2);
+
+        this.milPolicies = FXCollections.observableArrayList();
+        this.milPoliciesButton = new ButtonItem(save.getGame().getLocalisationClean("HEADER_TECHNOLOGY"), null,
+                                                save.getGame().getLocalisationClean("POLICYVIEW_MILITARY"), 2);
 
         //Modifiers
         this.modifiers = FXCollections.observableArrayList();
@@ -736,6 +770,117 @@ public class CountryPropertySheet extends VBox {
                 });
                 items.add(this.ideasButton);
 
+                this.availableAdmPolicies = this.country.getSave()
+                                                        .getGame()
+                                                        .getPolicies()
+                                                        .stream()
+                                                        .filter(policy -> Power.ADM.equals(policy.getCategory()))
+                                                        .filter(policy -> policy.getAllow().apply(this.country, this.country))
+                                                        .collect(Collectors.toCollection(FXCollections::observableArrayList));
+
+                if (!availableAdmPolicies.isEmpty()) {
+                    this.admPolicies.setAll(this.country.getActivePolicies()
+                                                        .stream()
+                                                        .filter(policy -> Power.ADM.equals(policy.getPolicy().getCategory()))
+                                                        .map(ActivePolicy::new)
+                                                        .toArray(ActivePolicy[]::new));
+                    this.admPoliciesButton.getButton().setOnAction(event -> {
+                        TableView2Policy tableView2Policy = new TableView2Policy(this.country, this.admPolicies, availableAdmPolicies, "POSSIBLE_ADM_POLICY");
+                        TableViewDialog<ActivePolicy> dialog =
+                                new TableViewDialog<>(this.country.getSave(),
+                                                      tableView2Policy,
+                                                      this.country.getSave().getGame().getLocalisationClean("POLICYVIEW_ADMINISTRATIVE"),
+                                                      list -> new ActivePolicy(availableAdmPolicies.stream()
+                                                                                                   .filter(policy -> list.stream()
+                                                                                                                         .noneMatch(
+                                                                                                                                 activePolicy -> activePolicy.getPolicy()
+                                                                                                                                                             .equals(policy)))
+                                                                                                   .findFirst()
+                                                                                                   .get(),
+                                                                               this.country.getSave().getDate()),
+                                                      () -> this.admPolicies);
+                        dialog.setDisableAddProperty(tableView2Policy.disableAddPropertyProperty());
+                        Optional<List<ActivePolicy>> policyList = dialog.showAndWait();
+
+                        policyList.ifPresent(this.admPolicies::setAll);
+                    });
+                    items.add(this.admPoliciesButton);
+                }
+
+                this.availableDipPolicies = this.country.getSave()
+                                                        .getGame()
+                                                        .getPolicies()
+                                                        .stream()
+                                                        .filter(policy -> Power.DIP.equals(policy.getCategory()))
+                                                        .filter(policy -> policy.getAllow().apply(this.country, this.country))
+                                                        .collect(Collectors.toCollection(FXCollections::observableArrayList));
+
+                if (!availableDipPolicies.isEmpty()) {
+                    this.dipPolicies.setAll(this.country.getActivePolicies()
+                                                        .stream()
+                                                        .filter(policy -> Power.DIP.equals(policy.getPolicy().getCategory()))
+                                                        .map(ActivePolicy::new)
+                                                        .toArray(ActivePolicy[]::new));
+                    this.dipPoliciesButton.getButton().setOnAction(event -> {
+                        TableView2Policy tableView2Policy = new TableView2Policy(this.country, this.dipPolicies, availableDipPolicies, "POSSIBLE_DIP_POLICY");
+                        TableViewDialog<ActivePolicy> dialog =
+                                new TableViewDialog<>(this.country.getSave(),
+                                                      tableView2Policy,
+                                                      this.country.getSave().getGame().getLocalisationClean("POLICYVIEW_DIPLOMATIC"),
+                                                      list -> new ActivePolicy(availableDipPolicies.stream()
+                                                                                                   .filter(policy -> list.stream()
+                                                                                                                         .noneMatch(
+                                                                                                                                 activePolicy -> activePolicy.getPolicy()
+                                                                                                                                                             .equals(policy)))
+                                                                                                   .findFirst()
+                                                                                                   .get(),
+                                                                               this.country.getSave().getDate()),
+                                                      () -> this.dipPolicies);
+                        dialog.setDisableAddProperty(tableView2Policy.disableAddPropertyProperty());
+                        Optional<List<ActivePolicy>> policyList = dialog.showAndWait();
+
+                        policyList.ifPresent(this.dipPolicies::setAll);
+                    });
+                    items.add(this.dipPoliciesButton);
+                }
+
+                this.availableMilPolicies = this.country.getSave()
+                                                        .getGame()
+                                                        .getPolicies()
+                                                        .stream()
+                                                        .filter(policy -> Power.MIL.equals(policy.getCategory()))
+                                                        .filter(policy -> policy.getAllow().apply(this.country, this.country))
+                                                        .collect(Collectors.toCollection(FXCollections::observableArrayList));
+
+                if (!availableMilPolicies.isEmpty()) {
+                    this.milPolicies.setAll(this.country.getActivePolicies()
+                                                        .stream()
+                                                        .filter(policy -> Power.MIL.equals(policy.getPolicy().getCategory()))
+                                                        .map(ActivePolicy::new)
+                                                        .toArray(ActivePolicy[]::new));
+                    this.milPoliciesButton.getButton().setOnAction(event -> {
+                        TableView2Policy tableView2Policy = new TableView2Policy(this.country, this.milPolicies, availableMilPolicies, "POSSIBLE_MIL_POLICY");
+                        TableViewDialog<ActivePolicy> dialog =
+                                new TableViewDialog<>(this.country.getSave(),
+                                                      tableView2Policy,
+                                                      this.country.getSave().getGame().getLocalisationClean("POLICYVIEW_MILITARY"),
+                                                      list -> new ActivePolicy(availableMilPolicies.stream()
+                                                                                                   .filter(policy -> list.stream()
+                                                                                                                         .noneMatch(
+                                                                                                                                 activePolicy -> activePolicy.getPolicy()
+                                                                                                                                                             .equals(policy)))
+                                                                                                   .findFirst()
+                                                                                                   .get(),
+                                                                               this.country.getSave().getDate()),
+                                                      () -> this.milPolicies);
+                        dialog.setDisableAddProperty(tableView2Policy.disableAddPropertyProperty());
+                        Optional<List<ActivePolicy>> policyList = dialog.showAndWait();
+
+                        policyList.ifPresent(this.milPolicies::setAll);
+                    });
+                    items.add(this.milPoliciesButton);
+                }
+
                 //Modifiers
                 this.modifiers.setAll(this.country.getModifiers().stream().map(Modifier::new).collect(Collectors.toList()));
                 this.modifiersButton.getButton().setOnAction(event -> {
@@ -1029,6 +1174,66 @@ public class CountryPropertySheet extends VBox {
                                                                                     this.modifiers.remove(modifier);
                                                                                 },
                                                                                 () -> this.country.removeModifier(saveModifier.getModifier())));
+        }
+
+        if (CollectionUtils.isNotEmpty(this.availableAdmPolicies) &&
+            (this.country.getActivePolicies().stream().filter(p -> Power.ADM.equals(p.getPolicy().getCategory())).count() != this.admPolicies.size()
+             || this.admPolicies.stream().anyMatch(ActivePolicy::isChanged))) {
+            this.country.getActivePolicies()
+                        .stream()
+                        .filter(p -> Power.ADM.equals(p.getPolicy().getCategory()))
+                        .forEach(activePolicy -> this.admPolicies.stream()
+                                                                 .filter(policy -> activePolicy.getPolicy().equals(policy.getPolicy()))
+                                                                 .findFirst()
+                                                                 .ifPresentOrElse(policy -> {
+                                                                                      if (!Objects.equals(policy.getDate(), activePolicy.getDate())) {
+                                                                                          activePolicy.setDate(policy.getDate());
+                                                                                      }
+
+                                                                                      this.admPolicies.remove(policy);
+                                                                                  },
+                                                                                  () -> this.country.removeActivePolicy(activePolicy.getPolicy())));
+            this.admPolicies.forEach(policy -> this.country.addActivePolicy(policy.getPolicy(), policy.getDate()));
+        }
+
+        if (CollectionUtils.isNotEmpty(this.availableDipPolicies) &&
+            (this.country.getActivePolicies().stream().filter(p -> Power.DIP.equals(p.getPolicy().getCategory())).count() != this.dipPolicies.size()
+             || this.dipPolicies.stream().anyMatch(ActivePolicy::isChanged))) {
+            this.country.getActivePolicies()
+                        .stream()
+                        .filter(p -> Power.DIP.equals(p.getPolicy().getCategory()))
+                        .forEach(activePolicy -> this.dipPolicies.stream()
+                                                                 .filter(policy -> activePolicy.getPolicy().equals(policy.getPolicy()))
+                                                                 .findFirst()
+                                                                 .ifPresentOrElse(policy -> {
+                                                                                      if (!Objects.equals(policy.getDate(), activePolicy.getDate())) {
+                                                                                          activePolicy.setDate(policy.getDate());
+                                                                                      }
+
+                                                                                      this.dipPolicies.remove(policy);
+                                                                                  },
+                                                                                  () -> this.country.removeActivePolicy(activePolicy.getPolicy())));
+            this.dipPolicies.forEach(policy -> this.country.addActivePolicy(policy.getPolicy(), policy.getDate()));
+        }
+
+        if (CollectionUtils.isNotEmpty(this.availableMilPolicies) &&
+            (this.country.getActivePolicies().stream().filter(p -> Power.MIL.equals(p.getPolicy().getCategory())).count() != this.milPolicies.size()
+             || this.milPolicies.stream().anyMatch(ActivePolicy::isChanged))) {
+            this.country.getActivePolicies()
+                        .stream()
+                        .filter(p -> Power.MIL.equals(p.getPolicy().getCategory()))
+                        .forEach(activePolicy -> this.milPolicies.stream()
+                                                                 .filter(policy -> activePolicy.getPolicy().equals(policy.getPolicy()))
+                                                                 .findFirst()
+                                                                 .ifPresentOrElse(policy -> {
+                                                                                      if (!Objects.equals(policy.getDate(), activePolicy.getDate())) {
+                                                                                          activePolicy.setDate(policy.getDate());
+                                                                                      }
+
+                                                                                      this.milPolicies.remove(policy);
+                                                                                  },
+                                                                                  () -> this.country.removeActivePolicy(activePolicy.getPolicy())));
+            this.milPolicies.forEach(policy -> this.country.addActivePolicy(policy.getPolicy(), policy.getDate()));
         }
 
         update(this.country, true);
