@@ -11,13 +11,12 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.util.converter.IntegerStringConverter;
 
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class TableView2Ideas extends TableView<Idea> {
@@ -26,7 +25,7 @@ public class TableView2Ideas extends TableView<Idea> {
 
     private final ObservableList<IdeaGroup> ideaGroups;
 
-    private final Map<Idea, ObservableList<IdeaGroup>> ideasMap = new HashMap<>();
+    private final ObservableMap<Idea, ObservableList<IdeaGroup>> ideasMap = FXCollections.observableHashMap();
 
     public TableView2Ideas(Country country, ObservableList<Idea> enactedIdeas, ObservableList<IdeaGroup> ideaGroups) {
         this.ideaGroups = ideaGroups;
@@ -34,9 +33,8 @@ public class TableView2Ideas extends TableView<Idea> {
         ideaGroup.setCellValueFactory(p -> p.getValue() == null ? null : new ReadOnlyObjectWrapper<>(p.getValue().getIdeaGroup()));
         ideaGroup.setCellFactory(UniqueComboBoxTableCell.forTableColumn(new IdeaGroupStringConverter(),
                                                                         this.ideasMap,
-                                                                        Comparator.comparing(IdeaGroup::getLocalizedName, Eu4Utils.COLLATOR),
-                                                                        Idea::getIdeaGroup,
-                                                                        this::getNewList));
+                                                                        Comparator.comparing(IdeaGroup::getLocalizedName, Eu4Utils.COLLATOR)
+                                                                       ));
         ideaGroup.setOnEditCommit(event -> event.getRowValue().setIdeaGroup(event.getNewValue()));
         ideaGroup.setPrefWidth(250);
         ideaGroup.setStyle("-fx-alignment: CENTER-LEFT");

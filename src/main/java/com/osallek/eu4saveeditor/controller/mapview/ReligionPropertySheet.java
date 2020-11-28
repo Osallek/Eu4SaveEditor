@@ -4,16 +4,21 @@ import com.osallek.eu4parser.model.game.GoldenBull;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.SaveReligion;
 import com.osallek.eu4parser.model.save.country.Country;
+import com.osallek.eu4parser.model.save.province.SaveProvince;
 import com.osallek.eu4saveeditor.controller.EditorController;
 import com.osallek.eu4saveeditor.controller.control.ClearableComboBox;
 import com.osallek.eu4saveeditor.controller.control.ClearableSpinnerDouble;
+import com.osallek.eu4saveeditor.controller.control.TableView2ReformationCenter;
 import com.osallek.eu4saveeditor.controller.converter.CountryStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.CountryStringConverter;
 import com.osallek.eu4saveeditor.controller.converter.GoldenBullStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.GoldenBullStringConverter;
+import com.osallek.eu4saveeditor.controller.object.ReformationCenter;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheetSkin;
+import com.osallek.eu4saveeditor.controller.pane.TableViewDialog;
 import com.osallek.eu4saveeditor.controller.propertyeditor.CustomPropertyEditorFactory;
+import com.osallek.eu4saveeditor.controller.propertyeditor.item.ButtonItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.CheckBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableComboBoxItem;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderItem;
@@ -24,6 +29,7 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.scene.layout.VBox;
+import org.apache.commons.collections4.CollectionUtils;
 import org.controlsfx.control.SearchableComboBox;
 import org.controlsfx.validation.ValidationSupport;
 import org.controlsfx.validation.decoration.CompoundValidationDecoration;
@@ -32,6 +38,8 @@ import org.controlsfx.validation.decoration.StyleClassValidationDecoration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class ReligionPropertySheet extends VBox {
@@ -58,9 +66,13 @@ public class ReligionPropertySheet extends VBox {
 
     private ClearableComboBoxItem<GoldenBull> goldenBullField;
 
+    private ButtonItem reformationCentersButton;
+
+    private ObservableList<ReformationCenter> reformationCenters;
+
     private CustomPropertySheetSkin propertySheetSkin;
 
-    public ReligionPropertySheet(Save save, SaveReligion religion, ObservableList<Country> countriesAlive) {
+    public ReligionPropertySheet(Save save, SaveReligion religion, ObservableList<Country> countriesAlive, ObservableList<SaveProvince> provinces) {
         this.save = save;
         this.religion = religion;
         this.propertySheet = new CustomPropertySheet();
@@ -192,6 +204,33 @@ public class ReligionPropertySheet extends VBox {
             this.religion.getPapacy().getGoldenBull();
         }
 
+        if (CollectionUtils.isNotEmpty(provinces) && this.religion.getGameReligion() != null
+            && CollectionUtils.isNotEmpty(this.religion.getGameReligion().getAllowedCenterConversion())) {
+            this.reformationCenters = FXCollections.observableArrayList();
+            this.reformationCenters.setAll(this.religion.getReformationCenters().stream().map(ReformationCenter::new).collect(Collectors.toList()));
+            this.reformationCentersButton = new ButtonItem(this.religion.getLocalizedName(), null,
+                                                           save.getGame().getLocalisationClean("protestant_center_of_reformation"),
+                                                           items.isEmpty() ? 1 : 2);
+            this.reformationCentersButton.getButton().setOnAction(event -> {
+                TableView2ReformationCenter tableView2 = new TableView2ReformationCenter(this.save, this.reformationCenters, provinces);
+                TableViewDialog<ReformationCenter> dialog = new TableViewDialog<>(this.save,
+                                                                                  tableView2,
+                                                                                  this.save.getGame().getLocalisationClean("protestant_center_of_reformation"),
+                                                                                  list -> new ReformationCenter(this.religion,
+                                                                                                                provinces.stream()
+                                                                                                                         .filter(Predicate.not(
+                                                                                                                                 SaveProvince::centerOfReligion))
+                                                                                                                         .findFirst()
+                                                                                                                         .get()),
+                                                                                  () -> this.reformationCenters);
+                dialog.setDisableAddProperty(tableView2.disableAddPropertyProperty());
+                Optional<List<ReformationCenter>> modifierList = dialog.showAndWait();
+
+                modifierList.ifPresent(this.reformationCenters::setAll);
+            });
+            items.add(this.reformationCentersButton);
+        }
+
         this.propertySheet.getItems().setAll(items);
     }
 
@@ -223,6 +262,10 @@ public class ReligionPropertySheet extends VBox {
 
         if (this.goldenBullField != null) {
             this.goldenBullField.setValue(this.religion.getPapacy().getGoldenBull());
+        }
+
+        if (this.reformationCenters != null) {
+            this.reformationCenters.setAll(this.religion.getReformationCenters().stream().map(ReformationCenter::new).collect(Collectors.toList()));
         }
     }
 
@@ -268,6 +311,20 @@ public class ReligionPropertySheet extends VBox {
         if (this.goldenBullField != null) {
             if (!Objects.equals(this.religion.getPapacy().getGoldenBull(), this.goldenBullField.getSelectedValue())) {
                 this.religion.getPapacy().setGoldenBull(this.goldenBullField.getSelectedValue());
+            }
+        }
+
+        if (this.reformationCenters != null) {
+            if (this.religion.getReformationCenters().size() != this.reformationCenters.size()
+                || this.reformationCenters.stream().anyMatch(ReformationCenter::isChanged)) {
+                this.religion.getReformationCenters()
+                             .forEach(reformationCenter -> this.reformationCenters.stream()
+                                                                                  .filter(r -> reformationCenter.getProvince().equals(r.getProvince()))
+                                                                                  .findFirst()
+                                                                                  .ifPresentOrElse(r -> this.reformationCenters.remove(r),
+                                                                                                   () -> this.religion.removeReformationCenter(
+                                                                                                           reformationCenter)));
+                this.reformationCenters.forEach(reformationCenter -> this.religion.addReformationCenter(reformationCenter.getProvince()));
             }
         }
     }

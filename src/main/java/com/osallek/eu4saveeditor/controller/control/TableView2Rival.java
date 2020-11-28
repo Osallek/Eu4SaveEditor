@@ -10,13 +10,12 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 
 import java.time.LocalDate;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class TableView2Rival extends TableView<Rival> {
@@ -27,7 +26,7 @@ public class TableView2Rival extends TableView<Rival> {
 
     private final ObservableList<Country> countriesAlive;
 
-    private final Map<Rival, ObservableList<Country>> countriesMap = new HashMap<>();
+    private final ObservableMap<Rival, ObservableList<Country>> countriesMap = FXCollections.observableHashMap();
 
     public TableView2Rival(Country country, ObservableList<Rival> rivals, ObservableList<Country> countriesAlive) {
         this.country = country;
@@ -37,9 +36,8 @@ public class TableView2Rival extends TableView<Rival> {
         target.setCellValueFactory(p -> p.getValue() == null ? null : new ReadOnlyObjectWrapper<>(p.getValue().getTarget()));
         target.setCellFactory(UniqueComboBoxTableCell.forTableColumn(new CountryStringConverter(),
                                                                      this.countriesMap,
-                                                                     Comparator.comparing(Country::getLocalizedName, Eu4Utils.COLLATOR),
-                                                                     Rival::getTarget,
-                                                                     this::getNewList));
+                                                                     Comparator.comparing(Country::getLocalizedName, Eu4Utils.COLLATOR)
+                                                                    ));
         target.setOnEditCommit(event -> event.getRowValue().setTarget(event.getNewValue()));
         target.setPrefWidth(200);
         target.setStyle("-fx-alignment: CENTER-LEFT");

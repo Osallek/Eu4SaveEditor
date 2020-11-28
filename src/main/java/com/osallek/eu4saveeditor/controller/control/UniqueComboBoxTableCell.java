@@ -1,25 +1,20 @@
 package com.osallek.eu4saveeditor.controller.control;
 
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.ListChangeListener;
+import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.collections.transformation.SortedList;
-import javafx.scene.Node;
 import javafx.scene.control.Cell;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.ListView;
-import javafx.scene.control.Skin;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.skin.ComboBoxListViewSkin;
+import javafx.scene.control.TableView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 
@@ -32,35 +27,46 @@ import java.util.function.Supplier;
 public class UniqueComboBoxTableCell<S, T> extends TableCell<S, T> {
 
     public static <S, T> Callback<TableColumn<S, T>, TableCell<S, T>> forTableColumn(StringConverter<T> converter,
-                                                                                     Map<S, ObservableList<T>> source,
-                                                                                     Comparator<T> comparator,
-                                                                                     Function<S, T> mapper,
-                                                                                     Supplier<ObservableList<T>> supplier) {
-        return list -> new UniqueComboBoxTableCell<>(converter, source, comparator, mapper, supplier);
+                                                                                     ObservableMap<S, ObservableList<T>> source,
+                                                                                     Comparator<T> comparator) {
+        return forTableColumn(converter, source, comparator, ComboBox::new);
     }
 
-    private final Map<S, ObservableList<T>> source;
+    public static <S, T> Callback<TableColumn<S, T>, TableCell<S, T>> forTableColumn(StringConverter<T> converter,
+                                                                                     ObservableMap<S, ObservableList<T>> source,
+                                                                                     Comparator<T> comparator,
+                                                                                     Function<ObservableList<T>, ComboBox<T>> boxSupplier) {
+        return list -> new UniqueComboBoxTableCell<>(converter, source, comparator, boxSupplier);
+    }
+
+    private final ObservableMap<S, ObservableList<T>> source;
 
     private final Map<S, SortedList<T>> sorted = new HashMap<>();
 
     private final Comparator<T> comparator;
 
-    private final Function<S, T> mapper;
-
-    private final Supplier<ObservableList<T>> supplier;
+    private final Function<ObservableList<T>, ComboBox<T>> boxSupplier;
 
     private ComboBox<T> comboBox;
 
-    public UniqueComboBoxTableCell(StringConverter<T> converter, Map<S, ObservableList<T>> source, Comparator<T> comparator, Function<S, T> mapper,
-                                   Supplier<ObservableList<T>> supplier) {
+    public UniqueComboBoxTableCell(StringConverter<T> converter, ObservableMap<S, ObservableList<T>> source, Comparator<T> comparator,
+                                   Function<ObservableList<T>,
+                                           ComboBox<T>> boxSupplier) {
         this.getStyleClass().add("combo-box-table-cell");
         this.source = source;
         this.comparator = comparator;
-        this.mapper = mapper;
-        this.supplier = supplier;
+        this.boxSupplier = boxSupplier;
         setConverter(converter);
 
         this.source.forEach((s, ts) -> this.sorted.put(s, ts.sorted(this.comparator)));
+
+        this.source.addListener((MapChangeListener<? super S, ? super ObservableList<T>>) change -> {
+            if (change.wasAdded()) {
+                this.sorted.put(change.getKey(), change.getValueAdded().sorted(this.comparator));
+            } else if (change.wasRemoved()) {
+                this.sorted.remove(change.getKey());
+            }
+        });
     }
 
     private final ObjectProperty<StringConverter<T>> converter = new SimpleObjectProperty<>(this, "converter");
@@ -105,23 +111,8 @@ public class UniqueComboBoxTableCell<S, T> extends TableCell<S, T> {
         }
 
         if (this.comboBox == null) {
-            this.comboBox = createComboBox(this, this.sorted.get(getTableRow().getItem()), converterProperty());
+            this.comboBox = createComboBox(this, this.boxSupplier, this.sorted.get(getTableRow().getItem()), converterProperty());
             this.comboBox.editableProperty().bind(comboBoxEditableProperty());
-
-            getTableView().getItems().addListener((ListChangeListener<? super S>) c -> {
-                while (c.next()) {
-                    c.getRemoved().forEach(s -> {
-                        this.source.remove(s);
-                        this.sorted.remove(s);
-                        this.source.values().forEach(list -> list.add(this.mapper.apply(s)));
-                    });
-                    c.getAddedSubList().forEach(s -> {
-                        this.source.values().forEach(countries -> countries.remove(this.mapper.apply(s)));
-                        this.source.put(s, this.supplier.get());
-                        this.sorted.put(s, this.source.get(s).sorted(this.comparator));
-                    });
-                }
-            });
         }
 
         this.comboBox.getSelectionModel().select(getItem());
@@ -178,8 +169,9 @@ public class UniqueComboBoxTableCell<S, T> extends TableCell<S, T> {
                converter.toString(cell.getItem());
     }
 
-    static <T> ComboBox<T> createComboBox(final Cell<T> cell, final ObservableList<T> items, final ObjectProperty<StringConverter<T>> converter) {
-        ComboBox<T> comboBox = new ComboBox<>(items);
+    static <T> ComboBox<T> createComboBox(final Cell<T> cell, final Function<ObservableList<T>, ComboBox<T>> boxSupplier, final ObservableList<T> items,
+                                          final ObjectProperty<StringConverter<T>> converter) {
+        ComboBox<T> comboBox = boxSupplier.apply(items);
         comboBox.converterProperty().bind(converter);
         comboBox.setMaxWidth(Double.MAX_VALUE);
 
@@ -191,24 +183,11 @@ public class UniqueComboBoxTableCell<S, T> extends TableCell<S, T> {
             }
         });
 
-        comboBox.getEditor().focusedProperty().addListener(o -> {
-            if (!comboBox.isFocused()) {
+        comboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (cell.isEditing()) {
                 tryComboBoxCommit(comboBox, cell);
             }
         });
-
-        boolean success = listenToComboBoxSkin(comboBox, cell);
-        if (!success) {
-            comboBox.skinProperty().addListener(new InvalidationListener() {
-                @Override
-                public void invalidated(Observable observable) {
-                    boolean successInListener = listenToComboBoxSkin(comboBox, cell);
-                    if (successInListener) {
-                        comboBox.skinProperty().removeListener(this);
-                    }
-                }
-            });
-        }
 
         return comboBox;
     }
@@ -221,18 +200,5 @@ public class UniqueComboBoxTableCell<S, T> extends TableCell<S, T> {
         } else {
             cell.commitEdit(comboBox.getValue());
         }
-    }
-
-    private static <T> boolean listenToComboBoxSkin(final ComboBox<T> comboBox, final Cell<T> cell) {
-        Skin<?> skin = comboBox.getSkin();
-        if (skin != null && skin instanceof ComboBoxListViewSkin) {
-            ComboBoxListViewSkin cbSkin = (ComboBoxListViewSkin) skin;
-            Node popupContent = cbSkin.getPopupContent();
-            if (popupContent != null && popupContent instanceof ListView) {
-                popupContent.addEventHandler(MouseEvent.MOUSE_RELEASED, e -> cell.commitEdit(comboBox.getValue()));
-                return true;
-            }
-        }
-        return false;
     }
 }

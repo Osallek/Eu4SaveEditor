@@ -11,12 +11,11 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class TableView2Privilege extends TableView<Privilege> {
@@ -25,7 +24,7 @@ public class TableView2Privilege extends TableView<Privilege> {
 
     private final ObservableList<EstatePrivilege> estatePrivileges;
 
-    private final Map<Privilege, ObservableList<EstatePrivilege>> privilegesMap = new HashMap<>();
+    private final ObservableMap<Privilege, ObservableList<EstatePrivilege>> privilegesMap = FXCollections.observableHashMap();
 
     public TableView2Privilege(Country country, SaveEstate estate, ObservableList<Privilege> enactedPrivileges,
                                ObservableList<EstatePrivilege> estatePrivileges) {
@@ -36,9 +35,8 @@ public class TableView2Privilege extends TableView<Privilege> {
         type.setCellValueFactory(p -> p.getValue() == null ? null : new ReadOnlyObjectWrapper<>(p.getValue().getPrivilege()));
         type.setCellFactory(UniqueComboBoxTableCell.forTableColumn(new EstatePrivilegeStringConverter(),
                                                                    this.privilegesMap,
-                                                                   EstatePrivilege::compareTo,
-                                                                   Privilege::getPrivilege,
-                                                                   this::getNewList));
+                                                                   EstatePrivilege::compareTo
+                                                                  ));
         type.setOnEditCommit(event -> event.getRowValue().setPrivilege(event.getNewValue()));
         type.setPrefWidth(350);
         type.setStyle("-fx-alignment: CENTER-LEFT");

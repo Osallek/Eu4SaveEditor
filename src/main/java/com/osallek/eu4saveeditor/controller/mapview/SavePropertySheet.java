@@ -772,7 +772,8 @@ public class SavePropertySheet extends VBox {
                  .filter(SaveReligion::hasSpecialAttribute)
                  .sorted(Comparator.comparing(SaveReligion::getLocalizedName, Eu4Utils.COLLATOR))
                  .forEach(religion -> {
-                     ReligionPropertySheet relPropertySheet = new ReligionPropertySheet(this.save, religion, countriesAlive);
+                     ReligionPropertySheet relPropertySheet = new ReligionPropertySheet(this.save, religion, countriesAlive,
+                                                                                        cities.filtered(province -> religion.equals(province.getReligion())));
 
                      if (!relPropertySheet.getPropertySheet().getItems().isEmpty()) {
                          this.religionPropertySheets.add(relPropertySheet);

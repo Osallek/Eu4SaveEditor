@@ -11,14 +11,12 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class TableView2Personalities extends TableView<RulerPersonality> {
@@ -29,7 +27,7 @@ public class TableView2Personalities extends TableView<RulerPersonality> {
 
     private final Monarch monarch;
 
-    private final Map<RulerPersonality, ObservableList<RulerPersonality>> personalitiesMap = new HashMap<>();
+    private final ObservableMap<RulerPersonality, ObservableList<RulerPersonality>> personalitiesMap = FXCollections.observableHashMap();
 
     public TableView2Personalities(Country country, Monarch monarch, ObservableList<RulerPersonality> enactedPersonalities,
                                    ObservableList<RulerPersonality> personalities) {
@@ -41,9 +39,8 @@ public class TableView2Personalities extends TableView<RulerPersonality> {
         rulerPersonality.setCellValueFactory(p -> p.getValue() == null ? null : new ReadOnlyObjectWrapper<>(p.getValue()));
         rulerPersonality.setCellFactory(UniqueComboBoxTableCell.forTableColumn(new RulerPersonalityStringConverter(),
                                                                                this.personalitiesMap,
-                                                                               Comparator.comparing(RulerPersonality::getLocalizedName, Eu4Utils.COLLATOR),
-                                                                               Function.identity(),
-                                                                               this::getNewList));
+                                                                               Comparator.comparing(RulerPersonality::getLocalizedName, Eu4Utils.COLLATOR)
+                                                                              ));
         rulerPersonality.setOnEditCommit(event -> event.getTableView().getItems().set(event.getTablePosition().getRow(), event.getNewValue()));
         rulerPersonality.setPrefWidth(250);
         rulerPersonality.setStyle("-fx-alignment: CENTER-LEFT");
