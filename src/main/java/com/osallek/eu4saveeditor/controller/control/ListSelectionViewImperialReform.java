@@ -2,7 +2,6 @@ package com.osallek.eu4saveeditor.controller.control;
 
 import com.osallek.eu4parser.model.game.ImperialReform;
 import com.osallek.eu4saveeditor.controller.converter.ImperialReformStringCellFactory;
-import com.osallek.eu4saveeditor.controller.pane.ImperialReformListSelectionViewSkin;
 import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
 import javafx.geometry.Orientation;
@@ -25,11 +24,9 @@ public class ListSelectionViewImperialReform extends CustomListSelectionView<Imp
     private final ObservableList<ImperialReform> selected;
 
     public ListSelectionViewImperialReform(ObservableList<ImperialReform> choices, ObservableList<ImperialReform> selected) {
+        super(choices, selected, new ImperialReformStringCellFactory(), 750, 600);
         this.choices = choices;
         this.selected = selected;
-        setCellFactory(new ImperialReformStringCellFactory());
-        setPrefWidth(750);
-        setPrefHeight(600);
         setSourceItems(this.choices.sorted());
         setTargetItems(this.selected.sorted());
 
@@ -40,11 +37,6 @@ public class ListSelectionViewImperialReform extends CustomListSelectionView<Imp
     public void onReset(Supplier<Collection<ImperialReform>> sourceSupplier, Supplier<Collection<ImperialReform>> targetSupplier) {
         this.choices.setAll(sourceSupplier.get());
         this.selected.setAll(targetSupplier.get());
-    }
-
-    @Override
-    protected Skin<ListSelectionView<ImperialReform>> createDefaultSkin() {
-        return new ImperialReformListSelectionViewSkin(this);
     }
 
     private static Glyph getGlyph(FontAwesome.Glyph angleDoubleDown) {

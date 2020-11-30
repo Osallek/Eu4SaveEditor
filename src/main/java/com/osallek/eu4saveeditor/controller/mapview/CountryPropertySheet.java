@@ -4,8 +4,13 @@ import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.model.Power;
 import com.osallek.eu4parser.model.game.Culture;
+import com.osallek.eu4parser.model.game.FetishistCult;
 import com.osallek.eu4parser.model.game.GovernmentReform;
+import com.osallek.eu4parser.model.game.PersonalDeity;
 import com.osallek.eu4parser.model.game.Policy;
+import com.osallek.eu4parser.model.game.Religion;
+import com.osallek.eu4parser.model.game.ReligionGroup;
+import com.osallek.eu4parser.model.game.ReligiousReform;
 import com.osallek.eu4parser.model.game.SubjectType;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.SaveReligion;
@@ -15,6 +20,7 @@ import com.osallek.eu4saveeditor.controller.control.ClearableCheckComboBox;
 import com.osallek.eu4saveeditor.controller.control.ClearableComboBox;
 import com.osallek.eu4saveeditor.controller.control.ClearableSpinnerDouble;
 import com.osallek.eu4saveeditor.controller.control.ClearableSpinnerInt;
+import com.osallek.eu4saveeditor.controller.control.CustomListSelectionView;
 import com.osallek.eu4saveeditor.controller.control.RequiredComboBox;
 import com.osallek.eu4saveeditor.controller.control.TableView2CountrySubject;
 import com.osallek.eu4saveeditor.controller.control.TableView2Ideas;
@@ -25,8 +31,17 @@ import com.osallek.eu4saveeditor.controller.control.TableView2Policy;
 import com.osallek.eu4saveeditor.controller.control.TableView2Rival;
 import com.osallek.eu4saveeditor.controller.converter.CultureStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.CultureStringConverter;
+import com.osallek.eu4saveeditor.controller.converter.FetishistCultStringCellFactory;
+import com.osallek.eu4saveeditor.controller.converter.FetishistCultStringConverter;
 import com.osallek.eu4saveeditor.controller.converter.PairCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.PairConverter;
+import com.osallek.eu4saveeditor.controller.converter.PersonalDeityStringCellFactory;
+import com.osallek.eu4saveeditor.controller.converter.PersonalDeityStringConverter;
+import com.osallek.eu4saveeditor.controller.converter.ReligionGroupStringCellFactory;
+import com.osallek.eu4saveeditor.controller.converter.ReligionStringCellFactory;
+import com.osallek.eu4saveeditor.controller.converter.ReligionStringConverter;
+import com.osallek.eu4saveeditor.controller.converter.ReligiousReformStringCellFactory;
+import com.osallek.eu4saveeditor.controller.converter.SaveReligionStringCellFactory;
 import com.osallek.eu4saveeditor.controller.object.ActivePolicy;
 import com.osallek.eu4saveeditor.controller.object.CountrySubject;
 import com.osallek.eu4saveeditor.controller.object.Idea;
@@ -37,6 +52,7 @@ import com.osallek.eu4saveeditor.controller.object.Rival;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheetSkin;
 import com.osallek.eu4saveeditor.controller.pane.GovernmentReformsDialog;
+import com.osallek.eu4saveeditor.controller.pane.ListSelectionViewDialog;
 import com.osallek.eu4saveeditor.controller.pane.TableViewDialog;
 import com.osallek.eu4saveeditor.controller.propertyeditor.CustomPropertyEditorFactory;
 import com.osallek.eu4saveeditor.controller.propertyeditor.item.ButtonItem;
@@ -58,6 +74,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.layout.VBox;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.controlsfx.control.SearchableComboBox;
 import org.controlsfx.validation.ValidationSupport;
@@ -74,6 +91,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -114,6 +132,50 @@ public class CountryPropertySheet extends VBox {
     private final ClearableComboBoxItem<Culture> cultureField;
 
     private final ClearableCheckComboBoxItem<Culture> acceptedCulturesField;
+
+    private final ClearableComboBoxItem<SaveReligion> religionField;
+
+    private final ClearableSliderItem authorityField;
+
+    private final ClearableSliderItem churchPowerField;
+
+    private final ClearableSliderItem fervorField;
+
+    private final ButtonItem religiousReformsButton;
+
+    private ObservableList<ReligiousReform> passedReligiousReforms;
+
+    private ObservableList<ReligiousReform> notPassedReligiousReforms;
+
+    private final ClearableSliderItem patriarchAuthorityField;
+
+    private final ClearableComboBoxItem<FetishistCult> fetishistCultField;
+
+    private final ClearableSpinnerItem<Integer> isolationismField;
+
+    private final ClearableSliderIntItem karmaField;
+
+    private final ClearableSliderItem pietyField;
+
+    private final ClearableSliderItem harmonyField;
+
+    private final ClearableComboBoxItem<PersonalDeity> personalDeityField;
+
+    private final ButtonItem harmonizedReligionGroupsButton;
+
+    private ObservableList<ReligionGroup> harmonizedReligionGroups;
+
+    private ObservableList<ReligionGroup> notHarmonizedReligionGroups;
+
+    private final ButtonItem harmonizedReligionsButton;
+
+    private ObservableList<Religion> harmonizedReligions;
+
+    private ObservableList<Religion> notHarmonizedReligions;
+
+    private final ClearableSliderItem doomField;
+
+    private final ClearableComboBoxItem<SaveReligion> secondaryReligionsField;
 
     private final ClearableSpinnerItem<Double> governmentReformProgressField;
 
@@ -277,6 +339,86 @@ public class CountryPropertySheet extends VBox {
                                                                       cultures,
                                                                       new ClearableCheckComboBox<>());
         this.acceptedCulturesField.setConverter(new CultureStringConverter());
+
+        //Religion
+        this.religionField = new ClearableComboBoxItem<>(save.getGame().getLocalisation("LEDGER_RELIGION"),
+                                                         save.getGame().getLocalisation("LEDGER_RELIGION"),
+                                                         this.religions,
+                                                         new ClearableComboBox<>(new SearchableComboBox<>()));
+        this.religionField.setConverter(new ReligionStringConverter());
+        this.religionField.setCellFactory(new SaveReligionStringCellFactory());
+
+        this.authorityField = new ClearableSliderItem(save.getGame().getLocalisation("LEDGER_RELIGION"),
+                                                      save.getGame().getLocalisation("authority"),
+                                                      0, 100);
+
+        this.churchPowerField = new ClearableSliderItem(save.getGame().getLocalisation("LEDGER_RELIGION"),
+                                                        save.getGame().getLocalisation("MODIFIER_CHURCH_POWER"),
+                                                        0, 200);
+
+        this.fervorField = new ClearableSliderItem(save.getGame().getLocalisation("LEDGER_RELIGION"),
+                                                   save.getGame().getLocalisationCleanNoPunctuation("FERVOR_VALUE2"),
+                                                   0, 100);
+
+        this.religiousReformsButton = new ButtonItem(save.getGame().getLocalisationClean("LEDGER_RELIGION"), null,
+                                                     save.getGame().getLocalisationClean("HEADER_RELIGIOUS_REFORMS"), 2);
+        this.passedReligiousReforms = FXCollections.observableArrayList();
+        this.notPassedReligiousReforms = FXCollections.observableArrayList();
+
+        this.patriarchAuthorityField = new ClearableSliderItem(save.getGame().getLocalisation("LEDGER_RELIGION"),
+                                                               save.getGame().getLocalisationCleanNoPunctuation("patriarch_authority_global"),
+                                                               0, 100);
+
+        this.fetishistCultField = new ClearableComboBoxItem<>(save.getGame().getLocalisation("LEDGER_RELIGION"),
+                                                              save.getGame().getLocalisationCleanNoPunctuation("HAS_ADOPTED_CULT"),
+                                                              FXCollections.observableArrayList(),
+                                                              new ClearableComboBox<>(new SearchableComboBox<>()));
+        this.fetishistCultField.setConverter(new FetishistCultStringConverter());
+        this.fetishistCultField.setCellFactory(new FetishistCultStringCellFactory());
+
+        this.isolationismField = new ClearableSpinnerItem<>(save.getGame().getLocalisation("LEDGER_RELIGION"),
+                                                            save.getGame().getLocalisationClean("ISOLATIONISM"),
+                                                            new ClearableSpinnerInt(0, 4, 1));
+
+        this.karmaField = new ClearableSliderIntItem(save.getGame().getLocalisation("LEDGER_RELIGION"),
+                                                     save.getGame().getLocalisationCleanNoPunctuation("CURRENT_KARMA"),
+                                                     -100, 100);
+
+        this.pietyField = new ClearableSliderItem(save.getGame().getLocalisation("LEDGER_RELIGION"),
+                                                  save.getGame().getLocalisationCleanNoPunctuation("CURRENT_PIETY"),
+                                                  0, 100);
+
+        this.harmonyField = new ClearableSliderItem(save.getGame().getLocalisation("LEDGER_RELIGION"),
+                                                    save.getGame().getLocalisationCleanNoPunctuation("CURRENT_HARMONY"),
+                                                    0, 100);
+
+        this.harmonizedReligionGroupsButton = new ButtonItem(save.getGame().getLocalisationClean("LEDGER_RELIGION"), null,
+                                                             save.getGame().getLocalisationClean("HARMONIZED_RELIGION_GROUP"), 2);
+        this.harmonizedReligionGroups = FXCollections.observableArrayList();
+        this.notHarmonizedReligionGroups = FXCollections.observableArrayList();
+
+        this.harmonizedReligionsButton = new ButtonItem(save.getGame().getLocalisationClean("LEDGER_RELIGION"), null,
+                                                        save.getGame().getLocalisationClean("HARMONIZED_RELIGION"), 2);
+        this.harmonizedReligions = FXCollections.observableArrayList();
+        this.notHarmonizedReligions = FXCollections.observableArrayList();
+
+        this.personalDeityField = new ClearableComboBoxItem<>(save.getGame().getLocalisation("LEDGER_RELIGION"),
+                                                              save.getGame().getLocalisationCleanNoPunctuation("HAS_DEITY"),
+                                                              FXCollections.observableArrayList(),
+                                                              new ClearableComboBox<>(new SearchableComboBox<>()));
+        this.personalDeityField.setConverter(new PersonalDeityStringConverter());
+        this.personalDeityField.setCellFactory(new PersonalDeityStringCellFactory());
+
+        this.doomField = new ClearableSliderItem(save.getGame().getLocalisation("LEDGER_RELIGION"),
+                                                 save.getGame().getLocalisationCleanNoPunctuation("doom"),
+                                                 0, 100);
+
+        this.secondaryReligionsField = new ClearableComboBoxItem<>(save.getGame().getLocalisation("LEDGER_RELIGION"),
+                                                                   save.getGame().getLocalisation("SECONDARY_RELIGION"),
+                                                                   FXCollections.observableArrayList(this.religions),
+                                                                   new ClearableComboBox<>(new SearchableComboBox<>()));
+        this.secondaryReligionsField.setConverter(new ReligionStringConverter());
+        this.secondaryReligionsField.setCellFactory(new SaveReligionStringCellFactory());
 
         //Economy
         this.treasuryField = new ClearableSpinnerItem<>(SheetCategory.ECONOMY,
@@ -493,6 +635,238 @@ public class CountryPropertySheet extends VBox {
                 this.acceptedCulturesField.setValue(FXCollections.observableArrayList(this.country.getAcceptedCultures()));
                 this.acceptedCulturesField.setSupplier(this.country::getAcceptedCultures);
                 items.add(this.acceptedCulturesField);
+
+                //Religion
+                this.religionField.setValue(this.country.getReligion());
+                this.religionField.setSupplier(this.country::getReligion);
+                items.add(this.religionField);
+
+                if (this.country.getReligion().getGameReligion().useAuthority()) {
+                    this.authorityField.setValue(this.country.getAuthority());
+                    this.authorityField.setSupplier(this.country::getAuthority);
+                    items.add(this.authorityField);
+                }
+
+                if (this.country.getReligion().getGameReligion().useAuthority()) {
+                    this.authorityField.setValue(this.country.getAuthority());
+                    this.authorityField.setSupplier(this.country::getAuthority);
+                    items.add(this.authorityField);
+                }
+
+                if (this.country.getReligion().getGameReligion().useReligiousReforms()) {
+                    this.passedReligiousReforms = FXCollections.observableArrayList(this.country.getReligiousReforms().getAdoptedReforms());
+                    this.notPassedReligiousReforms = this.country.getSave()
+                                                                 .getGame()
+                                                                 .getReligiousReforms(this.country.getReligiousReforms().getReligiousReforms().getName())
+                                                                 .getReforms()
+                                                                 .stream()
+                                                                 .filter(Predicate.not(this.passedReligiousReforms::contains))
+                                                                 .collect(Collectors.toCollection(FXCollections::observableArrayList));
+                    this.religiousReformsButton.getButton().setOnAction(event -> {
+                        CustomListSelectionView<ReligiousReform> listSelectionView = new CustomListSelectionView<>(
+                                FXCollections.observableArrayList(this.notPassedReligiousReforms),
+                                FXCollections.observableArrayList(this.passedReligiousReforms),
+                                new ReligiousReformStringCellFactory(),
+                                750, 600);
+
+                        ListSelectionViewDialog<ReligiousReform> dialog = new ListSelectionViewDialog<>(this.country.getSave(),
+                                                                                                        listSelectionView,
+                                                                                                        this.country.getSave().getGame()
+                                                                                                                    .getLocalisationClean(
+                                                                                                                            "CELESTIAL_DECISIONS"),
+                                                                                                        () -> this.notPassedReligiousReforms,
+                                                                                                        () -> this.passedReligiousReforms);
+
+                        Optional<List<ReligiousReform>> reforms = dialog.showAndWait();
+
+                        reforms.ifPresent(religiousReforms -> {
+                            this.passedReligiousReforms.setAll(religiousReforms);
+                            this.notPassedReligiousReforms.setAll(this.country.getSave()
+                                                                              .getGame()
+                                                                              .getReligiousReforms(
+                                                                                      this.country.getReligiousReforms().getReligiousReforms().getName())
+                                                                              .getReforms()
+                                                                              .stream()
+                                                                              .filter(Predicate.not(this.passedReligiousReforms::contains))
+                                                                              .toArray(ReligiousReform[]::new));
+                        });
+                    });
+
+                    items.add(this.religiousReformsButton);
+                }
+
+                if (this.country.getReligion().getGameReligion().usesAnglicanPower() || this.country.getReligion().getGameReligion().usesHussitePower()
+                    || this.country.getReligion().getGameReligion().usesChurchPower()) {
+                    this.churchPowerField.setValue(this.country.getChurch().getPower());
+                    this.churchPowerField.setSupplier(() -> this.country.getChurch().getPower());
+                    items.add(this.churchPowerField);
+                }
+
+                if (CollectionUtils.isNotEmpty(this.country.getReligion().getGameReligion().getAspects())) {
+                    //Todo
+                }
+
+                if (this.country.getReligion().getGameReligion().useFervor()) {
+                    this.fervorField.setValue(this.country.getFervor().getValue());
+                    this.fervorField.setSupplier(() -> this.country.getFervor().getValue());
+                    items.add(this.fervorField);
+                }
+
+                if (this.country.getReligion().getGameReligion().hasPatriarchs()) {
+                    this.patriarchAuthorityField.setValue(this.country.getPatriarchAuthority());
+                    this.patriarchAuthorityField.setSupplier(() -> this.country.getPatriarchAuthority());
+                    items.add(this.patriarchAuthorityField);
+                }
+
+                if (this.country.getReligion().getGameReligion().useFetishistCult()) {
+                    this.fetishistCultField.getChoices()
+                                           .setAll(Stream.concat(Stream.of((FetishistCult) null), this.country.getUnlockedFetishistCults().stream())
+                                                         .sorted(Comparator.nullsFirst(
+                                                                 Comparator.comparing(FetishistCult::getLocalizedName, Eu4Utils.COLLATOR)))
+                                                         .toArray(FetishistCult[]::new));
+                    this.fetishistCultField.setValue(this.country.getFetishistCult());
+                    this.fetishistCultField.setSupplier(this.country::getFetishistCult);
+                    items.add(this.fetishistCultField);
+                }
+
+                if (this.country.getReligion().getGameReligion().usesIsolationism()) {
+                    this.isolationismField.setSupplier(this.country::getIsolationismLevel);
+                    this.isolationismField.setValue(this.country.getIsolationismLevel());
+                    items.add(this.isolationismField);
+                }
+
+                if (this.country.getReligion().getGameReligion().usesKarma()) {
+                    this.karmaField.setValue(this.country.getKarma());
+                    this.karmaField.setSupplier(() -> this.country.getKarma());
+                    items.add(this.karmaField);
+                }
+
+                if (this.country.getReligion().getGameReligion().usePersonalDeity()) {
+                    this.personalDeityField.getChoices()
+                                           .setAll(Stream.concat(Stream.of((PersonalDeity) null), this.country.getUnlockedPersonalDeities().stream())
+                                                         .sorted(Comparator.nullsFirst(
+                                                                 Comparator.comparing(PersonalDeity::getLocalizedName, Eu4Utils.COLLATOR)))
+                                                         .toArray(PersonalDeity[]::new));
+                    this.personalDeityField.setValue(this.country.getPersonalDeity());
+                    this.personalDeityField.setSupplier(this.country::getPersonalDeity);
+                    items.add(this.personalDeityField);
+                }
+
+                if (this.country.getReligion().getGameReligion().usesPiety()) {
+                    this.pietyField.setValue(this.country.getPiety());
+                    this.pietyField.setSupplier(() -> this.country.getPiety());
+                    items.add(this.pietyField);
+                }
+
+                if (this.country.getReligion().getGameReligion().usesHarmony()) {
+                    this.harmonyField.setValue(this.country.getHarmony());
+                    this.harmonyField.setSupplier(() -> this.country.getHarmony());
+                    items.add(this.harmonyField);
+
+                    this.harmonizedReligionGroups = FXCollections.observableArrayList(this.country.getHarmonizedReligionGroups());
+                    this.notHarmonizedReligionGroups = this.country.getSave()
+                                                                   .getGame()
+                                                                   .getReligionGroups()
+                                                                   .stream()
+                                                                   .filter(religionGroup -> StringUtils.isNotBlank(religionGroup.harmonizedModifier()))
+                                                                   .filter(Predicate.not(this.harmonizedReligionGroups::contains))
+                                                                   .collect(Collectors.toCollection(FXCollections::observableArrayList));
+                    this.harmonizedReligionGroupsButton.getButton().setOnAction(event -> {
+                        CustomListSelectionView<ReligionGroup> listSelectionView = new CustomListSelectionView<>(
+                                FXCollections.observableArrayList(this.notHarmonizedReligionGroups),
+                                FXCollections.observableArrayList(this.harmonizedReligionGroups),
+                                new ReligionGroupStringCellFactory(),
+                                750, 600);
+
+                        ListSelectionViewDialog<ReligionGroup> dialog =
+                                new ListSelectionViewDialog<>(this.country.getSave(),
+                                                              listSelectionView,
+                                                              this.country.getSave().getGame().getLocalisationClean("HARMONIZED_RELIGION_GROUP"),
+                                                              () -> this.notHarmonizedReligionGroups,
+                                                              () -> this.harmonizedReligionGroups);
+
+                        Optional<List<ReligionGroup>> reforms = dialog.showAndWait();
+
+                        reforms.ifPresent(religiousReforms -> {
+                            this.harmonizedReligionGroups.setAll(religiousReforms);
+                            this.notHarmonizedReligionGroups.setAll(this.country.getSave()
+                                                                                .getGame()
+                                                                                .getReligionGroups()
+                                                                                .stream()
+                                                                                .filter(religionGroup -> StringUtils.isNotBlank(
+                                                                                        religionGroup.harmonizedModifier()))
+                                                                                .filter(Predicate.not(this.harmonizedReligionGroups::contains))
+                                                                                .toArray(ReligionGroup[]::new));
+                        });
+                    });
+
+                    items.add(this.harmonizedReligionGroupsButton);
+
+                    this.harmonizedReligions = FXCollections.observableArrayList(this.country.getHarmonizedReligions()
+                                                                                             .stream()
+                                                                                             .map(SaveReligion::getGameReligion)
+                                                                                             .collect(Collectors.toList()));
+                    this.notHarmonizedReligions = this.country.getSave()
+                                                              .getGame()
+                                                              .getReligions()
+                                                              .stream()
+                                                              .filter(religion -> StringUtils.isNotBlank(religion.getHarmonizedModifier()))
+                                                              .filter(Predicate.not(this.harmonizedReligions::contains))
+                                                              .collect(Collectors.toCollection(FXCollections::observableArrayList));
+                    this.harmonizedReligionsButton.getButton().setOnAction(event -> {
+                        CustomListSelectionView<Religion> listSelectionView = new CustomListSelectionView<>(
+                                FXCollections.observableArrayList(this.notHarmonizedReligions),
+                                FXCollections.observableArrayList(this.harmonizedReligions),
+                                new ReligionStringCellFactory(),
+                                750, 600);
+
+                        ListSelectionViewDialog<Religion> dialog =
+                                new ListSelectionViewDialog<>(this.country.getSave(),
+                                                              listSelectionView,
+                                                              this.country.getSave().getGame().getLocalisationClean("HARMONIZED_RELIGION_"),
+                                                              () -> this.notHarmonizedReligions,
+                                                              () -> this.harmonizedReligions);
+
+                        Optional<List<Religion>> reforms = dialog.showAndWait();
+
+                        reforms.ifPresent(religiousReforms -> {
+                            this.harmonizedReligions.setAll(religiousReforms);
+                            this.notHarmonizedReligions.setAll(this.country.getSave()
+                                                                           .getGame()
+                                                                           .getReligions()
+                                                                           .stream()
+                                                                           .filter(religion -> StringUtils.isNotBlank(religion.getHarmonizedModifier()))
+                                                                           .filter(Predicate.not(this.harmonizedReligions::contains))
+                                                                           .toArray(Religion[]::new));
+                        });
+                    });
+
+                    items.add(this.harmonizedReligionsButton);
+                }
+
+                if (this.country.getReligion().getGameReligion().useDoom()) {
+                    this.doomField.setValue(this.country.getDoom());
+                    this.doomField.setSupplier(() -> this.country.getDoom());
+                    items.add(this.doomField);
+                }
+
+                if (this.country.getReligion().getGameReligion().canHaveSecondaryReligion()) {
+                    this.secondaryReligionsField.getChoices()
+                                                .setAll(Stream.concat(Stream.of((SaveReligion) null),
+                                                                      this.country.getAvailableSecondaryReligions()
+                                                                                  .stream()
+                                                                                  .filter(religion -> !religion.equals(this.country.getReligion())))
+                                                              .sorted(Comparator.nullsFirst(
+                                                                      Comparator.comparing(SaveReligion::getLocalizedName, Eu4Utils.COLLATOR)))
+                                                              .toArray(SaveReligion[]::new));
+                    this.secondaryReligionsField.setValue(this.country.getSecondaryReligion());
+                    this.secondaryReligionsField.setSupplier(this.country::getSecondaryReligion);
+                    items.add(this.secondaryReligionsField);
+                }
+
+                if (CollectionUtils.isNotEmpty(this.country.getReligion().getGameReligion().getIcons())) {
+                    //Todo
+                }
 
                 //Economy
                 this.treasuryField.setValue(this.country.getTreasury());
@@ -946,6 +1320,10 @@ public class CountryPropertySheet extends VBox {
             this.country.setCorruption(this.corruptionField.getDoubleValue());
         }
 
+        if (!Objects.equals(this.country.getInflation(), this.inflationField.getTrueValue())) {
+            this.country.setInflation(this.inflationField.getTrueValue());
+        }
+
         if (!Objects.equals(this.country.getMercantilism(), this.mercantilismField.getIntValue())) {
             this.country.setMercantilism(this.mercantilismField.getIntValue());
         }
@@ -1012,6 +1390,125 @@ public class CountryPropertySheet extends VBox {
 
         if (!Objects.deepEquals(this.country.getAcceptedCultures(), this.acceptedCulturesField.getSelectedValues())) {
             this.country.setAcceptedCulture(new ArrayList<>(this.acceptedCulturesField.getSelectedValues()));
+        }
+
+        if (!Objects.deepEquals(this.country.getReligion(), this.religionField.getSelectedValue())) {
+            this.country.setReligion(this.religionField.getSelectedValue());
+        }
+
+        if (this.country.getReligion().getGameReligion().useAuthority()) {
+            if (!Objects.equals(this.country.getAuthority(), this.authorityField.getDoubleValue())) {
+                this.country.setAuthority(this.authorityField.getDoubleValue());
+            }
+        }
+
+        if (this.country.getReligion().getGameReligion().usesAnglicanPower() || this.country.getReligion().getGameReligion().usesHussitePower()
+            || this.country.getReligion().getGameReligion().usesChurchPower()) {
+            if (!Objects.equals(this.country.getChurch().getPower(), this.churchPowerField.getDoubleValue())) {
+                this.country.getChurch().setPower(this.churchPowerField.getDoubleValue());
+            }
+        }
+
+        if (this.country.getReligion().getGameReligion().useReligiousReforms()) {
+            if (!Objects.deepEquals(this.country.getReligiousReforms().getAdoptedReforms(), this.passedReligiousReforms)) {
+                this.country.getReligiousReforms()
+                            .getAdoptedReforms()
+                            .forEach(reform -> this.passedReligiousReforms.stream()
+                                                                          .filter(reform::equals)
+                                                                          .findFirst()
+                                                                          .ifPresentOrElse(this.passedReligiousReforms::remove,
+                                                                                           () -> this.country.getReligiousReforms()
+                                                                                                             .removeAdoptedReform(reform)));
+                this.passedReligiousReforms.forEach(reform -> this.country.getReligiousReforms().addAdoptedReform(reform));
+            }
+        }
+
+        if (this.country.getReligion().getGameReligion().useFervor()) {
+            if (!Objects.equals(this.country.getFervor().getValue(), this.fervorField.getDoubleValue())) {
+                this.country.getFervor().setValue(this.fervorField.getDoubleValue());
+            }
+        }
+
+        if (this.country.getReligion().getGameReligion().hasPatriarchs()) {
+            if (!Objects.equals(this.country.getPatriarchAuthority(), this.patriarchAuthorityField.getDoubleValue())) {
+                this.country.setPatriarchAuthority(this.patriarchAuthorityField.getDoubleValue());
+            }
+        }
+
+        if (this.country.getReligion().getGameReligion().useFetishistCult()) {
+            if (!Objects.deepEquals(this.country.getFetishistCult(), this.fetishistCultField.getSelectedValue())) {
+                this.country.setFetishistCult(this.fetishistCultField.getSelectedValue());
+            }
+        }
+
+        if (this.country.getReligion().getGameReligion().usesIsolationism()) {
+            if (!Objects.equals(this.country.getIsolationismLevel(), this.isolationismField.getTrueValue())) {
+                this.country.setIsolationismLevel(this.isolationismField.getTrueValue());
+            }
+        }
+
+        if (this.country.getReligion().getGameReligion().usesKarma()) {
+            if (!Objects.equals(this.country.getKarma(), this.karmaField.getIntValue())) {
+                this.country.setKarma(this.karmaField.getIntValue());
+            }
+        }
+
+        if (this.country.getReligion().getGameReligion().usesPiety()) {
+            if (!Objects.equals(this.country.getPiety(), this.pietyField.getDoubleValue())) {
+                this.country.setPiety(this.pietyField.getDoubleValue());
+            }
+        }
+
+        if (this.country.getReligion().getGameReligion().usesHarmony()) {
+            if (!Objects.equals(this.country.getHarmony(), this.harmonyField.getDoubleValue())) {
+                this.country.setHarmony(this.harmonyField.getDoubleValue());
+            }
+
+            if (!Objects.deepEquals(this.country.getHarmonizedReligionGroups(), this.harmonizedReligionGroups)) {
+                if (CollectionUtils.isNotEmpty(this.country.getHarmonizedReligionGroups())) {
+                    this.country.getHarmonizedReligionGroups()
+                                .forEach(group -> this.harmonizedReligionGroups.stream()
+                                                                               .filter(group::equals)
+                                                                               .findFirst()
+                                                                               .ifPresentOrElse(this.harmonizedReligionGroups::remove,
+                                                                                                () -> this.country.removeHarmonizedReligionGroup(group)));
+                }
+
+                this.harmonizedReligionGroups.forEach(religionGroup -> this.country.addHarmonizedReligionGroup(religionGroup));
+            }
+
+            if (!Objects.deepEquals(this.country.getHarmonizedReligions(), this.harmonizedReligions)) {
+                if (CollectionUtils.isNotEmpty(this.country.getHarmonizedReligions())) {
+                    this.country.getHarmonizedReligions()
+                                .stream()
+                                .map(SaveReligion::getGameReligion)
+                                .forEach(religion -> this.harmonizedReligions.stream()
+                                                                             .filter(religion::equals)
+                                                                             .findFirst()
+                                                                             .ifPresentOrElse(this.harmonizedReligions::remove,
+                                                                                              () -> this.country.removeHarmonizedReligion(religion)));
+                }
+
+                this.harmonizedReligions.forEach(religion -> this.country.addHarmonizedReligion(religion));
+            }
+        }
+
+        if (this.country.getReligion().getGameReligion().usePersonalDeity()) {
+            if (!Objects.deepEquals(this.country.getPersonalDeity(), this.personalDeityField.getSelectedValue())) {
+                this.country.setPersonalDeity(this.personalDeityField.getSelectedValue());
+            }
+        }
+
+        if (this.country.getReligion().getGameReligion().useDoom()) {
+            if (!Objects.equals(this.country.getDoom(), this.doomField.getDoubleValue())) {
+                this.country.setDoom(this.doomField.getDoubleValue());
+            }
+        }
+
+        if (this.country.getReligion().getGameReligion().canHaveSecondaryReligion()) {
+            if (!Objects.deepEquals(this.country.getSecondaryReligion(), this.secondaryReligionsField.getSelectedValue())) {
+                this.country.setSecondaryReligion(this.secondaryReligionsField.getSelectedValue());
+            }
         }
 
         if (!Objects.equals(this.country.getGovernmentReformProgress(), this.governmentReformProgressField.getTrueValue())) {

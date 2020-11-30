@@ -21,8 +21,8 @@ public class ListSelectionViewDialog<S> extends Dialog<List<S>> {
 
     private final CustomListSelectionView<S> listSelectionView;
 
-    public ListSelectionViewDialog(Save save, CustomListSelectionView<S> listSelectionView, String title,
-                                   Supplier<Collection<S>> sourceSupplier, Supplier<Collection<S>> targetSupplier) {
+    public ListSelectionViewDialog(Save save, CustomListSelectionView<S> listSelectionView, String title, Supplier<Collection<S>> sourceSupplier,
+                                   Supplier<Collection<S>> targetSupplier) {
         this.listSelectionView = listSelectionView;
         Button resetButton = new Button(save.getGame().getLocalisation("PW_RESET"));
         resetButton.setOnAction(event -> this.listSelectionView.onReset(sourceSupplier, targetSupplier));

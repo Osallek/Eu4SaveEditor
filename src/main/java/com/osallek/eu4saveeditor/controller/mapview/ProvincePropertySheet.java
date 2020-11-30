@@ -18,7 +18,7 @@ import com.osallek.eu4saveeditor.controller.converter.CountryStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.CountryStringConverter;
 import com.osallek.eu4saveeditor.controller.converter.CultureStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.CultureStringConverter;
-import com.osallek.eu4saveeditor.controller.converter.ReligionStringCellFactory;
+import com.osallek.eu4saveeditor.controller.converter.SaveReligionStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.ReligionStringConverter;
 import com.osallek.eu4saveeditor.controller.converter.TradeGoodStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.TradeGoodStringConverter;
@@ -166,7 +166,7 @@ public class ProvincePropertySheet extends VBox {
                                                             religions,
                                                             new ClearableComboBox<>(new SearchableComboBox<>()));
         this.religionComboBox.setConverter(new ReligionStringConverter());
-        this.religionComboBox.setCellFactory(new ReligionStringCellFactory());
+        this.religionComboBox.setCellFactory(new SaveReligionStringCellFactory());
 
         this.controllerComboBox = new ClearableComboBoxItem<>(SheetCategory.PROVINCE_POLITICAL,
                                                               save.getGame().getLocalisationClean("SUPPLY_CONTROLLER"),
@@ -302,6 +302,7 @@ public class ProvincePropertySheet extends VBox {
         this.claimsField.setEditable(false);
         this.hreField.setEditable(false);
         this.colonizeForField.setEditable(false);
+        this.colonizeForField.setValue(null);
         this.colonySizeField.setEditable(false);
         this.nativeHostilenessField.setEditable(false);
         this.nativeFerocityField.setEditable(false);
@@ -672,6 +673,7 @@ public class ProvincePropertySheet extends VBox {
         if (this.colonizeForField.isEditable().getValue()) {
             if (this.colonizeForField.getSelectedValue() != null) {
                 this.province.colonize(this.colonizeForField.getSelectedValue());
+                this.countryChanged.set(true);
             }
         }
 

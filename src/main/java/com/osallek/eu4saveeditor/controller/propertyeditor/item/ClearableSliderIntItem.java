@@ -22,6 +22,10 @@ public class ClearableSliderIntItem implements CustomItem<Integer> {
     private final BooleanProperty editable;
 
     public ClearableSliderIntItem(SheetCategory category, String name, int min, int max) {
+        this(category.getForDefaultLocale(), name, min, max);
+    }
+
+    public ClearableSliderIntItem(String category, String name, int min, int max) {
         this(category, name, min, max, null, null);
     }
 

@@ -14,8 +14,7 @@ import com.osallek.eu4parser.model.save.gameplayoptions.CustomNationDifficulty;
 import com.osallek.eu4parser.model.save.gameplayoptions.Difficulty;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
 import com.osallek.eu4saveeditor.controller.control.ClearableComboBox;
-import com.osallek.eu4saveeditor.controller.control.ListSelectionViewCountry;
-import com.osallek.eu4saveeditor.controller.control.ListSelectionViewEvent;
+import com.osallek.eu4saveeditor.controller.control.CustomListSelectionView;
 import com.osallek.eu4saveeditor.controller.control.ListSelectionViewImperialReform;
 import com.osallek.eu4saveeditor.controller.control.RequiredComboBox;
 import com.osallek.eu4saveeditor.controller.control.TableView2ChangePrice;
@@ -27,6 +26,7 @@ import com.osallek.eu4saveeditor.controller.converter.DecreeStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.DecreeStringConverter;
 import com.osallek.eu4saveeditor.controller.converter.DifficultyStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.DifficultyStringConverter;
+import com.osallek.eu4saveeditor.controller.converter.EventStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.HreReligionStatusStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.HreReligionStatusStringConverter;
 import com.osallek.eu4saveeditor.controller.converter.ProvinceStringCellFactory;
@@ -475,10 +475,9 @@ public class SavePropertySheet extends VBox {
                                                                                                       Collectors.toList()));
             hreElectorsButtonItem.getButton().setOnAction(event -> {
                 ListSelectionViewDialog<Country> dialog = new ListSelectionViewDialog<>(this.save,
-                                                                                        new ListSelectionViewCountry(
-                                                                                                members,
-                                                                                                this.hreElectors
-                                                                                        ),
+                                                                                        new CustomListSelectionView<>(members, this.hreElectors,
+                                                                                                                      new CountryStringCellFactory(),
+                                                                                                                      750, 600),
                                                                                         this.save.getGame()
                                                                                                  .getLocalisationClean(
                                                                                                          "HINT_ELECTOR_TITLE"),
@@ -513,20 +512,15 @@ public class SavePropertySheet extends VBox {
                                                                      save.getGame().getLocalisationClean("HRE_REFORMS"),
                                                                      2);
 
-            this.passedHreMainLineReforms = FXCollections.observableArrayList(this.save.getHre()
-                                                                                       .getMainLinePassedReforms());
+            this.passedHreMainLineReforms = FXCollections.observableArrayList(this.save.getHre().getMainLinePassedReforms());
 
-            this.notPassedHreMainLineReforms = FXCollections.observableArrayList(this.save.getHre()
-                                                                                          .getMainLineNotPassedReforms());
+            this.notPassedHreMainLineReforms = FXCollections.observableArrayList(this.save.getHre().getMainLineNotPassedReforms());
             hreMainLineReformsButtonItem.getButton().setOnAction(event -> {
-                ListSelectionViewImperialReform listSelectionView = new ListSelectionViewImperialReform(
-                        this.notPassedHreMainLineReforms,
-                        this.passedHreMainLineReforms);
+                ListSelectionViewImperialReform listSelectionView = new ListSelectionViewImperialReform(this.notPassedHreMainLineReforms,
+                                                                                                        this.passedHreMainLineReforms);
 
-                ObservableList<ImperialReform> tmpPassedHreMainLineReforms = FXCollections.observableArrayList(
-                        this.passedHreMainLineReforms);
-                ObservableList<ImperialReform> tmpNotPassedHreMainLineReforms = FXCollections.observableArrayList(
-                        this.notPassedHreMainLineReforms);
+                ObservableList<ImperialReform> tmpPassedHreMainLineReforms = FXCollections.observableArrayList(this.passedHreMainLineReforms);
+                ObservableList<ImperialReform> tmpNotPassedHreMainLineReforms = FXCollections.observableArrayList(this.notPassedHreMainLineReforms);
 
                 ListSelectionViewDialog<ImperialReform> dialog = new ListSelectionViewDialog<>(this.save,
                                                                                                listSelectionView,
@@ -548,38 +542,23 @@ public class SavePropertySheet extends VBox {
                 }
             });
 
-            ButtonItem hreLeftBranchReformsButtonItem = new ButtonItem(SheetCategory.SAVE_HRE,
-                                                                       null,
-                                                                       this.save.getGame()
-                                                                                .getLocalisationClean("HRE_LEFTBRANCH"),
-                                                                       2);
+            ButtonItem hreLeftBranchReformsButtonItem = new ButtonItem(SheetCategory.SAVE_HRE, null,
+                                                                       this.save.getGame().getLocalisationClean("HRE_LEFTBRANCH"), 2);
 
-            this.passedHreLeftBranchReforms = FXCollections.observableArrayList(this.save.getHre()
-                                                                                         .getLeftBranchPassedReforms());
-
-            this.notPassedHreLeftBranchReforms = FXCollections.observableArrayList(this.save.getHre()
-                                                                                            .getLeftBranchNotPassedReforms());
+            this.passedHreLeftBranchReforms = FXCollections.observableArrayList(this.save.getHre().getLeftBranchPassedReforms());
+            this.notPassedHreLeftBranchReforms = FXCollections.observableArrayList(this.save.getHre().getLeftBranchNotPassedReforms());
             hreLeftBranchReformsButtonItem.setOnAction(event -> {
-                ListSelectionViewImperialReform listSelectionView = new ListSelectionViewImperialReform(
-                        this.notPassedHreLeftBranchReforms,
-                        this.passedHreLeftBranchReforms);
+                ListSelectionViewImperialReform listSelectionView = new ListSelectionViewImperialReform(this.notPassedHreLeftBranchReforms,
+                                                                                                        this.passedHreLeftBranchReforms);
 
-                ObservableList<ImperialReform> tmpPassedHreLeftBranchReforms = FXCollections.observableArrayList(
-                        this.passedHreLeftBranchReforms);
-                ObservableList<ImperialReform> tmpNotPassedHreLeftBranchReforms = FXCollections.observableArrayList(
-                        this.notPassedHreLeftBranchReforms);
+                ObservableList<ImperialReform> tmpPassedHreLeftBranchReforms = FXCollections.observableArrayList(this.passedHreLeftBranchReforms);
+                ObservableList<ImperialReform> tmpNotPassedHreLeftBranchReforms = FXCollections.observableArrayList(this.notPassedHreLeftBranchReforms);
 
                 ListSelectionViewDialog<ImperialReform> dialog = new ListSelectionViewDialog<>(this.save,
                                                                                                listSelectionView,
-                                                                                               this.save.getGame()
-                                                                                                        .getLocalisationClean(
-                                                                                                                "HRE_LEFTBRANCH"),
-                                                                                               () -> this.save
-                                                                                                       .getHre()
-                                                                                                       .getLeftBranchNotPassedReforms(),
-                                                                                               () -> this.save
-                                                                                                       .getHre()
-                                                                                                       .getLeftBranchPassedReforms());
+                                                                                               this.save.getGame().getLocalisationClean("HRE_LEFTBRANCH"),
+                                                                                               () -> this.save.getHre().getLeftBranchNotPassedReforms(),
+                                                                                               () -> this.save.getHre().getLeftBranchPassedReforms());
                 Optional<List<ImperialReform>> newLeftBranchReforms = dialog.showAndWait();
 
                 if (newLeftBranchReforms.isPresent()) {
@@ -599,22 +578,17 @@ public class SavePropertySheet extends VBox {
                                                                                  .getLocalisationClean("HRE_RIGHTBRANCH"),
                                                                         2);
 
-            this.passedHreRightBranchReforms = FXCollections.observableArrayList(this.save.getHre()
-                                                                                          .getRightBranchPassedReforms());
+            this.passedHreRightBranchReforms = FXCollections.observableArrayList(this.save.getHre().getRightBranchPassedReforms());
 
-            this.notPassedHreRightBranchReforms = FXCollections.observableArrayList(this.save.getHre()
-                                                                                             .getRightBranchNotPassedReforms());
+            this.notPassedHreRightBranchReforms = FXCollections.observableArrayList(this.save.getHre().getRightBranchNotPassedReforms());
             hreRightBranchReformsButtonItem.setOnAction(event -> {
-                ObservableList<ImperialReform> tmpPassedHreRightBranchReforms = FXCollections.observableArrayList(
-                        this.passedHreRightBranchReforms);
-                ObservableList<ImperialReform> tmpNotPassedHreRightBranchReforms = FXCollections.observableArrayList(
-                        this.notPassedHreRightBranchReforms);
+                ObservableList<ImperialReform> tmpPassedHreRightBranchReforms = FXCollections.observableArrayList(this.passedHreRightBranchReforms);
+                ObservableList<ImperialReform> tmpNotPassedHreRightBranchReforms = FXCollections.observableArrayList(this.notPassedHreRightBranchReforms);
 
                 ListSelectionViewDialog<ImperialReform> dialog = new ListSelectionViewDialog<>(this.save,
                                                                                                new ListSelectionViewImperialReform(
                                                                                                        this.notPassedHreRightBranchReforms,
-                                                                                                       this.passedHreRightBranchReforms
-                                                                                               ),
+                                                                                                       this.passedHreRightBranchReforms),
                                                                                                this.save.getGame()
                                                                                                         .getLocalisationClean(
                                                                                                                 "HRE_RIGHTBRANCH"),
@@ -628,7 +602,7 @@ public class SavePropertySheet extends VBox {
 
                 if (newRightBranchReforms.isPresent()) {
                     if (!newRightBranchReforms.get().isEmpty()) {
-                        this.passedHreLeftBranchReforms.clear();
+                        this.passedHreLeftBranchReforms.setAll(this.save.getHre().getLeftBranchReforms());
                         this.notPassedHreLeftBranchReforms.setAll(this.save.getHre().getLeftBranchReforms());
                     }
                 } else {
@@ -700,20 +674,15 @@ public class SavePropertySheet extends VBox {
                                                                                .getLocalisationClean("CELESTIAL_DECISIONS"),
                                                                            2);
 
-            this.passedCelestialReforms = FXCollections.observableArrayList(this.save.getCelestialEmpire()
-                                                                                     .getMainLinePassedReforms());
+            this.passedCelestialReforms = FXCollections.observableArrayList(this.save.getCelestialEmpire().getMainLinePassedReforms());
 
-            this.notPassedCelestialReforms = FXCollections.observableArrayList(this.save.getCelestialEmpire()
-                                                                                        .getMainLineNotPassedReforms());
+            this.notPassedCelestialReforms = FXCollections.observableArrayList(this.save.getCelestialEmpire().getMainLineNotPassedReforms());
             celestialMainLineReformsButtonItem.getButton().setOnAction(event -> {
-                ListSelectionViewImperialReform listSelectionView = new ListSelectionViewImperialReform(
-                        this.notPassedCelestialReforms,
-                        this.passedCelestialReforms);
+                ListSelectionViewImperialReform listSelectionView = new ListSelectionViewImperialReform(this.notPassedCelestialReforms,
+                                                                                                        this.passedCelestialReforms);
 
-                ObservableList<ImperialReform> tmpPassedCelestialMainLineReforms = FXCollections.observableArrayList(
-                        this.passedCelestialReforms);
-                ObservableList<ImperialReform> tmpNotPassedCelestialMainLineReforms = FXCollections.observableArrayList(
-                        this.notPassedCelestialReforms);
+                ObservableList<ImperialReform> tmpPassedCelestialMainLineReforms = FXCollections.observableArrayList(this.passedCelestialReforms);
+                ObservableList<ImperialReform> tmpNotPassedCelestialMainLineReforms = FXCollections.observableArrayList(this.notPassedCelestialReforms);
 
                 ListSelectionViewDialog<ImperialReform> dialog = new ListSelectionViewDialog<>(this.save,
                                                                                                listSelectionView,
@@ -796,13 +765,14 @@ public class SavePropertySheet extends VBox {
         this.notFiredEvents.removeIf(this.firedEvents::contains);
 
         firedEventsButtonItem.setOnAction(event -> {
-            ListSelectionViewEvent listSelectionView = new ListSelectionViewEvent(this.notFiredEvents, this.firedEvents);
+            CustomListSelectionView<Event> selectionView = new CustomListSelectionView<>(this.notFiredEvents, this.firedEvents, new EventStringCellFactory(),
+                                                                                         1400, 600);
 
             ObservableList<Event> tmpFiredEvents = FXCollections.observableArrayList(this.firedEvents);
             ObservableList<Event> tmpNotFiredEvents = FXCollections.observableArrayList(this.notFiredEvents);
 
             ListSelectionViewDialog<Event> dialog = new ListSelectionViewDialog<>(this.save,
-                                                                                  listSelectionView,
+                                                                                  selectionView,
                                                                                   this.save.getGame().getLocalisation("MENU_MESSAGES_EVENTS"),
                                                                                   () -> tmpNotFiredEvents,
                                                                                   () -> tmpFiredEvents);

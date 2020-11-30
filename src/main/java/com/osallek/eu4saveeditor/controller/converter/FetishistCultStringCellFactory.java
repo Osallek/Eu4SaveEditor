@@ -1,19 +1,18 @@
 package com.osallek.eu4saveeditor.controller.converter;
 
-import com.osallek.eu4parser.model.game.Religion;
-import com.osallek.eu4parser.model.save.SaveReligion;
+import com.osallek.eu4parser.model.game.FetishistCult;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.util.Callback;
 
-public class ReligionStringCellFactory implements Callback<ListView<Religion>, ListCell<Religion>> {
+public class FetishistCultStringCellFactory implements Callback<ListView<FetishistCult>, ListCell<FetishistCult>> {
 
     @Override
-    public ListCell<Religion> call(ListView<Religion> param) {
+    public ListCell<FetishistCult> call(ListView<FetishistCult> param) {
         return new ListCell<>() {
 
             @Override
-            protected void updateItem(Religion value, boolean empty) {
+            protected void updateItem(FetishistCult value, boolean empty) {
                 super.updateItem(value, empty);
                 setText(value == null ? null : value.getLocalizedName());
             }

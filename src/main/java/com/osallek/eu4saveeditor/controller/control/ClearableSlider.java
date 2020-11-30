@@ -59,7 +59,7 @@ public class ClearableSlider extends HBox {
                 this.slider.setValue(newValue.doubleValue());
             }
         });
-//        this.slider.valueProperty().bindBidirectional(this.spinner.getValueFactory().valueProperty());
+
         HBox.setHgrow(this.slider, Priority.ALWAYS);
 
 

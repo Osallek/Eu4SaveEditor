@@ -12,7 +12,7 @@ import com.osallek.eu4saveeditor.controller.control.ClearableSpinnerInt;
 import com.osallek.eu4saveeditor.controller.control.TableView2Personalities;
 import com.osallek.eu4saveeditor.controller.converter.CultureStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.CultureStringConverter;
-import com.osallek.eu4saveeditor.controller.converter.ReligionStringCellFactory;
+import com.osallek.eu4saveeditor.controller.converter.SaveReligionStringCellFactory;
 import com.osallek.eu4saveeditor.controller.converter.ReligionStringConverter;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
 import com.osallek.eu4saveeditor.controller.pane.CustomPropertySheetSkin;
@@ -110,7 +110,7 @@ public class MonarchPropertySheet extends VBox {
                                                          religions,
                                                          new ClearableComboBox<>(new SearchableComboBox<>()));
         this.religionField.setConverter(new ReligionStringConverter());
-        this.religionField.setCellFactory(new ReligionStringCellFactory());
+        this.religionField.setCellFactory(new SaveReligionStringCellFactory());
         this.religionField.setValue(this.monarch.getReligion());
         this.religionField.setSupplier(this.monarch::getReligion);
         items.add(this.religionField);

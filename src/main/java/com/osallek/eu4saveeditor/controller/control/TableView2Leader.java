@@ -14,7 +14,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.util.converter.IntegerStringConverter;
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.time.LocalDate;
 import java.util.Comparator;
