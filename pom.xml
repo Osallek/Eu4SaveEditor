@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.osallek</groupId>
+  <groupId>fr.osallek</groupId>
   <artifactId>Eu4SaveEditor</artifactId>
   <version>1.0.1</version>
 
@@ -14,7 +14,7 @@
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
     <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
-    <main.class>com.osallek.eu4saveeditor.Main</main.class>
+    <main.class>fr.osallek.eu4saveeditor.Main</main.class>
     <eu4-parser.version>1.0.1</eu4-parser.version>
     <controlsfx.version>11.0.2</controlsfx.version>
     <imageio-tga.version>3.5</imageio-tga.version>
@@ -25,7 +25,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.osallek</groupId>
+      <groupId>fr.osallek</groupId>
       <artifactId>eu4-parser</artifactId>
       <version>${eu4-parser.version}</version>
     </dependency>

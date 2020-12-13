@@ -1,3 +1,3 @@
 Manifest-Version: 1.0
-Main-Class: com.osallek.eu4saveeditor.Main
+Main-Class: fr.osallek.eu4saveeditor.Main
 
