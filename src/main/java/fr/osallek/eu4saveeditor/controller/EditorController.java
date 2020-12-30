@@ -1,5 +1,6 @@
 package fr.osallek.eu4saveeditor.controller;
 
+import com.sun.javafx.geom.Rectangle;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.game.Culture;
 import fr.osallek.eu4parser.model.game.TradeGood;
@@ -15,7 +16,6 @@ import fr.osallek.eu4saveeditor.controller.mapview.MapViewContainer;
 import fr.osallek.eu4saveeditor.controller.mapview.MapViewType;
 import fr.osallek.eu4saveeditor.controller.pane.ZoomableScrollPane;
 import fr.osallek.eu4saveeditor.i18n.MenusI18n;
-import com.sun.javafx.geom.Rectangle;
 import javafx.animation.PauseTransition;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -280,6 +280,7 @@ public class EditorController implements Initializable {
                     while (y < this.provincesMap[x].length && Objects.equals(this.provincesMap[x][y], province)) {
                         y++;
                     }
+                    y--;
 
                     if (province != null) {
                         DrawableProvince drawableProvince = this.drawableProvinces.getOrDefault(province.getId(), new DrawableProvince(province));
@@ -299,7 +300,7 @@ public class EditorController implements Initializable {
 
                     if (province != null
                         && (!Objects.equals(province, this.provincesMap[x - 1][y]) || !Objects.equals(province, this.provincesMap[x][y - 1]))) {
-                        this.drawableProvinces.get(province.getId()).addBorder(x, y);
+                        this.drawableProvinces.get(province.getId()).addBorder(x, y - 1);
                     }
                 }
             }

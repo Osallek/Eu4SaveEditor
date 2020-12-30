@@ -530,7 +530,7 @@ public class ProvincePropertySheet extends VBox {
         }
 
         if (this.capitalField.isEditable().getValue()) {
-            if (!ClausewitzUtils.removeQuotes(this.province.getCapital()).equals(this.capitalField.getText())) {
+            if (!Objects.equals(ClausewitzUtils.removeQuotes(this.province.getCapital()), this.capitalField.getText())) {
                 this.province.setCapital(this.capitalField.getText());
             }
         }
