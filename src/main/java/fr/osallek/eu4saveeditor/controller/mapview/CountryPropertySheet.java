@@ -213,6 +213,8 @@ public class CountryPropertySheet extends VBox {
 
     private final ClearableSliderIntItem mercantilismField;
 
+    private final List<CheckBoxItem> institutionsEmbracedFields;
+
     private final ClearableSpinnerItem<Double> manpowerField;
 
     private final ClearableSpinnerItem<Double> sailorsField;
@@ -439,6 +441,9 @@ public class CountryPropertySheet extends VBox {
 
         this.loansButton = new ButtonItem(SheetCategory.ECONOMY, null, save.getGame().getLocalisationClean("AI_LOANS"), 2);
         this.loans = FXCollections.observableArrayList();
+
+        //Institutions
+        this.institutionsEmbracedFields = new ArrayList<>();
 
         //GOVERNMENT
         this.governmentRankField = new ClearableComboBoxItem<>(SheetCategory.COUNTRY_GOVERNMENT,
@@ -898,6 +903,16 @@ public class CountryPropertySheet extends VBox {
                 });
                 items.add(this.loansButton);
 
+                //Institutions
+                this.institutionsEmbracedFields.clear();
+                for (int i = 0; i < this.country.getSave().getInstitutions().getNbInstitutions(); i++) {
+                    CheckBoxItem checkBoxItem = new CheckBoxItem(this.country.getSave().getGame().getLocalisation("INSTITUTIONS"),
+                                                                 this.country.getSave().getGame().getInstitution(i).getLocalizedName(),
+                                                                 this.country.getEmbracedInstitution(i));
+                    this.institutionsEmbracedFields.add(checkBoxItem);
+                }
+                items.addAll(this.institutionsEmbracedFields);
+
                 //Government
                 this.governmentRankField.getChoices().setAll(this.country.getGovernmentName().getRanks().values());
                 this.governmentRankField.setValue(this.country.getGovernmentName().getRank(this.country.getGovernmentLevel()));
@@ -1126,16 +1141,16 @@ public class CountryPropertySheet extends VBox {
                             new TableViewDialog<>(this.country.getSave(),
                                                   tableView2Ideas,
                                                   this.country.getSave().getGame().getLocalisationClean("HEADER_IDEAS"),
-                                                  (list) -> new Idea(this.country.getSave()
-                                                                                 .getGame()
-                                                                                 .getIdeaGroups()
-                                                                                 .stream()
-                                                                                 .filter(ideaGroup -> list.stream()
-                                                                                                          .noneMatch(i -> i.getIdeaGroup().equals(ideaGroup)))
-                                                                                 .filter(ideaGroup -> list.isEmpty() == ideaGroup.isFree())
-                                                                                 .findFirst()
-                                                                                 .get(),
-                                                                     0),
+                                                  list -> new Idea(this.country.getSave()
+                                                                               .getGame()
+                                                                               .getIdeaGroups()
+                                                                               .stream()
+                                                                               .filter(ideaGroup -> list.stream()
+                                                                                                        .noneMatch(i -> i.getIdeaGroup().equals(ideaGroup)))
+                                                                               .filter(ideaGroup -> list.isEmpty() == ideaGroup.isFree())
+                                                                               .findFirst()
+                                                                               .get(),
+                                                                   0),
                                                   () -> this.ideas);
                     dialog.setDisableAddProperty(tableView2Ideas.disableAddPropertyProperty());
                     Optional<List<Idea>> ideas = dialog.showAndWait();
@@ -1513,6 +1528,12 @@ public class CountryPropertySheet extends VBox {
 
         if (!Objects.equals(this.country.getGovernmentReformProgress(), this.governmentReformProgressField.getTrueValue())) {
             this.country.setGovernmentReformProgress(this.governmentReformProgressField.getTrueValue());
+        }
+
+        for (int i = 0; i < this.country.getSave().getInstitutions().getNbInstitutions(); i++) {
+            if (this.country.getEmbracedInstitution(i) != this.institutionsEmbracedFields.get(i).isSelected()) {
+                this.country.embracedInstitution(i, this.institutionsEmbracedFields.get(i).isSelected());
+            }
         }
 
         if (!Objects.equals(this.country.getManpower() * 1000, this.manpowerField.getTrueValue())) {
