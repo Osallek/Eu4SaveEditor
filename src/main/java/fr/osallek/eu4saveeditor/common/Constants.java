@@ -7,6 +7,8 @@ public final class Constants {
     private Constants() {
     }
 
+    public static final String SUPPORTED_GAME_VERSION = "1.30.4";
+
     //Templates
     public static final String TEMPLATES_PATH = "/templates/";
     public static final String TEMPLATE_HOME = TEMPLATES_PATH + "home.fxml";

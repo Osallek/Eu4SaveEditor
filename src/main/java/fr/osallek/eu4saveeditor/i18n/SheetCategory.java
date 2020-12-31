@@ -71,7 +71,7 @@ public enum SheetCategory {
     }
 
     public String getForDefaultLocale() {
-        return getForLanguage(Eu4Language.getByLocale(Locale.getDefault()));
+        return getForLanguage(Eu4Language.ENGLISH);
     }
 
     public static SheetCategory getByLocale(String value) {

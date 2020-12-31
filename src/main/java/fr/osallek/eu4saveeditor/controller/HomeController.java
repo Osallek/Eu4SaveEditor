@@ -91,6 +91,9 @@ public class HomeController implements Initializable {
     @FXML
     private ProgressBar progressBar;
 
+    @FXML
+    private Text versionText;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         this.gameDirectory = new FileProperty(this, "gameDirectory");
@@ -125,6 +128,8 @@ public class HomeController implements Initializable {
 
         this.saveFileChooser.setInitialDirectory(Config.getSaveFolder());
         this.selectedSaveFile.setText(Config.getSaveFile() == null ? null : Config.getSaveFile().getAbsolutePath());
+
+        this.versionText.setText("Version " + getClass().getPackage().getImplementationVersion() + " | Supported game version: " + Constants.SUPPORTED_GAME_VERSION);
         enableStartExtractButton();
     }
 
