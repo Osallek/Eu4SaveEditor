@@ -33,7 +33,9 @@ public class TableView2Ideas extends TableView<Idea> {
         ideaGroup.setCellValueFactory(p -> p.getValue() == null ? null : new ReadOnlyObjectWrapper<>(p.getValue().getIdeaGroup()));
         ideaGroup.setCellFactory(UniqueComboBoxTableCell.forTableColumn(new IdeaGroupStringConverter(),
                                                                         this.ideasMap,
-                                                                        Comparator.comparing(IdeaGroup::getLocalizedName, Eu4Utils.COLLATOR)
+                                                                        Comparator.comparing(IdeaGroup::getLocalizedName, Eu4Utils.COLLATOR),
+                                                                        getItems(),
+                                                                        this::getNewList
                                                                        ));
         ideaGroup.setOnEditCommit(event -> event.getRowValue().setIdeaGroup(event.getNewValue()));
         ideaGroup.setPrefWidth(250);

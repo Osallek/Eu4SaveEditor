@@ -142,6 +142,7 @@ public class Config {
             if (Constants.DEFAULT_INSTALLATION_FOLDER.exists() && Constants.DEFAULT_INSTALLATION_FOLDER.canRead()) {
                 PROPERTIES.setProperty(GAME_FOLDER_PROP, Constants.DEFAULT_INSTALLATION_FOLDER.getAbsolutePath());
             }
+
             if (Constants.MODS_FOLDER.exists() && Constants.MODS_FOLDER.canRead()) {
                 PROPERTIES.setProperty(MOD_FOLDER_PROP, Constants.MODS_FOLDER.getAbsolutePath());
             }
@@ -154,6 +155,22 @@ public class Config {
         } else {
             try {
                 PROPERTIES.load(Files.newInputStream(file.toPath()));
+
+                if (!PROPERTIES.containsKey(GAME_FOLDER_PROP) && Constants.DEFAULT_INSTALLATION_FOLDER.exists() && Constants.DEFAULT_INSTALLATION_FOLDER.canRead()) {
+                    PROPERTIES.setProperty(GAME_FOLDER_PROP, Constants.DEFAULT_INSTALLATION_FOLDER.getAbsolutePath());
+                    store();
+                }
+
+                if (!PROPERTIES.containsKey(MOD_FOLDER_PROP) && Constants.MODS_FOLDER.exists() && Constants.MODS_FOLDER.canRead()) {
+                    PROPERTIES.setProperty(MOD_FOLDER_PROP, Constants.MODS_FOLDER.getAbsolutePath());
+                    store();
+                }
+
+                if (!PROPERTIES.containsKey(SAVE_FOLDER_PROP) && Constants.SAVES_FOLDER.exists() && Constants.SAVES_FOLDER.canRead()) {
+                    PROPERTIES.setProperty(SAVE_FOLDER_PROP, Constants.SAVES_FOLDER.getAbsolutePath());
+                    store();
+                }
+
             } catch (IOException e) {
                 LOGGER.error("An error occurred while reading config file: {}", e.getMessage());
             }

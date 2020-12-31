@@ -35,7 +35,9 @@ public class TableView2Privilege extends TableView<Privilege> {
         type.setCellValueFactory(p -> p.getValue() == null ? null : new ReadOnlyObjectWrapper<>(p.getValue().getPrivilege()));
         type.setCellFactory(UniqueComboBoxTableCell.forTableColumn(new EstatePrivilegeStringConverter(),
                                                                    this.privilegesMap,
-                                                                   EstatePrivilege::compareTo
+                                                                   EstatePrivilege::compareTo,
+                                                                   getItems(),
+                                                                   this::getNewList
                                                                   ));
         type.setOnEditCommit(event -> event.getRowValue().setPrivilege(event.getNewValue()));
         type.setPrefWidth(350);

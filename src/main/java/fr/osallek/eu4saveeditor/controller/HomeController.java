@@ -189,12 +189,13 @@ public class HomeController implements Initializable {
         this.canOpenModDirectoryChoose = false;
         this.canOpenSaveFileChooser = false;
         Config.setGameFolder(this.gameDirectory.getValue());
+        Config.setModFolder(this.modDirectory.getValue());
         Config.setSaveFile(this.saveFile.getValue());
 
         ReadSaveTask task = new ReadSaveTask(this.gameDirectory, this.modDirectory, this.saveFile, Eu4Language.getByLocale(Locale.getDefault()));
         task.setOnFailed(event -> {
             LOGGER.error("An error occurred while extracting the save: {}", task.getException().getMessage(), task.getException());
-            this.infoText.setFill(Paint.valueOf(Color.RED.toString()));
+            this.infoText.setFill(Color.RED);
             this.infoText.textProperty().unbind();
             this.infoText.setText("An error occurred while extracting the save: " + task.getException().getMessage());
             this.canOpenGameDirectoryChoose = true;
@@ -207,12 +208,12 @@ public class HomeController implements Initializable {
                 this.progressBar.progressProperty().unbind();
                 this.progressBar.setProgress(1);
                 Parent editorNode = this.editorLoader.load();
-                ((EditorController) this.editorLoader.getController()).load(task.getValue());
+                ((EditorController) this.editorLoader.getController()).load(task.getValue(), this.saveFile.get().getParentFile());
                 this.startExtractButton.getScene().setRoot(editorNode);
                 ((EditorController) this.editorLoader.getController()).maximize();
             } catch (IOException e) {
                 LOGGER.error("An error occurred while extracting the save: {}", e.getMessage(), e);
-                this.infoText.setFill(Paint.valueOf(Color.RED.toString()));
+                this.infoText.setFill(Color.RED);
                 this.infoText.setText("An error occurred while extracting the save: " + e.getMessage());
                 this.canOpenGameDirectoryChoose = true;
                 this.canOpenModDirectoryChoose = true;
@@ -221,6 +222,7 @@ public class HomeController implements Initializable {
         });
 
         this.infoText.setVisible(true);
+        this.infoText.setFill(Color.BLACK);
         this.infoText.textProperty().bind(task.titleProperty());
         this.progressBar.setVisible(true);
         this.progressBar.progressProperty().bind(task.progressProperty());

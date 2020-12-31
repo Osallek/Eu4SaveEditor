@@ -39,7 +39,9 @@ public class TableView2Personalities extends TableView<RulerPersonality> {
         rulerPersonality.setCellValueFactory(p -> p.getValue() == null ? null : new ReadOnlyObjectWrapper<>(p.getValue()));
         rulerPersonality.setCellFactory(UniqueComboBoxTableCell.forTableColumn(new RulerPersonalityStringConverter(),
                                                                                this.personalitiesMap,
-                                                                               Comparator.comparing(RulerPersonality::getLocalizedName, Eu4Utils.COLLATOR)
+                                                                               Comparator.comparing(RulerPersonality::getLocalizedName, Eu4Utils.COLLATOR),
+                                                                               getItems(),
+                                                                               this::getNewList
                                                                               ));
         rulerPersonality.setOnEditCommit(event -> event.getTableView().getItems().set(event.getTablePosition().getRow(), event.getNewValue()));
         rulerPersonality.setPrefWidth(250);

@@ -17,9 +17,8 @@ public final class Constants {
     public static final String IMAGE_ICON = IMAGES_PATH + "EuIV_icon.png";
 
     public static final File DEFAULT_INSTALLATION_FOLDER = new File("C:\\Program Files (x86)\\Steam\\steamapps\\common\\Europa Universalis IV");
-    public static final File DOCUMENTS_FOLDER = new File(
-            new javax.swing.JFileChooser().getFileSystemView().getDefaultDirectory().getAbsolutePath()
-            + File.separator + "Paradox Interactive" + File.separator + "Europa Universalis IV");
+    public static final File DOCUMENTS_FOLDER = new File(new javax.swing.JFileChooser().getFileSystemView().getDefaultDirectory().getAbsolutePath()
+                                                         + File.separator + "Paradox Interactive" + File.separator + "Europa Universalis IV");
     public static final File MODS_FOLDER = new File(DOCUMENTS_FOLDER.getAbsolutePath() + File.separator + "mod");
     public static final File SAVES_FOLDER = new File(DOCUMENTS_FOLDER.getAbsolutePath() + File.separator + "save games");
 }

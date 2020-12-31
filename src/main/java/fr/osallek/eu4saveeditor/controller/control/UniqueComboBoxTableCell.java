@@ -4,6 +4,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ListChangeListener;
 import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
@@ -21,20 +22,25 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class UniqueComboBoxTableCell<S, T> extends TableCell<S, T> {
 
     public static <S, T> Callback<TableColumn<S, T>, TableCell<S, T>> forTableColumn(StringConverter<T> converter,
                                                                                      ObservableMap<S, ObservableList<T>> source,
-                                                                                     Comparator<T> comparator) {
-        return forTableColumn(converter, source, comparator, ComboBox::new);
+                                                                                     Comparator<T> comparator,
+                                                                                     ObservableList<S> items,
+                                                                                     Supplier<ObservableList<T>> supplier) {
+        return forTableColumn(converter, source, comparator, ComboBox::new, items, supplier);
     }
 
     public static <S, T> Callback<TableColumn<S, T>, TableCell<S, T>> forTableColumn(StringConverter<T> converter,
                                                                                      ObservableMap<S, ObservableList<T>> source,
                                                                                      Comparator<T> comparator,
-                                                                                     Function<ObservableList<T>, ComboBox<T>> boxSupplier) {
-        return list -> new UniqueComboBoxTableCell<>(converter, source, comparator, boxSupplier);
+                                                                                     Function<ObservableList<T>, ComboBox<T>> boxSupplier,
+                                                                                     ObservableList<S> items,
+                                                                                     Supplier<ObservableList<T>> supplier) {
+        return list -> new UniqueComboBoxTableCell<>(converter, source, comparator, boxSupplier, items, supplier);
     }
 
     private final ObservableMap<S, ObservableList<T>> source;
@@ -45,15 +51,17 @@ public class UniqueComboBoxTableCell<S, T> extends TableCell<S, T> {
 
     private final Function<ObservableList<T>, ComboBox<T>> boxSupplier;
 
+    private final Supplier<ObservableList<T>> supplier;
+
     private ComboBox<T> comboBox;
 
     public UniqueComboBoxTableCell(StringConverter<T> converter, ObservableMap<S, ObservableList<T>> source, Comparator<T> comparator,
-                                   Function<ObservableList<T>,
-                                           ComboBox<T>> boxSupplier) {
+                                   Function<ObservableList<T>, ComboBox<T>> boxSupplier, ObservableList<S> items, Supplier<ObservableList<T>> supplier) {
         this.getStyleClass().add("combo-box-table-cell");
         this.source = source;
         this.comparator = comparator;
         this.boxSupplier = boxSupplier;
+        this.supplier = supplier;
         setConverter(converter);
 
         this.source.forEach((s, ts) -> this.sorted.put(s, ts.sorted(this.comparator)));
@@ -63,6 +71,16 @@ public class UniqueComboBoxTableCell<S, T> extends TableCell<S, T> {
                 this.sorted.put(change.getKey(), change.getValueAdded().sorted(this.comparator));
             } else if (change.wasRemoved()) {
                 this.sorted.remove(change.getKey());
+            }
+        });
+
+        items.addListener((ListChangeListener<? super S>) change -> {
+            while (change.next()) {
+                if (change.wasAdded()) {
+                    change.getAddedSubList().forEach(s -> this.source.put(s, this.supplier.get()));
+                } else if (change.wasRemoved()) {
+                    change.getRemoved().forEach(this.source::remove);
+                }
             }
         });
     }

@@ -41,6 +41,8 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.controlsfx.control.MaskerPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -227,10 +229,14 @@ public class EditorController implements Initializable {
         }
     }
 
-    public void load(Save save) {
+    public void load(Save save, File parentFile) {
         this.save = save;
-        int extIndex = this.save.getName().lastIndexOf('.');
+        int extIndex = FilenameUtils.indexOfExtension(this.save.getName());
         this.saveFileChooser.setInitialFileName(this.save.getName().substring(0, extIndex) + "_edit" + this.save.getName().substring(extIndex));
+
+        if (parentFile != null && parentFile.isDirectory() && parentFile.isAbsolute()) {
+            this.saveFileChooser.setInitialDirectory(parentFile);
+        }
 
         try {
             EditorController.dummyCountry = this.save.getCountry(Eu4Utils.DEFAULT_TAG);

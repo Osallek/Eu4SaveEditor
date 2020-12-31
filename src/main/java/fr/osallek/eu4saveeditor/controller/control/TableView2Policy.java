@@ -42,10 +42,12 @@ public class TableView2Policy extends TableView<ActivePolicy> {
         target.setCellValueFactory(p -> p.getValue() == null ? null : new ReadOnlyObjectWrapper<>(p.getValue().getPolicy()));
         target.setCellFactory(UniqueComboBoxTableCell.forTableColumn(new PolicyStringConverter(),
                                                                      this.policiesMap,
-                                                                     Comparator.comparing(Policy::getLocalizedName, Eu4Utils.COLLATOR)
+                                                                     Comparator.comparing(Policy::getLocalizedName, Eu4Utils.COLLATOR),
+                                                                     getItems(),
+                                                                     this::getNewList
                                                                     ));
         target.setOnEditCommit(event -> event.getRowValue().setPolicy(event.getNewValue()));
-        target.setPrefWidth(200);
+        target.setPrefWidth(250);
         target.setStyle("-fx-alignment: CENTER-LEFT");
 
         TableColumn<ActivePolicy, LocalDate> date = new TableColumn<>(country.getSave().getGame().getLocalisationCleanNoPunctuation("FE_STARTING_DATE"));
@@ -61,7 +63,7 @@ public class TableView2Policy extends TableView<ActivePolicy> {
         remove.setCellFactory(ClearCellFactory.forTableColumn());
 
         setFixedCellSize(40);
-        setPrefWidth(400);
+        setPrefWidth(450);
         setEditable(true);
 
         getColumns().clear();

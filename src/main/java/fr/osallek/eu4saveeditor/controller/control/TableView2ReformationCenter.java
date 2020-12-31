@@ -38,7 +38,9 @@ public class TableView2ReformationCenter extends TableView<ReformationCenter> {
         province.setCellFactory(UniqueComboBoxTableCell.forTableColumn(new ProvinceStringConverter(),
                                                                        this.reformationCenters,
                                                                        Comparator.comparing(SaveProvince::getName, Eu4Utils.COLLATOR),
-                                                                       SearchableComboBox::new));
+                                                                       SearchableComboBox::new,
+                                                                       getItems(),
+                                                                       this::getNewList));
         province.setOnEditCommit(event -> {
             if (event.getNewValue() != null) {
                 event.getRowValue().setProvince(event.getNewValue());
