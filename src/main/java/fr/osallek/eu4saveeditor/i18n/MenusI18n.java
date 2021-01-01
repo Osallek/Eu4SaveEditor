@@ -52,7 +52,7 @@ public enum MenusI18n {
     }
 
     public String getForDefaultLocale() {
-        return getForLanguage(Eu4Language.ENGLISH);
+        return getForLanguage(Eu4Language.getByLocale(Locale.getDefault()));
     }
 
     public String getForLanguage(Eu4Language eu4Language) {
