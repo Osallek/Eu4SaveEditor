@@ -240,105 +240,74 @@ public class SavePropertySheet extends VBox {
                                                    this.save.getGame().getLocalisationClean("FE_LIMITED_LEDGER_DESC"));
 
         this.dynamicProvinceNamesField = new CheckBoxItem(SheetCategory.SAVE_GAME_OPTIONS,
-                                                          this.save.getGame()
-                                                                   .getLocalisation("FE_USE_DYNAMIC_PROVINCE_NAMES"),
+                                                          this.save.getGame().getLocalisation("FE_USE_DYNAMIC_PROVINCE_NAMES"),
                                                           this.save.getGameplayOptions().getDynamicProvinceNames(),
-                                                          this.save.getGame()
-                                                                   .getLocalisationClean("FE_DYNAMIC_PROVINCE_DESC"));
+                                                          this.save.getGame().getLocalisationClean("FE_DYNAMIC_PROVINCE_DESC"));
 
         this.customNationDifficultyField = new ClearableComboBoxItem<>(SheetCategory.SAVE_GAME_OPTIONS,
-                                                                       this.save.getGame()
-                                                                                .getLocalisation(
-                                                                                        "FE_CUSTOM_NATION_DIFFICULTY"),
-                                                                       FXCollections.observableArrayList(
-                                                                               CustomNationDifficulty
-                                                                                       .values()),
-                                                                       this.save.getGameplayOptions()
-                                                                                .getCustomNationDifficulty(),
-                                                                       this.save.getGame()
-                                                                                .getLocalisation(
-                                                                                        "CN_DIFFICULTY_TOOLTIP"),
-                                                                       new ClearableComboBox<>(
-                                                                               new RequiredComboBox<>()));
+                                                                       this.save.getGame().getLocalisation("FE_CUSTOM_NATION_DIFFICULTY"),
+                                                                       FXCollections.observableArrayList(CustomNationDifficulty.values()),
+                                                                       this.save.getGameplayOptions().getCustomNationDifficulty(),
+                                                                       this.save.getGame().getLocalisation("CN_DIFFICULTY_TOOLTIP"),
+                                                                       new ClearableComboBox<>(new RequiredComboBox<>()));
         this.customNationDifficultyField.setConverter(new CustomNationDifficultyStringConverter(this.save));
         this.customNationDifficultyField.setCellFactory(new CustomNationDifficultyStringCellFactory(this.save));
         this.customNationDifficultyField.setSupplier(() -> this.save.getGameplayOptions().getCustomNationDifficulty());
 
         this.addNationsToGameField = new CheckBoxItem(SheetCategory.SAVE_GAME_OPTIONS,
-                                                      this.save.getGame()
-                                                               .getLocalisation("FE_CUSTOM_NATION_ADD_TO_SAVE"),
+                                                      this.save.getGame().getLocalisation("FE_CUSTOM_NATION_ADD_TO_SAVE"),
                                                       this.save.getGameplayOptions().getAddNationsToGame(),
-                                                      this.save.getGame()
-                                                               .getLocalisationClean("CN_ADD_TO_SAVE_TOOLTIP1"));
+                                                      this.save.getGame().getLocalisationClean("CN_ADD_TO_SAVE_TOOLTIP1"));
 
         this.showMonthlyTaxIncomeField = new CheckBoxItem(SheetCategory.SAVE_GAME_OPTIONS,
-                                                          this.save.getGame()
-                                                                   .getLocalisation("SHOW_MONTHLY_TAX_INCOME"),
+                                                          this.save.getGame().getLocalisation("SHOW_MONTHLY_TAX_INCOME"),
                                                           this.save.getGameplayOptions().getShowMonthlyTaxIncome(),
-                                                          this.save.getGame()
-                                                                   .getLocalisationClean(
-                                                                           "SHOW_MONTHLY_TAX_INCOME_TOOLTIP"));
+                                                          this.save.getGame().getLocalisationClean("SHOW_MONTHLY_TAX_INCOME_TOOLTIP"));
 
         this.colorWastelandsField = new CheckBoxItem(SheetCategory.SAVE_GAME_OPTIONS,
                                                      this.save.getGame().getLocalisation("COLOR_WASTELANDS"),
                                                      this.save.getGameplayOptions().getColorWastelands(),
-                                                     this.save.getGame()
-                                                              .getLocalisationClean("COLOR_WASTELANDS_TOOLTIP"));
+                                                     this.save.getGame().getLocalisationClean("COLOR_WASTELANDS_TOOLTIP"));
 
         this.exclavesRegionNameField = new CheckBoxItem(SheetCategory.SAVE_GAME_OPTIONS,
                                                         this.save.getGame().getLocalisation("USE_REGION_NAMES"),
                                                         this.save.getGameplayOptions().getExclavesRegionName(),
-                                                        this.save.getGame()
-                                                                 .getLocalisationClean("USE_REGION_NAMES_TOOLTIP"));
+                                                        this.save.getGame().getLocalisationClean("USE_REGION_NAMES_TOOLTIP"));
 
         this.blockNationRuiningField = new CheckBoxItem(SheetCategory.SAVE_GAME_OPTIONS,
                                                         this.save.getGame().getLocalisation("FE_BLOCK_NATION_RUINING"),
                                                         this.save.getGameplayOptions().getBlockNationRuining(),
-                                                        this.save.getGame()
-                                                                 .getLocalisationClean("FE_BLOCK_NATION_RUINING_DESC"));
+                                                        this.save.getGame().getLocalisationClean("FE_BLOCK_NATION_RUINING_DESC"));
 
         this.unlimitedIdeaGroupsField = new CheckBoxItem(SheetCategory.SAVE_GAME_OPTIONS,
                                                          this.save.getGame().getLocalisation("USE_ANY_IDEAGROUP"),
                                                          this.save.getGameplayOptions().getUnlimitedIdeaGroups(),
-                                                         this.save.getGame()
-                                                                  .getLocalisationClean("FE_NO_LIMITS_ON_IDEAS_DESC"));
+                                                         this.save.getGame().getLocalisationClean("FE_NO_LIMITS_ON_IDEAS_DESC"));
 
         this.allowNameChangeField = new CheckBoxItem(SheetCategory.SAVE_GAME_OPTIONS,
                                                      this.save.getGame().getLocalisation("FE_ALLOW_NAME_CHANGE"),
                                                      this.save.getGameplayOptions().getAllowNameChange(),
-                                                     this.save.getGame()
-                                                              .getLocalisationClean("FE_ALLOW_NAME_CHANGE_DESC"));
+                                                     this.save.getGame().getLocalisationClean("FE_ALLOW_NAME_CHANGE_DESC"));
 
         this.onlyHostCanPauseField = new CheckBoxItem(SheetCategory.SAVE_GAME_OPTIONS,
                                                       this.save.getGame().getLocalisation("FE_ONLY_HOST_PAUSE"),
                                                       this.save.getGameplayOptions().getOnlyHostCanPause(),
-                                                      this.save.getGame()
-                                                               .getLocalisationClean("FE_ONLY_HOST_PAUSE_DESC"));
+                                                      this.save.getGame().getLocalisationClean("FE_ONLY_HOST_PAUSE_DESC"));
 
         this.onlyHostAndObserversCanSaveField = new CheckBoxItem(SheetCategory.SAVE_GAME_OPTIONS,
-                                                                 this.save.getGame()
-                                                                          .getLocalisation("FE_ONLY_HOST_SAVE"),
-                                                                 this.save.getGameplayOptions()
-                                                                          .getOnlyHostAndObserversCanSave(),
-                                                                 this.save.getGame()
-                                                                          .getLocalisationClean(
-                                                                                  "FE_ONLY_HOST_SAVE_DESC"));
+                                                                 this.save.getGame().getLocalisation("FE_ONLY_HOST_SAVE"),
+                                                                 this.save.getGameplayOptions().getOnlyHostAndObserversCanSave(),
+                                                                 this.save.getGame().getLocalisationClean("FE_ONLY_HOST_SAVE_DESC"));
 
         this.allowTeamsField = new CheckBoxItem(SheetCategory.SAVE_GAME_OPTIONS,
                                                 this.save.getGame().getLocalisation("FE_USE_TEAMS"),
-                                                this.save.getGameplayOptions()
-                                                         .getAllowTeams(),
-                                                this.save.getGame()
-                                                         .getLocalisationClean("USE_TEAMS_TOOLTIP"));
+                                                this.save.getGameplayOptions().getAllowTeams(),
+                                                this.save.getGame().getLocalisationClean("USE_TEAMS_TOOLTIP"));
 
         this.allowFreeTeamCreationField = new CheckBoxItem(SheetCategory.SAVE_GAME_OPTIONS,
-                                                           this.save.getGame()
-                                                                    .getLocalisation("FE_ALLOW_FREE_TEAM_CREATION"),
-                                                           this.save.getGameplayOptions()
-                                                                    .getAllowFreeTeamCreation(),
-                                                           this.save.getGame()
-                                                                    .getLocalisationClean(
-                                                                            "ALLOW_FREE_TEAM_CREATION_TOOLTIP"));
+                                                           this.save.getGame().getLocalisation("FE_ALLOW_FREE_TEAM_CREATION"),
+                                                           this.save.getGameplayOptions().getAllowFreeTeamCreation(),
+                                                           this.save.getGame().getLocalisationClean("ALLOW_FREE_TEAM_CREATION_TOOLTIP"));
         items.add(this.difficultyField);
         items.add(this.terraIncognitaField);
         items.add(this.dynamicProvinceNamesField);
@@ -394,8 +363,7 @@ public class SavePropertySheet extends VBox {
 
             ButtonItem buttonItem = new ButtonItem(SheetCategory.SAVE_GOODS,
                                                    " ",
-                                                   save.getGame()
-                                                       .getLocalisationClean("TSI_CURR_MOD_BY"));
+                                                   save.getGame().getLocalisationClean("TSI_CURR_MOD_BY"));
 
             buttonItem.getButton().setOnAction(event -> {
                 Function<ObservableList<ChangePrice>, ChangePrice> supplier = (list) -> {
@@ -453,8 +421,7 @@ public class SavePropertySheet extends VBox {
                                                                                                .equals(this.save.getHre().getContinent())),
                                                           this.save.getHre().getEmperor(),
                                                           new ClearableComboBox<>(new SearchableComboBox<>(),
-                                                                                  () -> this.save.getHre()
-                                                                                                 .getEmperor()));
+                                                                                  () -> this.save.getHre().getEmperor()));
             this.hreEmperor.setConverter(new CountryStringConverter());
             this.hreEmperor.setCellFactory(new CountryStringCellFactory());
 
@@ -465,32 +432,19 @@ public class SavePropertySheet extends VBox {
 
             this.hreElectors = FXCollections.observableArrayList(new ArrayList<>(this.save.getHre().getElectors()));
             ObservableList<Country> members = FXCollections.observableArrayList(countriesAlive.stream()
-                                                                                              .filter(country -> country
-                                                                                                      .getCapital()
-                                                                                                      .inHre())
-                                                                                              .filter(country -> !this.hreElectors
-                                                                                                      .contains(
-                                                                                                              country))
-                                                                                              .collect(
-                                                                                                      Collectors.toList()));
+                                                                                              .filter(country -> country.getCapital().inHre())
+                                                                                              .filter(country -> !this.hreElectors.contains(country))
+                                                                                              .collect(Collectors.toList()));
             hreElectorsButtonItem.getButton().setOnAction(event -> {
                 ListSelectionViewDialog<Country> dialog = new ListSelectionViewDialog<>(this.save,
                                                                                         new CustomListSelectionView<>(members, this.hreElectors,
                                                                                                                       new CountryStringCellFactory(),
                                                                                                                       750, 600),
-                                                                                        this.save.getGame()
-                                                                                                 .getLocalisationClean(
-                                                                                                         "HINT_ELECTOR_TITLE"),
+                                                                                        this.save.getGame().getLocalisationClean("HINT_ELECTOR_TITLE"),
                                                                                         () -> countriesAlive.stream()
-                                                                                                            .filter(country -> country
-                                                                                                                    .getCapital()
-                                                                                                                    .inHre())
-                                                                                                            .filter(country -> !this.hreElectors
-                                                                                                                    .contains(
-                                                                                                                            country))
-                                                                                                            .collect(
-                                                                                                                    Collectors
-                                                                                                                            .toList()),
+                                                                                                            .filter(country -> country.getCapital().inHre())
+                                                                                                            .filter(country -> !this.hreElectors.contains(country))
+                                                                                                            .collect(Collectors.toList()),
                                                                                         () -> this.save.getHre()
                                                                                                        .getElectors());
                 Optional<List<Country>> newElectors = dialog.showAndWait();
@@ -527,12 +481,8 @@ public class SavePropertySheet extends VBox {
                                                                                                this.save.getGame()
                                                                                                         .getLocalisationClean(
                                                                                                                 "HRE_REFORMS"),
-                                                                                               () -> this.save
-                                                                                                       .getHre()
-                                                                                                       .getMainLineNotPassedReforms(),
-                                                                                               () -> this.save
-                                                                                                       .getHre()
-                                                                                                       .getMainLinePassedReforms());
+                                                                                               () -> this.save.getHre().getMainLineNotPassedReforms(),
+                                                                                               () -> this.save.getHre().getMainLinePassedReforms());
 
                 Optional<List<ImperialReform>> newMainLineReforms = dialog.showAndWait();
 
@@ -574,8 +524,7 @@ public class SavePropertySheet extends VBox {
 
             ButtonItem hreRightBranchReformsButtonItem = new ButtonItem(SheetCategory.SAVE_HRE,
                                                                         null,
-                                                                        this.save.getGame()
-                                                                                 .getLocalisationClean("HRE_RIGHTBRANCH"),
+                                                                        this.save.getGame().getLocalisationClean("HRE_RIGHTBRANCH"),
                                                                         2);
 
             this.passedHreRightBranchReforms = FXCollections.observableArrayList(this.save.getHre().getRightBranchPassedReforms());
@@ -624,7 +573,7 @@ public class SavePropertySheet extends VBox {
                                                                                       .values()),
                                                                       this.save.getHreReligionStatus(),
                                                                       new ClearableComboBox<>(new ComboBox<>(),
-                                                                                              () -> this.save.getHreReligionStatus()));
+                                                                                              this.save::getHreReligionStatus));
             this.hreReligionStatusField.setConverter(new HreReligionStatusStringConverter(this.save));
             this.hreReligionStatusField.setCellFactory(new HreReligionStatusStringCellFactory(this.save));
 
@@ -644,34 +593,27 @@ public class SavePropertySheet extends VBox {
                                                                 save.getGame().getLocalisation("HINT_EMPEROR_TITLE"),
                                                                 new FilteredList<>(countriesAlive,
                                                                                    country ->
-                                                                                           "pagan".equals(
-                                                                                                   country.getReligion()
-                                                                                                          .getReligionGroup()
-                                                                                                          .getName())
-                                                                                           || "eastern".equals(
-                                                                                                   country.getReligion()
-                                                                                                          .getReligionGroup()
-                                                                                                          .getName())),
+                                                                                           "pagan".equals(country.getReligion()
+                                                                                                                 .getReligionGroup()
+                                                                                                                 .getName())
+                                                                                           || "eastern".equals(country.getReligion()
+                                                                                                                      .getReligionGroup()
+                                                                                                                      .getName())),
                                                                 this.save.getCelestialEmpire().getEmperor(),
                                                                 new ClearableComboBox<>(new SearchableComboBox<>(),
-                                                                                        () -> this.save.getCelestialEmpire()
-                                                                                                       .getEmperor()));
+                                                                                        () -> this.save.getCelestialEmpire().getEmperor()));
             this.celestialEmperor.setConverter(new CountryStringConverter());
             this.celestialEmperor.setCellFactory(new CountryStringCellFactory());
 
             this.celestialInfluenceField = new ClearableSliderItem(SheetCategory.SAVE_CELESTIAL_EMPIRE,
-                                                                   save.getGame()
-                                                                       .getLocalisation("CELESTIAL_MANDATE"),
+                                                                   save.getGame().getLocalisation("CELESTIAL_MANDATE"),
                                                                    0, 100,
-                                                                   this.save.getCelestialEmpire()
-                                                                            .getImperialInfluence(),
-                                                                   () -> this.save.getCelestialEmpire()
-                                                                                  .getImperialInfluence());
+                                                                   this.save.getCelestialEmpire().getImperialInfluence(),
+                                                                   () -> this.save.getCelestialEmpire().getImperialInfluence());
 
             ButtonItem celestialMainLineReformsButtonItem = new ButtonItem(SheetCategory.SAVE_CELESTIAL_EMPIRE,
                                                                            null,
-                                                                           save.getGame()
-                                                                               .getLocalisationClean("CELESTIAL_DECISIONS"),
+                                                                           save.getGame().getLocalisationClean("CELESTIAL_DECISIONS"),
                                                                            2);
 
             this.passedCelestialReforms = FXCollections.observableArrayList(this.save.getCelestialEmpire().getMainLinePassedReforms());
@@ -687,8 +629,7 @@ public class SavePropertySheet extends VBox {
                 ListSelectionViewDialog<ImperialReform> dialog = new ListSelectionViewDialog<>(this.save,
                                                                                                listSelectionView,
                                                                                                this.save.getGame()
-                                                                                                        .getLocalisationClean(
-                                                                                                                "CELESTIAL_DECISIONS"),
+                                                                                                        .getLocalisationClean("CELESTIAL_DECISIONS"),
                                                                                                () -> this.save
                                                                                                        .getCelestialEmpire()
                                                                                                        .getMainLineNotPassedReforms(),
@@ -698,7 +639,7 @@ public class SavePropertySheet extends VBox {
 
                 Optional<List<ImperialReform>> newMainLineReforms = dialog.showAndWait();
 
-                if (!newMainLineReforms.isPresent()) {
+                if (newMainLineReforms.isEmpty()) {
                     this.passedCelestialReforms.setAll(tmpPassedCelestialMainLineReforms);
                     this.notPassedCelestialReforms.setAll(tmpNotPassedCelestialMainLineReforms);
                 }
@@ -746,8 +687,7 @@ public class SavePropertySheet extends VBox {
 
                      if (!relPropertySheet.getPropertySheet().getItems().isEmpty()) {
                          this.religionPropertySheets.add(relPropertySheet);
-                         this.religionPropertySheet.getItems()
-                                                   .addAll(relPropertySheet.getPropertySheet().getItems());
+                         this.religionPropertySheet.getItems().addAll(relPropertySheet.getPropertySheet().getItems());
                      }
                  });
 
@@ -778,7 +718,7 @@ public class SavePropertySheet extends VBox {
                                                                                   () -> tmpFiredEvents);
             Optional<List<Event>> newLeftBranchReforms = dialog.showAndWait();
 
-            if (!newLeftBranchReforms.isPresent()) {
+            if (newLeftBranchReforms.isEmpty()) {
                 this.firedEvents.setAll(tmpFiredEvents);
                 this.notFiredEvents.setAll(tmpNotFiredEvents);
             }

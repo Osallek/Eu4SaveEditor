@@ -97,15 +97,14 @@ public class ReligionPropertySheet extends VBox {
         }
 
         ObservableList<Country> countries = FXCollections.observableArrayList(countriesAlive.stream()
-                                                                                            .filter(country -> religion.equals(
-                                                                                                    country.getReligion()))
-                                                                                            .collect(
-                                                                                                    Collectors.toList()));
+                                                                                            .filter(country -> religion.equals(country.getReligion()))
+                                                                                            .collect(Collectors.toList()));
         ObservableList<Country> otherReligionGroupCountries =
                 FXCollections.observableArrayList(countriesAlive.stream()
-                                                                .filter(country -> !country.getReligion()
-                                                                                           .getReligionGroup()
-                                                                                           .equals(religion.getReligionGroup()))
+                                                                .filter(country -> country.getReligion() == null
+                                                                                   || !country.getReligion()
+                                                                                              .getReligionGroup()
+                                                                                              .equals(religion.getReligionGroup()))
                                                                 .collect(Collectors.toList()));
 
         FilteredList<Country> possibleDefenders = countries.filtered(

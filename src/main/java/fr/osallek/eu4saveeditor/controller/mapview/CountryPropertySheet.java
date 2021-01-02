@@ -646,19 +646,19 @@ public class CountryPropertySheet extends VBox {
                 this.religionField.setSupplier(this.country::getReligion);
                 items.add(this.religionField);
 
-                if (this.country.getReligion().getGameReligion().useAuthority()) {
+                if (this.country.getReligion() != null && this.country.getReligion().getGameReligion().useAuthority()) {
                     this.authorityField.setValue(this.country.getAuthority());
                     this.authorityField.setSupplier(this.country::getAuthority);
                     items.add(this.authorityField);
                 }
 
-                if (this.country.getReligion().getGameReligion().useAuthority()) {
+                if (this.country.getReligion() != null && this.country.getReligion().getGameReligion().useAuthority()) {
                     this.authorityField.setValue(this.country.getAuthority());
                     this.authorityField.setSupplier(this.country::getAuthority);
                     items.add(this.authorityField);
                 }
 
-                if (this.country.getReligion().getGameReligion().useReligiousReforms()) {
+                if (this.country.getReligion() != null && this.country.getReligion().getGameReligion().useReligiousReforms()) {
                     this.passedReligiousReforms = FXCollections.observableArrayList(this.country.getReligiousReforms().getAdoptedReforms());
                     this.notPassedReligiousReforms = this.country.getSave()
                                                                  .getGame()
@@ -700,30 +700,32 @@ public class CountryPropertySheet extends VBox {
                     items.add(this.religiousReformsButton);
                 }
 
-                if (this.country.getReligion().getGameReligion().usesAnglicanPower() || this.country.getReligion().getGameReligion().usesHussitePower()
-                    || this.country.getReligion().getGameReligion().usesChurchPower()) {
+                if (this.country.getReligion() != null &&
+                    (this.country.getReligion().getGameReligion().usesAnglicanPower()
+                     || this.country.getReligion().getGameReligion().usesHussitePower()
+                    || this.country.getReligion().getGameReligion().usesChurchPower())) {
                     this.churchPowerField.setValue(this.country.getChurch().getPower());
                     this.churchPowerField.setSupplier(() -> this.country.getChurch().getPower());
                     items.add(this.churchPowerField);
                 }
 
-                if (CollectionUtils.isNotEmpty(this.country.getReligion().getGameReligion().getAspects())) {
+                if (this.country.getReligion() != null && CollectionUtils.isNotEmpty(this.country.getReligion().getGameReligion().getAspects())) {
                     //Todo
                 }
 
-                if (this.country.getReligion().getGameReligion().useFervor()) {
+                if (this.country.getReligion() != null && this.country.getReligion().getGameReligion().useFervor()) {
                     this.fervorField.setValue(this.country.getFervor().getValue());
                     this.fervorField.setSupplier(() -> this.country.getFervor().getValue());
                     items.add(this.fervorField);
                 }
 
-                if (this.country.getReligion().getGameReligion().hasPatriarchs()) {
+                if (this.country.getReligion() != null && this.country.getReligion().getGameReligion().hasPatriarchs()) {
                     this.patriarchAuthorityField.setValue(this.country.getPatriarchAuthority());
                     this.patriarchAuthorityField.setSupplier(() -> this.country.getPatriarchAuthority());
                     items.add(this.patriarchAuthorityField);
                 }
 
-                if (this.country.getReligion().getGameReligion().useFetishistCult()) {
+                if (this.country.getReligion() != null && this.country.getReligion().getGameReligion().useFetishistCult()) {
                     this.fetishistCultField.getChoices()
                                            .setAll(Stream.concat(Stream.of((FetishistCult) null), this.country.getUnlockedFetishistCults().stream())
                                                          .sorted(Comparator.nullsFirst(
@@ -734,19 +736,19 @@ public class CountryPropertySheet extends VBox {
                     items.add(this.fetishistCultField);
                 }
 
-                if (this.country.getReligion().getGameReligion().usesIsolationism()) {
+                if (this.country.getReligion() != null && this.country.getReligion().getGameReligion().usesIsolationism()) {
                     this.isolationismField.setSupplier(this.country::getIsolationismLevel);
                     this.isolationismField.setValue(this.country.getIsolationismLevel());
                     items.add(this.isolationismField);
                 }
 
-                if (this.country.getReligion().getGameReligion().usesKarma()) {
+                if (this.country.getReligion() != null && this.country.getReligion().getGameReligion().usesKarma()) {
                     this.karmaField.setValue(this.country.getKarma());
                     this.karmaField.setSupplier(() -> this.country.getKarma());
                     items.add(this.karmaField);
                 }
 
-                if (this.country.getReligion().getGameReligion().usePersonalDeity()) {
+                if (this.country.getReligion() != null && this.country.getReligion().getGameReligion().usePersonalDeity()) {
                     this.personalDeityField.getChoices()
                                            .setAll(Stream.concat(Stream.of((PersonalDeity) null), this.country.getUnlockedPersonalDeities().stream())
                                                          .sorted(Comparator.nullsFirst(
@@ -757,13 +759,13 @@ public class CountryPropertySheet extends VBox {
                     items.add(this.personalDeityField);
                 }
 
-                if (this.country.getReligion().getGameReligion().usesPiety()) {
+                if (this.country.getReligion() != null && this.country.getReligion().getGameReligion().usesPiety()) {
                     this.pietyField.setValue(this.country.getPiety());
                     this.pietyField.setSupplier(() -> this.country.getPiety());
                     items.add(this.pietyField);
                 }
 
-                if (this.country.getReligion().getGameReligion().usesHarmony()) {
+                if (this.country.getReligion() != null && this.country.getReligion().getGameReligion().usesHarmony()) {
                     this.harmonyField.setValue(this.country.getHarmony());
                     this.harmonyField.setSupplier(() -> this.country.getHarmony());
                     items.add(this.harmonyField);
@@ -849,13 +851,13 @@ public class CountryPropertySheet extends VBox {
                     items.add(this.harmonizedReligionsButton);
                 }
 
-                if (this.country.getReligion().getGameReligion().useDoom()) {
+                if (this.country.getReligion() != null && this.country.getReligion().getGameReligion().useDoom()) {
                     this.doomField.setValue(this.country.getDoom());
                     this.doomField.setSupplier(() -> this.country.getDoom());
                     items.add(this.doomField);
                 }
 
-                if (this.country.getReligion().getGameReligion().canHaveSecondaryReligion()) {
+                if (this.country.getReligion() != null && this.country.getReligion().getGameReligion().canHaveSecondaryReligion()) {
                     this.secondaryReligionsField.getChoices()
                                                 .setAll(Stream.concat(Stream.of((SaveReligion) null),
                                                                       this.country.getAvailableSecondaryReligions()
@@ -869,7 +871,7 @@ public class CountryPropertySheet extends VBox {
                     items.add(this.secondaryReligionsField);
                 }
 
-                if (CollectionUtils.isNotEmpty(this.country.getReligion().getGameReligion().getIcons())) {
+                if (this.country.getReligion() != null && CollectionUtils.isNotEmpty(this.country.getReligion().getGameReligion().getIcons())) {
                     //Todo
                 }
 
@@ -1411,20 +1413,21 @@ public class CountryPropertySheet extends VBox {
             this.country.setReligion(this.religionField.getSelectedValue());
         }
 
-        if (this.country.getReligion().getGameReligion().useAuthority()) {
+        if (this.country.getReligion() != null && this.country.getReligion().getGameReligion().useAuthority()) {
             if (!Objects.equals(this.country.getAuthority(), this.authorityField.getDoubleValue())) {
                 this.country.setAuthority(this.authorityField.getDoubleValue());
             }
         }
 
-        if (this.country.getReligion().getGameReligion().usesAnglicanPower() || this.country.getReligion().getGameReligion().usesHussitePower()
-            || this.country.getReligion().getGameReligion().usesChurchPower()) {
+        if (this.country.getReligion() != null
+            && (this.country.getReligion().getGameReligion().usesAnglicanPower() || this.country.getReligion().getGameReligion().usesHussitePower()
+            || this.country.getReligion().getGameReligion().usesChurchPower())) {
             if (!Objects.equals(this.country.getChurch().getPower(), this.churchPowerField.getDoubleValue())) {
                 this.country.getChurch().setPower(this.churchPowerField.getDoubleValue());
             }
         }
 
-        if (this.country.getReligion().getGameReligion().useReligiousReforms()) {
+        if (this.country.getReligion() != null && this.country.getReligion().getGameReligion().useReligiousReforms()) {
             if (!Objects.deepEquals(this.country.getReligiousReforms().getAdoptedReforms(), this.passedReligiousReforms)) {
                 this.country.getReligiousReforms()
                             .getAdoptedReforms()
@@ -1438,43 +1441,43 @@ public class CountryPropertySheet extends VBox {
             }
         }
 
-        if (this.country.getReligion().getGameReligion().useFervor()) {
+        if (this.country.getReligion() != null && this.country.getReligion().getGameReligion().useFervor()) {
             if (!Objects.equals(this.country.getFervor().getValue(), this.fervorField.getDoubleValue())) {
                 this.country.getFervor().setValue(this.fervorField.getDoubleValue());
             }
         }
 
-        if (this.country.getReligion().getGameReligion().hasPatriarchs()) {
+        if (this.country.getReligion() != null && this.country.getReligion().getGameReligion().hasPatriarchs()) {
             if (!Objects.equals(this.country.getPatriarchAuthority(), this.patriarchAuthorityField.getDoubleValue())) {
                 this.country.setPatriarchAuthority(this.patriarchAuthorityField.getDoubleValue());
             }
         }
 
-        if (this.country.getReligion().getGameReligion().useFetishistCult()) {
+        if (this.country.getReligion() != null && this.country.getReligion().getGameReligion().useFetishistCult()) {
             if (!Objects.deepEquals(this.country.getFetishistCult(), this.fetishistCultField.getSelectedValue())) {
                 this.country.setFetishistCult(this.fetishistCultField.getSelectedValue());
             }
         }
 
-        if (this.country.getReligion().getGameReligion().usesIsolationism()) {
+        if (this.country.getReligion() != null && this.country.getReligion().getGameReligion().usesIsolationism()) {
             if (!Objects.equals(this.country.getIsolationismLevel(), this.isolationismField.getTrueValue())) {
                 this.country.setIsolationismLevel(this.isolationismField.getTrueValue());
             }
         }
 
-        if (this.country.getReligion().getGameReligion().usesKarma()) {
+        if (this.country.getReligion() != null && this.country.getReligion().getGameReligion().usesKarma()) {
             if (!Objects.equals(this.country.getKarma(), this.karmaField.getIntValue())) {
                 this.country.setKarma(this.karmaField.getIntValue());
             }
         }
 
-        if (this.country.getReligion().getGameReligion().usesPiety()) {
+        if (this.country.getReligion() != null && this.country.getReligion().getGameReligion().usesPiety()) {
             if (!Objects.equals(this.country.getPiety(), this.pietyField.getDoubleValue())) {
                 this.country.setPiety(this.pietyField.getDoubleValue());
             }
         }
 
-        if (this.country.getReligion().getGameReligion().usesHarmony()) {
+        if (this.country.getReligion() != null && this.country.getReligion().getGameReligion().usesHarmony()) {
             if (!Objects.equals(this.country.getHarmony(), this.harmonyField.getDoubleValue())) {
                 this.country.setHarmony(this.harmonyField.getDoubleValue());
             }
@@ -1508,19 +1511,19 @@ public class CountryPropertySheet extends VBox {
             }
         }
 
-        if (this.country.getReligion().getGameReligion().usePersonalDeity()) {
+        if (this.country.getReligion() != null && this.country.getReligion().getGameReligion().usePersonalDeity()) {
             if (!Objects.deepEquals(this.country.getPersonalDeity(), this.personalDeityField.getSelectedValue())) {
                 this.country.setPersonalDeity(this.personalDeityField.getSelectedValue());
             }
         }
 
-        if (this.country.getReligion().getGameReligion().useDoom()) {
+        if (this.country.getReligion() != null && this.country.getReligion().getGameReligion().useDoom()) {
             if (!Objects.equals(this.country.getDoom(), this.doomField.getDoubleValue())) {
                 this.country.setDoom(this.doomField.getDoubleValue());
             }
         }
 
-        if (this.country.getReligion().getGameReligion().canHaveSecondaryReligion()) {
+        if (this.country.getReligion() != null && this.country.getReligion().getGameReligion().canHaveSecondaryReligion()) {
             if (!Objects.deepEquals(this.country.getSecondaryReligion(), this.secondaryReligionsField.getSelectedValue())) {
                 this.country.setSecondaryReligion(this.secondaryReligionsField.getSelectedValue());
             }

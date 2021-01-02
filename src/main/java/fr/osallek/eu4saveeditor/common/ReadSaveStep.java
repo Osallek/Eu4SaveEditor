@@ -12,7 +12,7 @@ public enum ReadSaveStep {
     PROVINCES("provinces", 1, "Reading provinces...", "Lecture des provinces...", "Leseprovinzen...", "Provincias de lectura..."),
     COUNTRIES("countries", 2, "Reading countries...", "Lecture des pays...", "Leseländer...", "Países de lectura..."),
     WARS("active_advisors", 3, "Reading wars...", "Lectures des guerres...", "Kriege lesen...", "Leer las guerras..."),
-    GAME("campaign_stats", 4, "Reading game files...", "Lecture des fichiers du jeu...", "Lesen von Spieldateien...", "Leer los archivos de los juegos...");
+    GAME("idea_dates", 4, "Reading game files...", "Lecture des fichiers du jeu...", "Lesen von Spieldateien...", "Leer los archivos de los juegos...");
 
     public final String itemName;
 
