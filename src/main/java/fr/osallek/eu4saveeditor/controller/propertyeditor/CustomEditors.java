@@ -1,5 +1,6 @@
 package fr.osallek.eu4saveeditor.controller.propertyeditor;
 
+import fr.osallek.eu4saveeditor.controller.control.ClearableColorPicker;
 import fr.osallek.eu4saveeditor.controller.pane.AbstractObjectField;
 import fr.osallek.eu4saveeditor.controller.pane.AbstractPropertyEditor;
 import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
@@ -7,6 +8,7 @@ import fr.osallek.eu4saveeditor.controller.pane.NumericField;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ButtonItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.CheckComboBoxItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableCheckComboBoxItem;
+import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableColorPickerItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableComboBoxItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableDatePickerItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderIntItem;
@@ -481,6 +483,22 @@ public class CustomEditors {
 
             @Override
             public void setValue(String value) {
+            }
+        };
+    }
+
+    public static PropertyEditor<Color> createColorPickerSheet(ClearableColorPickerItem colorPickerItem) {
+
+        return new AbstractPropertyEditor<>(colorPickerItem, colorPickerItem.getColorPicker()) {
+
+            @Override
+            protected ObservableValue<Color> getObservableValue() {
+                return getEditor().getColorPicker().valueProperty();
+            }
+
+            @Override
+            public void setValue(Color value) {
+                getEditor().select(value);
             }
         };
     }

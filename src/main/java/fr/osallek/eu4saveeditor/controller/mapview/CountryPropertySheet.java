@@ -16,7 +16,10 @@ import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.SaveReligion;
 import fr.osallek.eu4parser.model.save.country.Country;
 import fr.osallek.eu4parser.model.save.country.LeaderType;
+import fr.osallek.eu4parser.model.save.province.SaveProvince;
+import fr.osallek.eu4saveeditor.common.Eu4SaveEditorUtils;
 import fr.osallek.eu4saveeditor.controller.control.ClearableCheckComboBox;
+import fr.osallek.eu4saveeditor.controller.control.ClearableColorPicker;
 import fr.osallek.eu4saveeditor.controller.control.ClearableComboBox;
 import fr.osallek.eu4saveeditor.controller.control.ClearableSpinnerDouble;
 import fr.osallek.eu4saveeditor.controller.control.ClearableSpinnerInt;
@@ -37,6 +40,8 @@ import fr.osallek.eu4saveeditor.controller.converter.PairCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.PairConverter;
 import fr.osallek.eu4saveeditor.controller.converter.PersonalDeityStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.PersonalDeityStringConverter;
+import fr.osallek.eu4saveeditor.controller.converter.ProvinceStringCellFactory;
+import fr.osallek.eu4saveeditor.controller.converter.ProvinceStringConverter;
 import fr.osallek.eu4saveeditor.controller.converter.ReligionGroupStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.ReligionStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.ReligionStringConverter;
@@ -58,6 +63,7 @@ import fr.osallek.eu4saveeditor.controller.propertyeditor.CustomPropertyEditorFa
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ButtonItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.CheckBoxItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableCheckComboBoxItem;
+import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableColorPickerItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableComboBoxItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderIntItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderItem;
@@ -66,10 +72,13 @@ import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableTextItem
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.PropertySheetItem;
 import fr.osallek.eu4saveeditor.controller.validator.CustomGraphicValidationDecoration;
 import fr.osallek.eu4saveeditor.i18n.SheetCategory;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
 import javafx.scene.layout.VBox;
 import org.apache.commons.collections4.CollectionUtils;
@@ -128,6 +137,10 @@ public class CountryPropertySheet extends VBox {
     private final ClearableSpinnerItem<Double> prestigeField;
 
     private final ClearableSpinnerItem<Integer> absolutismField;
+
+    private final ClearableComboBoxItem<SaveProvince> capitalField;
+
+    private final ClearableColorPickerItem mapColorField;
 
     private final ClearableComboBoxItem<Culture> cultureField;
 
@@ -277,6 +290,8 @@ public class CountryPropertySheet extends VBox {
 
     private final CustomPropertySheetSkin propertySheetSkin;
 
+    private BooleanProperty colorChanged;
+
     public CountryPropertySheet(Save save, ObservableList<Country> countriesAlive, ObservableList<Culture> cultures, ObservableList<SaveReligion> religions) {
         this.countriesAlive = countriesAlive;
         this.cultures = cultures;
@@ -327,6 +342,17 @@ public class CountryPropertySheet extends VBox {
         this.absolutismField = new ClearableSpinnerItem<>(SheetCategory.GENERAL,
                                                           save.getGame().getLocalisationClean("absolutism"),
                                                           new ClearableSpinnerInt(0, 100, 1));
+
+        this.capitalField = new ClearableComboBoxItem<>(SheetCategory.GENERAL,
+                                                        save.getGame().getLocalisation("TRIGGER_CAPITAL"),
+                                                        FXCollections.observableArrayList(),
+                                                        new ClearableComboBox<>(new SearchableComboBox<>()));
+        this.capitalField.setConverter(new ProvinceStringConverter());
+        this.capitalField.setCellFactory(new ProvinceStringCellFactory());
+
+        this.mapColorField = new ClearableColorPickerItem(SheetCategory.GENERAL,
+                                                         save.getGame().getLocalisation("ND_MAP_COLOR"),
+                                                         new ClearableColorPicker(new ColorPicker()));
 
         //Culture
         this.cultureField = new ClearableComboBoxItem<>(save.getGame().getLocalisation("LEDGER_CULTURE"),
@@ -576,6 +602,8 @@ public class CountryPropertySheet extends VBox {
     }
 
     public void update(Country country, boolean force) {
+        this.colorChanged.set(false);
+
         if (force || this.country == null || !this.country.equals(country)) {
             this.country = country;
 
@@ -631,6 +659,17 @@ public class CountryPropertySheet extends VBox {
                 if (MapUtils.isNotEmpty(this.country.getSave().getCurrentAge().getAbsolutism())) {
                     items.add(this.absolutismField);
                 }
+
+                this.capitalField.getChoices().setAll(this.country.getOwnedProvinces()
+                                                                  .stream()
+                                                                  .sorted(Comparator.comparing(SaveProvince::getName, Eu4Utils.COLLATOR))
+                                                                  .collect(Collectors.toList()));
+                this.capitalField.setValue(this.country.getCapital());
+                this.capitalField.setSupplier(this.country::getCapital);
+                items.add(this.capitalField);
+
+                this.mapColorField.setValue(Eu4SaveEditorUtils.countryToMapColor(country));
+                items.add(this.mapColorField);
 
                 //Culture
                 this.cultureField.setValue(this.country.getPrimaryCulture());
@@ -1401,6 +1440,17 @@ public class CountryPropertySheet extends VBox {
             }
         }
 
+        if (!Objects.deepEquals(this.country.getCapital(), this.capitalField.getSelectedValue())) {
+            this.country.setCapital(this.capitalField.getSelectedValue());
+        }
+
+        if (!Objects.deepEquals(Eu4SaveEditorUtils.countryToMapColor(this.country), this.mapColorField.getValue())) {
+            this.country.getColors().setMapColor((int) (this.mapColorField.getSelectedValue().getRed() * 255),
+                                                 (int) (this.mapColorField.getSelectedValue().getGreen() * 255),
+                                                 (int) (this.mapColorField.getSelectedValue().getBlue() * 255));
+            this.colorChanged.set(true);
+        }
+
         if (!Objects.deepEquals(this.country.getPrimaryCulture(), this.cultureField.getSelectedValue())) {
             this.country.setPrimaryCulture(this.cultureField.getSelectedValue());
         }
@@ -1758,6 +1808,24 @@ public class CountryPropertySheet extends VBox {
         }
 
         update(this.country, true);
+    }
+
+    public final BooleanProperty colorChangedProperty() {
+        if (this.colorChanged == null) {
+            this.colorChanged = new BooleanPropertyBase() {
+                @Override
+                public Object getBean() {
+                    return CountryPropertySheet.this;
+                }
+
+                @Override
+                public String getName() {
+                    return "colorChanged";
+                }
+            };
+        }
+
+        return colorChanged;
     }
 
     public Country getCountry() {

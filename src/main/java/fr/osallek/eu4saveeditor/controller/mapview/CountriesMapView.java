@@ -3,6 +3,7 @@ package fr.osallek.eu4saveeditor.controller.mapview;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.eu4parser.model.save.country.Country;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
+import fr.osallek.eu4saveeditor.common.Eu4SaveEditorUtils;
 import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.scene.canvas.GraphicsContext;
@@ -41,6 +42,11 @@ public class CountriesMapView extends AbstractMapView {
                                                      this.mapViewContainer.getCountriesAlive(),
                                                      this.mapViewContainer.getCultures(),
                                                      this.mapViewContainer.getPlayableReligions());
+        this.countrySheet.colorChangedProperty().addListener((observable, oldValue, newValue) -> {
+            if (Boolean.FALSE.equals(oldValue) && Boolean.TRUE.equals(newValue)) {
+                this.countrySheet.getCountry().getOwnedProvinces().forEach(saveProvince -> drawProvince(saveProvince.getId()));
+            }
+        });
 
         this.countryButton = new ToggleButton(this.mapViewContainer.getSave()
                                                                    .getGame()
@@ -199,7 +205,7 @@ public class CountriesMapView extends AbstractMapView {
         if (province == null) {
             return Color.BLACK;
         } else if (province.getOwner() != null) {
-            return countryToMapColor(province.getOwner());
+            return Eu4SaveEditorUtils.countryToMapColor(province.getOwner());
         } else {
             if (province.isOcean() || province.isLake()) {
                 return Color.rgb(68, 107, 163);
@@ -209,11 +215,5 @@ public class CountriesMapView extends AbstractMapView {
                 return Color.rgb(148, 146, 149);
             }
         }
-    }
-
-    private Color countryToMapColor(Country country) {
-        return Color.rgb(country.getColors().getMapColor().getRed(),
-                         country.getColors().getMapColor().getGreen(),
-                         country.getColors().getMapColor().getBlue());
     }
 }

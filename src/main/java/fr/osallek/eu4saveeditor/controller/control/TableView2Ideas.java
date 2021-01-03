@@ -66,8 +66,8 @@ public class TableView2Ideas extends TableView<Idea> {
         getItems().setAll(enactedIdeas.stream().map(Idea::new).collect(Collectors.toCollection(FXCollections::observableArrayList)));
         getItems().forEach(idea -> this.ideasMap.put(idea, getNewList()));
 
-        this.disableAddProperty = new SimpleBooleanProperty(getItems().stream().filter(idea -> !idea.getIdeaGroup().isFree()).count()
-                                                            >= country.getAllowedIdeaGroups());
+        this.disableAddProperty = new SimpleBooleanProperty(
+                getItems().stream().filter(idea -> !idea.getIdeaGroup().isFree()).count() >= country.getAllowedIdeaGroups());
 
         getItems().addListener((ListChangeListener<? super Idea>) c ->
                 this.disableAddProperty.setValue(c.getList().stream().filter(idea -> !idea.getIdeaGroup().isFree()).count() >= country.getAllowedIdeaGroups()));
