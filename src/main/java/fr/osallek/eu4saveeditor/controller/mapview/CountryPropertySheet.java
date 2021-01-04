@@ -1609,6 +1609,10 @@ public class CountryPropertySheet extends VBox {
             this.country.setArmyProfessionalism(this.armyProfessionalismField.getDoubleValue());
         }
 
+        if (!Objects.equals(this.country.getWarExhaustion(), this.warEhaustionField.getDoubleValue())) {
+            this.country.setWarExhaustion(this.warEhaustionField.getDoubleValue());
+        }
+
         if (this.country.getLeaders().size() != this.leaders.size() || this.leaders.stream().anyMatch(Leader::isChanged)) {
             this.country.getLeaders()
                         .values()
