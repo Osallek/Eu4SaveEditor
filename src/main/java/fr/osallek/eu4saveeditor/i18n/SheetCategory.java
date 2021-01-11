@@ -21,7 +21,8 @@ public enum SheetCategory {
     SAVE_CELESTIAL_EMPIRE("Empire of China", "Empire de Chine", "Das chinesische Reich", "Emperador de China"),
     COUNTRY_GOVERNMENT("Government", "Gouvernement", "Regierung", "Gobierno"),
     COUNTRY_MILITARY("Military", "Militaire", "Militär", "Militar"),
-    COUNTRY_TECHNOLOGY("Techn", "Militaire", "Militär", "Militar");
+    COUNTRY_FLAGS("Flags", "Indicateurs", "Indikatoren", "Indicadores"),
+    COUNTRY_HIDDEN_FLAGS("Hidden flags", "Indicateurs cachées", "Ausgeblendete Indikatoren", "Indicadores ocultos");
 
     final String english;
 

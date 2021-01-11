@@ -4,6 +4,7 @@ import com.sun.javafx.geom.Rectangle;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.game.Culture;
 import fr.osallek.eu4parser.model.game.TradeGood;
+import fr.osallek.eu4parser.model.game.TradeNode;
 import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.SaveReligion;
@@ -116,6 +117,8 @@ public class EditorController implements Initializable {
     private ObservableList<SaveReligion> playableReligions;
 
     private ObservableList<TradeGood> tradeGoods;
+
+    private ObservableList<TradeNode> tradeNodes;
 
     @FXML
     private Text title;
@@ -264,6 +267,7 @@ public class EditorController implements Initializable {
             this.countriesAlive = new FilteredList<>(this.playableCountries, Country::isAlive);
             this.cultures = FXCollections.observableArrayList(this.save.getGame().getCultures());
             this.tradeGoods = FXCollections.observableArrayList(this.save.getGame().getTradeGoods());
+            this.tradeNodes = FXCollections.observableArrayList(this.save.getGame().getTradeNodes());
             this.religions = this.save.getReligions()
                                       .getReligions()
                                       .values()
@@ -315,7 +319,7 @@ public class EditorController implements Initializable {
 
             this.mapViewContainer = new MapViewContainer(this.provincesMap, this.drawableProvinces, this.provincesCanvas, this.editPane, this.save,
                                                          this.playableCountries, this.countriesAlive, this.cultures, this.religions, this.playableReligions,
-                                                         this.tradeGoods, this.cities);
+                                                         this.tradeGoods, this.tradeNodes, this.cities);
             this.mapViewContainer.registerMapView(MapViewType.COUNTRIES_MAP_VIEW);
             this.mapViewContainer.selectMapView(MapViewType.COUNTRIES_MAP_VIEW);
             this.mapViewContainer.draw();

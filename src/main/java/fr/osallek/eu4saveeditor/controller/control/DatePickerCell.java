@@ -83,8 +83,8 @@ public class DatePickerCell<S> extends TableCell<S, LocalDate> {
                 }
             });
             this.datePicker.valueProperty().addListener((observable, oldValue, newValue) -> {
-                if (!Objects.equals(oldValue, newValue) && ((endDate != null && newValue.isAfter(endDate)) || (startDate != null && newValue.isBefore(
-                        startDate)))) {
+                if (!Objects.equals(oldValue, newValue)
+                    && ((endDate != null && newValue.isAfter(endDate)) || (startDate != null && newValue.isBefore(startDate)))) {
                     this.datePicker.setValue(oldValue);
                 }
             });

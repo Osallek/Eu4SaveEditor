@@ -4,6 +4,7 @@ import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.eu4parser.model.game.Building;
 import fr.osallek.eu4parser.model.game.Culture;
 import fr.osallek.eu4parser.model.game.TradeGood;
+import fr.osallek.eu4parser.model.game.TradeNode;
 import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.SaveReligion;
 import fr.osallek.eu4parser.model.save.country.Country;
@@ -22,6 +23,8 @@ import fr.osallek.eu4saveeditor.controller.converter.SaveReligionStringCellFacto
 import fr.osallek.eu4saveeditor.controller.converter.ReligionStringConverter;
 import fr.osallek.eu4saveeditor.controller.converter.TradeGoodStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.TradeGoodStringConverter;
+import fr.osallek.eu4saveeditor.controller.converter.TradeNodeStringCellFactory;
+import fr.osallek.eu4saveeditor.controller.converter.TradeNodeStringConverter;
 import fr.osallek.eu4saveeditor.controller.object.Modifier;
 import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
 import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheetSkin;
@@ -116,6 +119,8 @@ public class ProvincePropertySheet extends VBox {
 
     private final ClearableSliderItem devastationField;
 
+    private final ClearableComboBoxItem<TradeNode> tradeNodeField;
+
     private List<SelectableGridViewItem<Building>> buildingsFields;
 
     private final ButtonItem modifiersButton;
@@ -129,7 +134,7 @@ public class ProvincePropertySheet extends VBox {
     private CustomPropertySheetSkin propertySheetSkin;
 
     public ProvincePropertySheet(Save save, ObservableList<Country> playableCountries, ObservableList<Culture> cultures, ObservableList<SaveReligion> religions,
-                                 ObservableList<TradeGood> tradeGoods) {
+                                 ObservableList<TradeGood> tradeGoods, ObservableList<TradeNode> tradeNodes) {
         this.propertySheet = new CustomPropertySheet();
         this.propertySheet.setPropertyEditorFactory(new CustomPropertyEditorFactory());
         this.propertySheet.setMode(CustomPropertySheet.Mode.CATEGORY);
@@ -239,6 +244,13 @@ public class ProvincePropertySheet extends VBox {
         this.tradeGoodField.setConverter(new TradeGoodStringConverter());
         this.tradeGoodField.setCellFactory(new TradeGoodStringCellFactory());
 
+        this.tradeNodeField = new ClearableComboBoxItem<>(SheetCategory.ECONOMY,
+                                                          save.getGame().getLocalisation("TRADENODE"),
+                                                          tradeNodes,
+                                                          new ClearableComboBox<>(new SearchableComboBox<>()));
+        this.tradeNodeField.setConverter(new TradeNodeStringConverter());
+        this.tradeNodeField.setCellFactory(new TradeNodeStringCellFactory());
+
         this.latentTradeGoodField = new ClearableComboBoxItem<>(SheetCategory.ECONOMY,
                                                                 save.getGame()
                                                                     .getLocalisationClean("LATENT_TRADE_GOODS_TOOLTIP_HEADER"),
@@ -316,6 +328,7 @@ public class ProvincePropertySheet extends VBox {
         this.institutionFields.forEach(clearableSliderItem -> clearableSliderItem.setEditable(false));
         this.autonomyField.setEditable(false);
         this.devastationField.setEditable(false);
+        this.tradeNodeField.setEditable(false);
 
         //GENERAL
         this.nameField.setValue(ClausewitzUtils.removeQuotes(this.province.getName()));
@@ -441,6 +454,10 @@ public class ProvincePropertySheet extends VBox {
                 items.add(this.devastationField);
             }
 
+            this.tradeNodeField.setValue(this.province.getTradeNode());
+            this.tradeNodeField.setSupplier(this.province::getTradeNode);
+            this.tradeNodeField.setEditable(true);
+            items.add(this.tradeNodeField);
 
             //INSTITUTIONS
             if (!this.province.getInstitutionsProgress().isEmpty()) {
@@ -651,6 +668,12 @@ public class ProvincePropertySheet extends VBox {
         if (this.devastationField.isEditable().getValue()) {
             if (!Objects.deepEquals(this.province.getDevastation(), this.devastationField.getDoubleValue())) {
                 this.province.setDevastation(this.devastationField.getDoubleValue());
+            }
+        }
+
+        if (this.tradeNodeField.isEditable().getValue()) {
+            if (!Objects.deepEquals(this.province.getTradeNode(), this.tradeNodeField.getSelectedValue())) {
+                this.province.setTradeNode(this.tradeNodeField.getSelectedValue());
             }
         }
 

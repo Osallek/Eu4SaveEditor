@@ -2,6 +2,7 @@ package fr.osallek.eu4saveeditor.controller.mapview;
 
 import fr.osallek.eu4parser.model.game.Culture;
 import fr.osallek.eu4parser.model.game.TradeGood;
+import fr.osallek.eu4parser.model.game.TradeNode;
 import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.SaveReligion;
 import fr.osallek.eu4parser.model.save.country.Country;
@@ -53,6 +54,8 @@ public class MapViewContainer {
 
     private final ObservableList<TradeGood> tradeGoods;
 
+    private final ObservableList<TradeNode> tradeNodes;
+
     private final ObservableList<SaveProvince> cities;
 
     private final Label titleLabel;
@@ -68,7 +71,7 @@ public class MapViewContainer {
     public MapViewContainer(SaveProvince[][] provincesMap, Map<Integer, DrawableProvince> drawableProvinces, Canvas canvas, VBox editPane, Save save,
                             ObservableList<Country> playableCountries, ObservableList<Country> countriesAlive, ObservableList<Culture> cultures,
                             ObservableList<SaveReligion> religions, ObservableList<SaveReligion> playableReligions, ObservableList<TradeGood> tradeGoods,
-                            ObservableList<SaveProvince> cities) {
+                            ObservableList<TradeNode> tradeNodes, ObservableList<SaveProvince> cities) {
         this.provincesMap = provincesMap;
         this.drawableProvinces = drawableProvinces;
         this.canvas = canvas;
@@ -81,6 +84,7 @@ public class MapViewContainer {
         this.religions = religions;
         this.playableReligions = playableReligions;
         this.tradeGoods = tradeGoods;
+        this.tradeNodes = tradeNodes;
         this.saveSheet = new SavePropertySheet(this.save, this.countriesAlive, this.cities);
         this.mapViews = new EnumMap<>(MapViewType.class);
 
@@ -253,6 +257,10 @@ public class MapViewContainer {
 
     public ObservableList<TradeGood> getTradeGoods() {
         return tradeGoods;
+    }
+
+    public ObservableList<TradeNode> getTradeNodes() {
+        return tradeNodes;
     }
 
     public SegmentedButton getTabsSegmentedButton() {

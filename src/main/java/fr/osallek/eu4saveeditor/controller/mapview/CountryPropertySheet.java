@@ -32,6 +32,7 @@ import fr.osallek.eu4saveeditor.controller.control.TableView2Loan;
 import fr.osallek.eu4saveeditor.controller.control.TableView2Modifier;
 import fr.osallek.eu4saveeditor.controller.control.TableView2Policy;
 import fr.osallek.eu4saveeditor.controller.control.TableView2Rival;
+import fr.osallek.eu4saveeditor.controller.control.TableView2StringDate;
 import fr.osallek.eu4saveeditor.controller.converter.CultureStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.CultureStringConverter;
 import fr.osallek.eu4saveeditor.controller.converter.FetishistCultStringCellFactory;
@@ -54,6 +55,7 @@ import fr.osallek.eu4saveeditor.controller.object.Leader;
 import fr.osallek.eu4saveeditor.controller.object.Loan;
 import fr.osallek.eu4saveeditor.controller.object.Modifier;
 import fr.osallek.eu4saveeditor.controller.object.Rival;
+import fr.osallek.eu4saveeditor.controller.object.StringDate;
 import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
 import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheetSkin;
 import fr.osallek.eu4saveeditor.controller.pane.GovernmentReformsDialog;
@@ -287,6 +289,14 @@ public class CountryPropertySheet extends VBox {
     private final ButtonItem modifiersButton;
 
     private final ObservableList<Modifier> modifiers;
+
+    private final ObservableList<StringDate> flags;
+
+    private final ButtonItem flagsButton;
+
+    private final ObservableList<StringDate> hiddenFlags;
+
+    private final ButtonItem hiddenFlagsButton;
 
     private final CustomPropertySheetSkin propertySheetSkin;
 
@@ -590,6 +600,15 @@ public class CountryPropertySheet extends VBox {
         this.modifiers = FXCollections.observableArrayList();
         this.modifiersButton = new ButtonItem(save.getGame().getLocalisationClean("DOMESTIC_MODIFIERS"), null,
                                               save.getGame().getLocalisationClean("DOMESTIC_MODIFIERS"));
+
+        //Flags
+        this.flags = FXCollections.observableArrayList();
+        this.flagsButton = new ButtonItem(SheetCategory.COUNTRY_FLAGS, null,
+                                          SheetCategory.COUNTRY_FLAGS.getForDefaultLocale());
+
+        this.hiddenFlags = FXCollections.observableArrayList();
+        this.hiddenFlagsButton = new ButtonItem(SheetCategory.COUNTRY_FLAGS, null,
+                                                SheetCategory.COUNTRY_HIDDEN_FLAGS.getForDefaultLocale());
 
         this.validationSupport = new ValidationSupport();
         this.validationSupport.registerValidator(this.nameField.getTextField(), Validator.createEmptyValidator("Text is required"));
@@ -1327,6 +1346,49 @@ public class CountryPropertySheet extends VBox {
                 });
                 items.add(this.modifiersButton);
 
+                //Flags
+                this.flags.setAll(this.country.getFlags()
+                                              .getAll()
+                                              .entrySet()
+                                              .stream()
+                                              .map(StringDate::new)
+                                              .sorted(Comparator.comparing(StringDate::getDate))
+                                              .collect(Collectors.toList()));
+                this.flagsButton.getButton().setOnAction(event -> {
+                    TableView2StringDate tableView2Flag = new TableView2StringDate(this.country.getSave(), this.flags, false, null, null);
+                    TableViewDialog<StringDate> dialog = new TableViewDialog<>(this.country.getSave(),
+                                                                               tableView2Flag,
+                                                                               SheetCategory.COUNTRY_FLAGS.getForDefaultLocale(),
+                                                                               list -> null,
+                                                                               () -> this.flags);
+                    dialog.setDisableAddProperty(new SimpleBooleanProperty(true));
+                    Optional<List<StringDate>> flagList = dialog.showAndWait();
+
+                    flagList.ifPresent(this.flags::setAll);
+                });
+                items.add(this.flagsButton);
+
+                this.hiddenFlags.setAll(this.country.getHiddenFlags()
+                                                    .getAll()
+                                                    .entrySet()
+                                                    .stream()
+                                                    .map(StringDate::new)
+                                                    .sorted(Comparator.comparing(StringDate::getDate))
+                                                    .collect(Collectors.toList()));
+                this.hiddenFlagsButton.getButton().setOnAction(event -> {
+                    TableView2StringDate tableView2HiddenFlag = new TableView2StringDate(this.country.getSave(), this.hiddenFlags, false, null, null);
+                    TableViewDialog<StringDate> dialog = new TableViewDialog<>(this.country.getSave(),
+                                                                               tableView2HiddenFlag,
+                                                                               SheetCategory.COUNTRY_HIDDEN_FLAGS.getForDefaultLocale(),
+                                                                               list -> null,
+                                                                               () -> this.hiddenFlags);
+                    dialog.setDisableAddProperty(new SimpleBooleanProperty(true));
+                    Optional<List<StringDate>> hiddenFlagList = dialog.showAndWait();
+
+                    hiddenFlagList.ifPresent(this.hiddenFlags::setAll);
+                });
+                items.add(this.hiddenFlagsButton);
+
                 this.propertySheet.getItems().setAll(items);
 
                 if (expandedPaneName != null) {
@@ -1749,6 +1811,38 @@ public class CountryPropertySheet extends VBox {
                                                                                     this.modifiers.remove(modifier);
                                                                                 },
                                                                                 () -> this.country.removeModifier(saveModifier.getModifier())));
+        }
+
+        if (this.country.getFlags().getAll().size() != this.flags.size() || this.flags.stream().anyMatch(StringDate::isChanged)) {
+            this.country.getFlags()
+                        .getAll()
+                        .forEach((s, date) -> this.flags.stream()
+                                                        .filter(flag -> s.equals(flag.getName()))
+                                                        .findFirst()
+                                                        .ifPresentOrElse(flag -> {
+                                                                             if (!Objects.equals(flag.getDate(), date)) {
+                                                                                 this.country.getFlags().set(s, flag.getDate());
+                                                                             }
+
+                                                                             this.flags.remove(flag);
+                                                                         },
+                                                                         () -> this.country.getFlags().remove(s)));
+        }
+
+        if (this.country.getHiddenFlags().getAll().size() != this.hiddenFlags.size() || this.hiddenFlags.stream().anyMatch(StringDate::isChanged)) {
+            this.country.getHiddenFlags()
+                        .getAll()
+                        .forEach((s, date) -> this.hiddenFlags.stream()
+                                                              .filter(hiddenFlag -> s.equals(hiddenFlag.getName()))
+                                                              .findFirst()
+                                                              .ifPresentOrElse(hiddenFlag -> {
+                                                                                   if (!Objects.equals(hiddenFlag.getDate(), date)) {
+                                                                                       this.country.getHiddenFlags().set(s, hiddenFlag.getDate());
+                                                                                   }
+
+                                                                                   this.hiddenFlags.remove(hiddenFlag);
+                                                                               },
+                                                                               () -> this.country.getHiddenFlags().remove(s)));
         }
 
         if (CollectionUtils.isNotEmpty(this.availableAdmPolicies) &&

@@ -55,7 +55,7 @@ public class TableView2ReformationCenter extends TableView<ReformationCenter> {
         remove.setCellFactory(ClearCellFactory.forTableColumn());
 
         setFixedCellSize(40);
-        setPrefWidth(300);
+        setPrefWidth(313);
         setEditable(true);
 
         getColumns().clear();

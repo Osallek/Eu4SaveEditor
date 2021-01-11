@@ -1,7 +1,6 @@
 package fr.osallek.eu4saveeditor.controller.mapview;
 
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
-import fr.osallek.eu4parser.model.save.country.Country;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 import fr.osallek.eu4saveeditor.common.Eu4SaveEditorUtils;
 import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
@@ -31,7 +30,8 @@ public class CountriesMapView extends AbstractMapView {
                                                        this.mapViewContainer.getPlayableCountries(),
                                                        this.mapViewContainer.getCultures(),
                                                        this.mapViewContainer.getPlayableReligions(),
-                                                       this.mapViewContainer.getTradeGoods());
+                                                       this.mapViewContainer.getTradeGoods(),
+                                                       this.mapViewContainer.getTradeNodes());
         this.provinceSheet.countryChangedProperty().addListener((observable, oldValue, newValue) -> {
             if (Boolean.FALSE.equals(oldValue) && Boolean.TRUE.equals(newValue)) {
                 drawProvince(this.provinceSheet.getProvince().getId());

@@ -57,7 +57,7 @@ public class TableView2Rival extends TableView<Rival> {
         remove.setCellFactory(ClearCellFactory.forTableColumn());
 
         setFixedCellSize(40);
-        setPrefWidth(400);
+        setPrefWidth(413);
         setEditable(true);
 
         getColumns().clear();
