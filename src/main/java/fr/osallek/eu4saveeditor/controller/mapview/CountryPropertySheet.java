@@ -1347,47 +1347,55 @@ public class CountryPropertySheet extends VBox {
                 items.add(this.modifiersButton);
 
                 //Flags
-                this.flags.setAll(this.country.getFlags()
-                                              .getAll()
-                                              .entrySet()
-                                              .stream()
-                                              .map(StringDate::new)
-                                              .sorted(Comparator.comparing(StringDate::getDate))
-                                              .collect(Collectors.toList()));
-                this.flagsButton.getButton().setOnAction(event -> {
-                    TableView2StringDate tableView2Flag = new TableView2StringDate(this.country.getSave(), this.flags, false, null, null);
-                    TableViewDialog<StringDate> dialog = new TableViewDialog<>(this.country.getSave(),
-                                                                               tableView2Flag,
-                                                                               SheetCategory.COUNTRY_FLAGS.getForDefaultLocale(),
-                                                                               list -> null,
-                                                                               () -> this.flags);
-                    dialog.setDisableAddProperty(new SimpleBooleanProperty(true));
-                    Optional<List<StringDate>> flagList = dialog.showAndWait();
+                if (this.country.getFlags() != null) {
+                    this.flags.setAll(this.country.getFlags()
+                                                  .getAll()
+                                                  .entrySet()
+                                                  .stream()
+                                                  .map(StringDate::new)
+                                                  .sorted(Comparator.comparing(StringDate::getDate))
+                                                  .collect(Collectors.toList()));
+                    this.flagsButton.getButton().setOnAction(event -> {
+                        TableView2StringDate tableView2Flag = new TableView2StringDate(this.country.getSave(), this.flags, false, null, null);
+                        TableViewDialog<StringDate> dialog = new TableViewDialog<>(this.country.getSave(),
+                                                                                   tableView2Flag,
+                                                                                   SheetCategory.COUNTRY_FLAGS.getForDefaultLocale(),
+                                                                                   list -> null,
+                                                                                   () -> this.flags);
+                        dialog.setDisableAddProperty(new SimpleBooleanProperty(true));
+                        Optional<List<StringDate>> flagList = dialog.showAndWait();
 
-                    flagList.ifPresent(this.flags::setAll);
-                });
-                items.add(this.flagsButton);
+                        flagList.ifPresent(this.flags::setAll);
+                    });
+                    items.add(this.flagsButton);
+                } else {
+                    this.flags.clear();
+                }
 
-                this.hiddenFlags.setAll(this.country.getHiddenFlags()
-                                                    .getAll()
-                                                    .entrySet()
-                                                    .stream()
-                                                    .map(StringDate::new)
-                                                    .sorted(Comparator.comparing(StringDate::getDate))
-                                                    .collect(Collectors.toList()));
-                this.hiddenFlagsButton.getButton().setOnAction(event -> {
-                    TableView2StringDate tableView2HiddenFlag = new TableView2StringDate(this.country.getSave(), this.hiddenFlags, false, null, null);
-                    TableViewDialog<StringDate> dialog = new TableViewDialog<>(this.country.getSave(),
-                                                                               tableView2HiddenFlag,
-                                                                               SheetCategory.COUNTRY_HIDDEN_FLAGS.getForDefaultLocale(),
-                                                                               list -> null,
-                                                                               () -> this.hiddenFlags);
-                    dialog.setDisableAddProperty(new SimpleBooleanProperty(true));
-                    Optional<List<StringDate>> hiddenFlagList = dialog.showAndWait();
+                if (this.country.getHiddenFlags() != null) {
+                    this.hiddenFlags.setAll(this.country.getHiddenFlags()
+                                                        .getAll()
+                                                        .entrySet()
+                                                        .stream()
+                                                        .map(StringDate::new)
+                                                        .sorted(Comparator.comparing(StringDate::getDate))
+                                                        .collect(Collectors.toList()));
+                    this.hiddenFlagsButton.getButton().setOnAction(event -> {
+                        TableView2StringDate tableView2HiddenFlag = new TableView2StringDate(this.country.getSave(), this.hiddenFlags, false, null, null);
+                        TableViewDialog<StringDate> dialog = new TableViewDialog<>(this.country.getSave(),
+                                                                                   tableView2HiddenFlag,
+                                                                                   SheetCategory.COUNTRY_HIDDEN_FLAGS.getForDefaultLocale(),
+                                                                                   list -> null,
+                                                                                   () -> this.hiddenFlags);
+                        dialog.setDisableAddProperty(new SimpleBooleanProperty(true));
+                        Optional<List<StringDate>> hiddenFlagList = dialog.showAndWait();
 
-                    hiddenFlagList.ifPresent(this.hiddenFlags::setAll);
-                });
-                items.add(this.hiddenFlagsButton);
+                        hiddenFlagList.ifPresent(this.hiddenFlags::setAll);
+                    });
+                    items.add(this.hiddenFlagsButton);
+                } else {
+                    this.hiddenFlags.clear();
+                }
 
                 this.propertySheet.getItems().setAll(items);
 
