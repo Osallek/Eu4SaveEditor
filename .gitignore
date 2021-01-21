@@ -68,3 +68,7 @@ build/
 ### VS Code ###
 .vscode/
 /config/
+/logs.txt
+
+logs.txt.lck
+/config.txt
