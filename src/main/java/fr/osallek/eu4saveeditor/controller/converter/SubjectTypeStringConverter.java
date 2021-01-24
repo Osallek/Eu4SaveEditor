@@ -2,7 +2,6 @@ package fr.osallek.eu4saveeditor.controller.converter;
 
 import fr.osallek.eu4parser.model.game.SubjectType;
 import javafx.util.StringConverter;
-import org.apache.commons.lang3.StringUtils;
 
 public class SubjectTypeStringConverter extends StringConverter<SubjectType> {
 

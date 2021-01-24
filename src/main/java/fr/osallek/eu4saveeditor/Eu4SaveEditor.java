@@ -31,7 +31,7 @@ public class Eu4SaveEditor extends Application {
         stage.setHeight(480);
         stage.setTitle("Eu4SaveEditor");
         stage.setScene(new Scene(homeLoader.load()));
-        stage.getIcons().addAll(new Image(Constants.IMAGE_ICON));
+        stage.getIcons().addAll(new Image(getClass().getResourceAsStream(Constants.IMAGE_ICON)));
         stage.show();
     }
 

@@ -18,7 +18,6 @@ package fr.osallek.eu4saveeditor.controller.pane;
 import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheet.Item;
 import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheet.Mode;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.CustomItem;
-import impl.org.controlsfx.skin.PropertySheetSkin;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.Insets;
@@ -32,13 +31,13 @@ import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.stage.PopupWindow;
+import org.controlsfx.control.GridCell;
 import org.controlsfx.control.SegmentedButton;
 import org.controlsfx.control.action.Action;
 import org.controlsfx.control.action.ActionUtils;
@@ -50,9 +49,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
-import static impl.org.controlsfx.i18n.Localization.asKey;
-import static impl.org.controlsfx.i18n.Localization.localize;
 
 public class CustomPropertySheetSkin extends SkinBase<CustomPropertySheet> {
 
@@ -102,7 +98,6 @@ public class CustomPropertySheetSkin extends SkinBase<CustomPropertySheet> {
         toolbar.getItems().add(modeButton);
 
         // property sheet search
-        searchField.setPromptText(localize(asKey("property.sheet.search.field.prompt"))); //$NON-NLS-1$
         searchField.setMinWidth(0);
         HBox.setHgrow(searchField, Priority.SOMETIMES);
         searchField.managedProperty().bind(searchField.visibleProperty());
@@ -206,24 +201,19 @@ public class CustomPropertySheetSkin extends SkinBase<CustomPropertySheet> {
 
     private class ActionChangeMode extends Action {
 
-        private final Image CATEGORY_IMAGE = new Image(
-                PropertySheetSkin.class.getResource("/org/controlsfx/control/format-indent-more.png").toExternalForm()); //$NON-NLS-1$
-        private final Image NAME_IMAGE = new Image(
-                PropertySheetSkin.class.getResource("/org/controlsfx/control/format-line-spacing-triple.png").toExternalForm()); //$NON-NLS-1$
-
         public ActionChangeMode(CustomPropertySheet.Mode mode) {
             super(""); //$NON-NLS-1$
             setEventHandler(ae -> getSkinnable().modeProperty().set(mode));
 
-            if (mode == Mode.CATEGORY) {
-                setGraphic(new ImageView(CATEGORY_IMAGE));
-                setLongText(localize(asKey("property.sheet.group.mode.bycategory"))); //$NON-NLS-1$
-            } else if (mode == Mode.NAME) {
-                setGraphic(new ImageView(NAME_IMAGE));
-                setLongText(localize(asKey("property.sheet.group.mode.byname"))); //$NON-NLS-1$
-            } else {
+//            if (mode == Mode.CATEGORY) {
+//                setGraphic(new ImageView(CATEGORY_IMAGE));
+//                setLongText(localize(asKey("property.sheet.group.mode.bycategory"))); //$NON-NLS-1$
+//            } else if (mode == Mode.NAME) {
+//                setGraphic(new ImageView(NAME_IMAGE));
+//                setLongText(localize(asKey("property.sheet.group.mode.byname"))); //$NON-NLS-1$
+//            } else {
                 setText("???"); //$NON-NLS-1$
-            }
+//            }
         }
 
     }

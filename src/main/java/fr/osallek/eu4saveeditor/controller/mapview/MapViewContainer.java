@@ -105,8 +105,7 @@ public class MapViewContainer {
         this.tabsSegmentedButton = new SegmentedButton();
         this.tabsSegmentedButton.getStyleClass().add(SegmentedButton.STYLE_CLASS_DARK);
         this.tabsSegmentedButton.setMaxWidth(Double.MAX_VALUE);
-        this.tabsSegmentedButton.getStylesheets()
-                                .add(getClass().getClassLoader().getResource("styles/style.css").toExternalForm());
+        this.tabsSegmentedButton.getStylesheets().add(getClass().getResource("/styles/style.css").toExternalForm());
         addTabsSegmentedButtons(this.saveButton);
 
         this.editPane.getChildren().clear();

@@ -19,8 +19,8 @@ import fr.osallek.eu4saveeditor.controller.converter.CountryStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.CountryStringConverter;
 import fr.osallek.eu4saveeditor.controller.converter.CultureStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.CultureStringConverter;
-import fr.osallek.eu4saveeditor.controller.converter.SaveReligionStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.ReligionStringConverter;
+import fr.osallek.eu4saveeditor.controller.converter.SaveReligionStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.TradeGoodStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.TradeGoodStringConverter;
 import fr.osallek.eu4saveeditor.controller.converter.TradeNodeStringCellFactory;
@@ -149,7 +149,7 @@ public class ProvincePropertySheet extends VBox {
                                                save.getGame().getLocalisation("LEDGER_NAME"));
         this.nameField.getTextField()
                       .getStylesheets()
-                      .add(getClass().getClassLoader().getResource("styles/propertySheetsStyle.css").toExternalForm());
+                      .add(getClass().getResource("/styles/propertySheetsStyle.css").toExternalForm());
 
         this.validationSupport = new ValidationSupport();
         this.validationSupport.registerValidator(this.nameField.getTextField(), Validator.createEmptyValidator("Text is required"));

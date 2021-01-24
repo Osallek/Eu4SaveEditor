@@ -15,13 +15,11 @@
  */
 package fr.osallek.eu4saveeditor.controller.pane;
 
-import impl.org.controlsfx.version.VersionChecker;
 import javafx.scene.control.Control;
 
 abstract class CustomControlsFXControl extends Control {
 
     public CustomControlsFXControl() {
-        VersionChecker.doVersionCheck();
     }
 
     private String stylesheet;
@@ -43,7 +41,7 @@ abstract class CustomControlsFXControl extends Control {
          * For more information please see RT-40658
          */
         if (stylesheet == null) {
-            stylesheet = clazz.getClassLoader().getResource("styles/" + fileName).toExternalForm();
+            stylesheet = clazz.getResource("/styles/" + fileName).toExternalForm();
         }
 
         return stylesheet;

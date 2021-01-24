@@ -1,6 +1,5 @@
 package fr.osallek.eu4saveeditor.controller.propertyeditor;
 
-import fr.osallek.eu4saveeditor.controller.control.ClearableColorPicker;
 import fr.osallek.eu4saveeditor.controller.pane.AbstractObjectField;
 import fr.osallek.eu4saveeditor.controller.pane.AbstractPropertyEditor;
 import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;

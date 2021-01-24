@@ -1,8 +1,8 @@
 package fr.osallek.eu4saveeditor.controller.mapview;
 
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
-import com.sun.javafx.geom.Rectangle;
 import javafx.geometry.Point2D;
+import javafx.geometry.Rectangle2D;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -13,7 +13,7 @@ public class DrawableProvince {
 
     private final SaveProvince province;
 
-    private List<Rectangle> rectangles;
+    private List<Rectangle2D> rectangles;
 
     private Set<Point2D> borders;
 
@@ -26,7 +26,7 @@ public class DrawableProvince {
             this.rectangles = new ArrayList<>();
         }
 
-        this.rectangles.add(new Rectangle(x, y, width, height));
+        this.rectangles.add(new Rectangle2D(x, y, width, height));
     }
 
     public void addBorder(int x, int y) {
@@ -41,7 +41,7 @@ public class DrawableProvince {
         return province;
     }
 
-    public List<Rectangle> getRectangles() {
+    public List<Rectangle2D> getRectangles() {
         return this.rectangles == null ? new ArrayList<>() : this.rectangles;
     }
 

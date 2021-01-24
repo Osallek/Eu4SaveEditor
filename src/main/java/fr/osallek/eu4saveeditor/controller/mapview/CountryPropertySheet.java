@@ -325,7 +325,7 @@ public class CountryPropertySheet extends VBox {
         this.nameField = new ClearableTextItem(SheetCategory.GENERAL, save.getGame().getLocalisation("LEDGER_NAME"));
         this.nameField.getTextField()
                       .getStylesheets()
-                      .add(getClass().getClassLoader().getResource("styles/propertySheetsStyle.css").toExternalForm());
+                      .add(getClass().getResource("/styles/propertySheetsStyle.css").toExternalForm());
 
         this.wasPlayerField = new CheckBoxItem(SheetCategory.GENERAL, save.getGame().getLocalisationClean("WAS_PLAYER"), false);
 

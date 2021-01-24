@@ -122,7 +122,8 @@ public class CountriesMapView extends AbstractMapView {
         Color color = getOwnerColor(this.mapViewContainer.getDrawableProvinces().get(provinceId).getProvince());
         graphicsContext.setFill(color);
         this.mapViewContainer.getDrawableProvinces().get(provinceId).getRectangles()
-                             .forEach(rectangle -> graphicsContext.fillRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height));
+                             .forEach(rectangle -> graphicsContext.fillRect(rectangle.getMinX(), rectangle.getMinY(), rectangle.getWidth(),
+                                                                            rectangle.getHeight()));
 
         PixelWriter pixelWriter = graphicsContext.getPixelWriter();
         this.mapViewContainer.getDrawableProvinces().get(provinceId).getBorders()

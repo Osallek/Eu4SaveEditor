@@ -1,6 +1,5 @@
 package fr.osallek.eu4saveeditor.controller;
 
-import com.sun.javafx.geom.Rectangle;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.game.Culture;
 import fr.osallek.eu4parser.model.game.TradeGood;
@@ -26,6 +25,7 @@ import javafx.collections.transformation.FilteredList;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.ImageCursor;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
@@ -42,7 +42,6 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.controlsfx.control.MaskerPane;
 import org.slf4j.Logger;
@@ -335,25 +334,21 @@ public class EditorController implements Initializable {
         if (this.provincesCanvas.getWidth() > this.provincesPane.getViewportBounds().getWidth()) {
             if (this.drawableProvinces.get(this.save.getPlayedCountry().getCapitalId()) != null
                 && this.drawableProvinces.get(this.save.getPlayedCountry().getCapitalId()).getRectangles() != null) {
-                Rectangle rectangle = this.drawableProvinces.get(this.save.getPlayedCountry().getCapitalId())
-                                                            .getRectangles()
-                                                            .get(0);
-                this.provincesPane.setHvalue(
-                        this.provincesPane.getHmax() * (rectangle.x / this.provincesCanvas.getWidth()));
+                Rectangle2D rectangle = this.drawableProvinces.get(this.save.getPlayedCountry().getCapitalId()).getRectangles().get(0);
+                this.provincesPane.setHvalue(this.provincesPane.getHmax() * (rectangle.getMinX() / this.provincesCanvas.getWidth()));
 
-                this.provincesPane.setVvalue(
-                        this.provincesPane.getVmax() * (rectangle.y / this.provincesCanvas.getHeight()));
+                this.provincesPane.setVvalue(this.provincesPane.getVmax() * (rectangle.getMinY() / this.provincesCanvas.getHeight()));
             }
         }
 
         if (this.drawableProvinces.get(this.save.getPlayedCountry().getCapitalId()) != null
             && this.drawableProvinces.get(this.save.getPlayedCountry().getCapitalId()).getRectangles() != null) {
-            Rectangle rectangle = this.drawableProvinces.get(this.save.getPlayedCountry().getCapitalId())
-                                                        .getRectangles()
-                                                        .get(0);
+            Rectangle2D rectangle = this.drawableProvinces.get(this.save.getPlayedCountry().getCapitalId())
+                                                          .getRectangles()
+                                                          .get(0);
 
-            onMouseReleasedProvinceImageView(new MouseEvent(MouseEvent.MOUSE_RELEASED, rectangle.x, rectangle.y,
-                                                            rectangle.x, rectangle.y, MouseButton.PRIMARY, 1, false, false,
+            onMouseReleasedProvinceImageView(new MouseEvent(MouseEvent.MOUSE_RELEASED, rectangle.getMinX(), rectangle.getMinY(),
+                                                            rectangle.getMinX(), rectangle.getMinY(), MouseButton.PRIMARY, 1, false, false,
                                                             false, false, true, false, false, false, false, false,
                                                             null));
         }

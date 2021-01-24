@@ -1,7 +1,6 @@
 package fr.osallek.eu4saveeditor.controller.converter;
 
 import fr.osallek.eu4parser.model.game.Religion;
-import fr.osallek.eu4parser.model.save.SaveReligion;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.util.Callback;

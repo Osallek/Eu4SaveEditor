@@ -12,8 +12,8 @@ import fr.osallek.eu4saveeditor.controller.control.ClearableSpinnerInt;
 import fr.osallek.eu4saveeditor.controller.control.TableView2Personalities;
 import fr.osallek.eu4saveeditor.controller.converter.CultureStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.CultureStringConverter;
-import fr.osallek.eu4saveeditor.controller.converter.SaveReligionStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.ReligionStringConverter;
+import fr.osallek.eu4saveeditor.controller.converter.SaveReligionStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
 import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheetSkin;
 import fr.osallek.eu4saveeditor.controller.pane.TableViewDialog;
@@ -90,7 +90,7 @@ public class MonarchPropertySheet extends VBox {
         this.propertySheet.setSkin(this.propertySheetSkin);
 
         this.nameField = new ClearableTextItem(name, this.country.getSave().getGame().getLocalisation("LEDGER_NAME"));
-        this.nameField.getTextField().getStylesheets().add(getClass().getClassLoader().getResource("styles/propertySheetsStyle.css").toExternalForm());
+        this.nameField.getTextField().getStylesheets().add(getClass().getResource("/styles/propertySheetsStyle.css").toExternalForm());
         this.nameField.setValue(ClausewitzUtils.removeQuotes(this.monarch.getName()));
         this.nameField.setSupplier(() -> ClausewitzUtils.removeQuotes(this.monarch.getName()));
         items.add(this.nameField);
