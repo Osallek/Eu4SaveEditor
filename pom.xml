@@ -8,7 +8,6 @@
   <artifactId>Eu4SaveEditor</artifactId>
   <version>1.1.0</version>
   <packaging>jar</packaging>
-<!--  <packaging>jlink</packaging>-->
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -18,6 +17,9 @@
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
     <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
     <maven-jlink.version>3.1.0</maven-jlink.version>
+    <maven-dependency-plugin.version>3.1.2</maven-dependency-plugin.version>
+
+    <moditect.version>1.0.0.Beta2</moditect.version>
 
     <main.class>fr.osallek.eu4saveeditor.Main</main.class>
 
@@ -26,6 +28,9 @@
     <javafx.version>11.0.2</javafx.version>
     <slf4j.version>2.0.0-alpha1</slf4j.version>
     <log4j.version>2.14.0</log4j.version>
+    <commons-lang3.version>3.11</commons-lang3.version>
+    <commons-io.version>2.7</commons-io.version>
+    <commons-collections4.version>4.4</commons-collections4.version>
 
     <eu4-parser.version>1.1.0</eu4-parser.version>
   </properties>
@@ -35,6 +40,12 @@
       <groupId>fr.osallek</groupId>
       <artifactId>eu4-parser</artifactId>
       <version>${eu4-parser.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.controlsfx</groupId>
@@ -68,52 +79,218 @@
     </dependency>
     <dependency>
       <groupId>org.openjfx</groupId>
+      <artifactId>javafx-media</artifactId>
+      <version>${javafx.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
       <artifactId>javafx-fxml</artifactId>
       <version>${javafx.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+      <version>${log4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>${log4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-slf4j18-impl</artifactId>
+      <version>${log4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>${commons-lang3.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-collections4</artifactId>
+      <version>${commons-collections4.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>${commons-io.version}</version>
     </dependency>
   </dependencies>
 
   <build>
-      <plugins>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <version>${maven-compiler-plugin.version}</version>
-        </plugin>
-        <plugin>
-          <artifactId>maven-assembly-plugin</artifactId>
-          <version>${maven-assembly-plugin.version}</version>
-          <executions>
-            <execution>
-              <phase>package</phase>
-              <goals>
-                <goal>single</goal>
-              </goals>
-            </execution>
-          </executions>
-          <configuration>
-            <appendAssemblyId>false</appendAssemblyId>
-            <descriptors>
-              <descriptor>src/assembly/jar-with-dependencies.xml</descriptor>
-              <descriptor>src/assembly/zip.xml</descriptor>
-            </descriptors>
-            <archive>
-              <manifest>
-                <mainClass>${main.class}</mainClass>
-                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-              </manifest>
-            </archive>
-          </configuration>
-        </plugin>
-<!--        <plugin>
-          <artifactId>maven-jlink-plugin</artifactId>
-          <version>${maven-jlink.version}</version>
-          <extensions>true</extensions>
-          <configuration>
-            &lt;!&ndash; configuration elements goes here &ndash;&gt;
-          </configuration>
-        </plugin>-->
-      </plugins>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven-compiler-plugin.version}</version>
+        <configuration>
+          <outputDirectory>${project.build.directory}/modules</outputDirectory>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>${maven-assembly-plugin.version}</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <appendAssemblyId>false</appendAssemblyId>
+          <descriptors>
+            <descriptor>src/assembly/jar-with-dependencies.xml</descriptor>
+            <descriptor>src/assembly/zip.xml</descriptor>
+          </descriptors>
+          <archive>
+            <manifest>
+              <mainClass>${main.class}</mainClass>
+              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>${maven-dependency-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>copy-dependencies</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/modules</outputDirectory>
+              <overWriteReleases>false</overWriteReleases>
+              <overWriteSnapshots>false</overWriteSnapshots>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.moditect</groupId>
+        <artifactId>moditect-maven-plugin</artifactId>
+        <version>${moditect.version}</version>
+        <executions>
+          <execution>
+            <id>add-module-infos</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>add-module-info</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/modules</outputDirectory>
+              <overwriteExistingFiles>true</overwriteExistingFiles>
+              <modules>
+                <module>
+                  <artifact>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-lang3</artifactId>
+                    <version>${commons-lang3.version}</version>
+                  </artifact>
+                  <moduleInfoSource>
+                    module org.apache.commons.lang3 {
+                    requires java.se;
+
+                    exports org.apache.commons.lang3;
+                    exports org.apache.commons.lang3.function;
+                    exports org.apache.commons.lang3.tuple;
+                    }
+                  </moduleInfoSource>
+                </module>
+                <module>
+                  <artifact>
+                    <groupId>commons-io</groupId>
+                    <artifactId>commons-io</artifactId>
+                    <version>${commons-io.version}</version>
+                  </artifact>
+                  <moduleInfoSource>
+                    module org.apache.commons.io {
+                    requires java.se;
+
+                    exports org.apache.commons.io;
+                    }
+                  </moduleInfoSource>
+                </module>
+                <!--                  <module>
+                                    <artifact>
+                                      <groupId>org.slf4j</groupId>
+                                      <artifactId>slf4j-api</artifactId>
+                                    </artifact>
+                                    <moduleInfoSource>
+                                      module slf4j.api {
+                                      exports org.slf4j;
+                                      exports org.slf4j.spi;
+                                      }
+                                    </moduleInfoSource>
+                                  </module>-->
+                <module>
+                  <artifact>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-slf4j18-impl</artifactId>
+                  </artifact>
+                  <moduleInfoSource>
+                    module org.apache.logging.log4j.slf4j {
+                    requires java.se;
+
+                    exports org.apache.logging.slf4j;
+                    }
+                  </moduleInfoSource>
+                </module>
+              </modules>
+            </configuration>
+          </execution>
+          <!--            <execution>-->
+          <!--              <id>create-runtime-image</id>-->
+          <!--              <phase>package</phase>-->
+          <!--              <goals>-->
+          <!--                <goal>create-runtime-image</goal>-->
+          <!--              </goals>-->
+          <!--              <configuration>-->
+          <!--                <modulePath>-->
+          <!--                  <path>${project.build.directory}/modules</path>-->
+          <!--                </modulePath>-->
+          <!--                <modules>-->
+          <!--                  <module>javafx.controls</module>-->
+          <!--                  <module>org.slf4j</module>-->
+          <!--                  <module>java.desktop</module>-->
+          <!--                  <module>javafx.base</module>-->
+          <!--                  <module>javafx.controls</module>-->
+          <!--                  <module>org.controlsfx.controls</module>-->
+          <!--                  <module>javafx.swing</module>-->
+          <!--                  <module>javafx.fxml</module>-->
+          <!--                  <module>javafx.media</module>-->
+          <!--                  <module>org.apache.commons.io</module>-->
+          <!--                  <module>org.apache.logging.log4j</module>-->
+          <!--                  <module>org.apache.commons.collections4</module>-->
+          <!--                  <module>org.apache.commons.lang3</module>-->
+          <!--                  <module>fr.osallek.clausewitzparser</module>-->
+          <!--                  <module>fr.osallek.eu4parser</module>-->
+          <!--                  <module>fr.osallek.eu4saveeditor</module>-->
+          <!--                </modules>-->
+          <!--                <launcher>-->
+          <!--                  <name>Eu4SaveEditor</name>-->
+          <!--                  <module>fr.osallek.eu4saveeditor</module>-->
+          <!--                </launcher>-->
+          <!--                <outputDirectory>-->
+          <!--                  ${project.build.directory}/jlink-image-->
+          <!--                </outputDirectory>-->
+          <!--              </configuration>-->
+          <!--            </execution>-->
+        </executions>
+      </plugin>
+    </plugins>
     <resources>
       <resource>
         <directory>src/main/resources</directory>

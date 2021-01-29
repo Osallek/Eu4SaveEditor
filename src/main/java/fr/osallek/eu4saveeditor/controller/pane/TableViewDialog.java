@@ -62,7 +62,7 @@ public class TableViewDialog<S> extends Dialog<List<S>> {
         dialogPane.setMaxWidth(Double.MAX_VALUE);
         dialogPane.setContent(vBox);
         dialogPane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-        ((Stage) dialogPane.getScene().getWindow()).getIcons().addAll(new Image(Constants.IMAGE_ICON));
+        ((Stage) dialogPane.getScene().getWindow()).getIcons().addAll(new Image(getClass().getResourceAsStream(Constants.IMAGE_ICON)));
         setResultConverter(button -> {
             if (button.getButtonData().isDefaultButton() && !button.getButtonData().isCancelButton()) {
                 return this.tableView2.getItems();
