@@ -19,7 +19,8 @@ public enum MenusI18n {
     CHOOSE_FOLDER("Choose folder", "Choisir le dossier", "Wählen Sie den Ordner", "Elija la carpeta"),
     CHOOSE_FILE("Choose file", "Choisir le fichier", "Wählen Sie die Datei", "Elija el archivo"),
     START_EXTRACT("Start extract", "Démarrer l'extraction", "Extraktion beginnen", "Comienza la extracción"),
-    EXTRACTING("Extracting...", "Extraction en cours...", "Extraktion im Gange...", "Extracción en curso...");
+    EXTRACTING("Extracting...", "Extraction en cours...", "Extraktion im Gange...", "Extracción en curso..."),
+    SEARCH("Search a province or country...", "Rechercher une province ou un pays...", "Suchen Sie eine Provinz oder ein Land...", "Buscar una provincia o país...");
 
     final String english;
 

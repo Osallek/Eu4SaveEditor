@@ -38,7 +38,7 @@ public class ListSelectionViewDialog<S> extends Dialog<List<S>> {
         getDialogPane().setMaxWidth(Double.MAX_VALUE);
         getDialogPane().setContent(vBox);
         getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-        ((Stage) getDialogPane().getScene().getWindow()).getIcons().addAll(new Image(Constants.IMAGE_ICON));
+        ((Stage) getDialogPane().getScene().getWindow()).getIcons().addAll(new Image(getClass().getResourceAsStream(Constants.IMAGE_ICON)));
         setResultConverter(button -> {
             if (button.getButtonData().isDefaultButton() && !button.getButtonData().isCancelButton()) {
                 return this.listSelectionView.getTargetItems();

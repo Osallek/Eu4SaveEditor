@@ -22,11 +22,13 @@ public class DrawableProvince {
     }
 
     public void addRectangle(int x, int y, int width, int height) {
-        if (this.rectangles == null) {
-            this.rectangles = new ArrayList<>();
-        }
+        if (width > 0 && height > 0) {
+            if (this.rectangles == null) {
+                this.rectangles = new ArrayList<>();
+            }
 
-        this.rectangles.add(new Rectangle2D(x, y, width, height));
+            this.rectangles.add(new Rectangle2D(x, y, width, height));
+        }
     }
 
     public void addBorder(int x, int y) {

@@ -8,10 +8,11 @@ module fr.osallek.eu4saveeditor {
     requires org.controlsfx.controls;
     requires javafx.swing;
     requires javafx.fxml;
+    requires javafx.media;
     requires org.apache.commons.io;
     requires org.apache.logging.log4j;
-    requires org.apache.logging.log4j.core;
-    requires org.apache.logging.log4j.slf4j;
+    requires org.apache.commons.collections4;
+    requires org.apache.commons.lang3;
 
     exports fr.osallek.eu4saveeditor;
     exports fr.osallek.eu4saveeditor.common;
@@ -27,5 +28,5 @@ module fr.osallek.eu4saveeditor {
     exports fr.osallek.eu4saveeditor.i18n;
     exports fr.osallek.eu4saveeditor.imagereader;
 
-    opens fr.osallek.eu4saveeditor.controller to javafx.fxml;
+    opens fr.osallek.eu4saveeditor.controller to javafx.fxml, javafx.graphics;
 }
