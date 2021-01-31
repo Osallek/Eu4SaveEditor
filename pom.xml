@@ -131,7 +131,12 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${maven-compiler-plugin.version}</version>
         <configuration>
-          <outputDirectory>${project.build.directory}/modules</outputDirectory>
+          <compilerArgs>
+            <arg>--add-exports</arg>
+            <arg>javafx.base/com.sun.javafx.event=org.controlsfx.controls</arg>
+            <arg>--add-exports</arg>
+            <arg>org.controlsfx.controls/impl.org.controlsfx.autocompletion=fr.osallek.eu4saveeditor</arg>
+          </compilerArgs>
         </configuration>
       </plugin>
       <plugin>
@@ -156,6 +161,9 @@
               <mainClass>${main.class}</mainClass>
               <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
             </manifest>
+            <manifestEntries>
+              <Multi-Release>true</Multi-Release>
+            </manifestEntries>
           </archive>
         </configuration>
       </plugin>
@@ -223,18 +231,6 @@
                     }
                   </moduleInfoSource>
                 </module>
-                <!--                  <module>
-                                    <artifact>
-                                      <groupId>org.slf4j</groupId>
-                                      <artifactId>slf4j-api</artifactId>
-                                    </artifact>
-                                    <moduleInfoSource>
-                                      module slf4j.api {
-                                      exports org.slf4j;
-                                      exports org.slf4j.spi;
-                                      }
-                                    </moduleInfoSource>
-                                  </module>-->
                 <module>
                   <artifact>
                     <groupId>org.apache.logging.log4j</groupId>

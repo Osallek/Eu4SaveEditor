@@ -11,11 +11,14 @@ import fr.osallek.eu4parser.model.save.country.Country;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 import fr.osallek.eu4saveeditor.common.Constants;
 import fr.osallek.eu4saveeditor.common.WriteSaveTask;
+import fr.osallek.eu4saveeditor.controller.converter.ProvinceCountryCallBack;
+import fr.osallek.eu4saveeditor.controller.converter.ProvinceCountryStringConverter;
 import fr.osallek.eu4saveeditor.controller.mapview.DrawableProvince;
 import fr.osallek.eu4saveeditor.controller.mapview.MapViewContainer;
 import fr.osallek.eu4saveeditor.controller.mapview.MapViewType;
 import fr.osallek.eu4saveeditor.controller.pane.ZoomableScrollPane;
 import fr.osallek.eu4saveeditor.i18n.MenusI18n;
+import impl.org.controlsfx.autocompletion.SuggestionProvider;
 import javafx.animation.PauseTransition;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -30,6 +33,7 @@ import javafx.scene.ImageCursor;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
@@ -44,6 +48,8 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.apache.commons.io.FilenameUtils;
 import org.controlsfx.control.MaskerPane;
+import org.controlsfx.control.textfield.AutoCompletionBinding;
+import org.controlsfx.control.textfield.TextFields;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +65,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class EditorController implements Initializable {
 
@@ -119,11 +127,23 @@ public class EditorController implements Initializable {
 
     private ObservableList<TradeNode> tradeNodes;
 
+    private AutoCompletionBinding<Object> autoCompletionBinding;
+
+    private SaveProvince autoCompletedProvince;
+
+    private Country autoCompletedCountry;
+
     @FXML
     private Text title;
 
     @FXML
     private Button saveButton;
+
+    @FXML
+    private TextField searchTextField;
+
+    @FXML
+    private Button searchButton;
 
     @FXML
     private VBox editPane;
@@ -150,6 +170,8 @@ public class EditorController implements Initializable {
 
         this.provincesPane = new ZoomableScrollPane(this.provincesCanvas);
         this.provincesPane.setTooltip(this.tooltip);
+        this.provincesPane.setFitToHeight(true);
+        this.provincesPane.setFitToWidth(true);
         this.provincesPane.setFocusTraversable(true);
         this.provincesPane.setStyle("-fx-focus-color: transparent; -fx-faint-focus-color: transparent;");
 
@@ -178,8 +200,7 @@ public class EditorController implements Initializable {
                 SaveProvince province = this.provincesMap[(int) event.getX()][(int) event.getY()];
 
                 if (province != null) {
-                    this.selectedProvince = province;
-                    this.mapViewContainer.onProvinceSelected(this.selectedProvince);
+                    selectProvince(province);
                 }
             }
         }
@@ -315,6 +336,41 @@ public class EditorController implements Initializable {
             }
 
             this.saveButton.setText(this.save.getGame().getLocalisation("SAVE"));
+            this.searchTextField.setPromptText(MenusI18n.SEARCH.getForDefaultLocale());
+            this.autoCompletionBinding = TextFields.bindAutoCompletion(this.searchTextField,
+                                                                       SuggestionProvider.create(new ProvinceCountryCallBack(),
+                                                                                                 Stream.concat(this.save.getProvinces()
+                                                                                                                        .values()
+                                                                                                                        .stream()
+                                                                                                                        .filter(Predicate.not(SaveProvince::isImpassable)),
+                                                                                                               this.save.getCountries()
+                                                                                                                        .values()
+                                                                                                                        .stream()
+                                                                                                                        .filter(Country::isAlive))
+                                                                                                       .collect(Collectors.toList())),
+                                                                       new ProvinceCountryStringConverter());
+            this.autoCompletionBinding.setOnAutoCompleted(event -> {
+                if (SaveProvince.class.equals(event.getCompletion().getClass())) {
+                    this.autoCompletedProvince = (SaveProvince) event.getCompletion();
+                    this.autoCompletedCountry = null;
+                } else if (Country.class.equals(event.getCompletion().getClass())) {
+                    this.autoCompletedCountry = (Country) event.getCompletion();
+                    this.autoCompletedProvince = null;
+                } else {
+                    this.autoCompletedProvince = null;
+                    this.autoCompletedCountry = null;
+                }
+            });
+
+            this.searchButton.setOnAction(event -> {
+                if (this.autoCompletedProvince != null) {
+                    selectProvince(this.autoCompletedProvince);
+                    moveToProvince(this.autoCompletedProvince);
+                } else if (this.autoCompletedCountry != null) {
+                    selectProvince(this.autoCompletedCountry.getCapital());
+                    moveToProvince(this.autoCompletedCountry.getCapital());
+                }
+            });
 
             this.mapViewContainer = new MapViewContainer(this.provincesMap, this.drawableProvinces, this.provincesCanvas, this.editPane, this.save,
                                                          this.playableCountries, this.countriesAlive, this.cultures, this.religions, this.playableReligions,
@@ -334,10 +390,7 @@ public class EditorController implements Initializable {
         if (this.provincesCanvas.getWidth() > this.provincesPane.getViewportBounds().getWidth()) {
             if (this.drawableProvinces.get(this.save.getPlayedCountry().getCapitalId()) != null
                 && this.drawableProvinces.get(this.save.getPlayedCountry().getCapitalId()).getRectangles() != null) {
-                Rectangle2D rectangle = this.drawableProvinces.get(this.save.getPlayedCountry().getCapitalId()).getRectangles().get(0);
-                this.provincesPane.setHvalue(this.provincesPane.getHmax() * (rectangle.getMinX() / this.provincesCanvas.getWidth()));
-
-                this.provincesPane.setVvalue(this.provincesPane.getVmax() * (rectangle.getMinY() / this.provincesCanvas.getHeight()));
+                moveToProvince(this.save.getPlayedCountry().getCapital());
             }
         }
 
@@ -364,5 +417,37 @@ public class EditorController implements Initializable {
 
     private void setTitle() {
         this.title.setText(this.save.getName() + " (" + PRETTY_DATE_FORMAT.format(this.save.getDate()) + ")");
+    }
+
+    private void moveToProvince(SaveProvince province) {
+        double x;
+        double y;
+        double provinceY = this.provincesCanvas.getHeight() - province.getCityY();
+
+        if (province.getCityX() < this.provincesPane.getWidth() / 2) {
+            x = 0;
+        } else if (province.getCityX() > (this.provincesCanvas.getWidth() - this.provincesPane.getWidth() / 2)) {
+            x = 1;
+        } else {
+            x = (province.getCityX() - this.provincesPane.getWidth() / 2) / (this.provincesCanvas.getWidth() - this.provincesPane.getWidth());
+        }
+
+        if (provinceY < this.provincesPane.getHeight() / 2) {
+            y = 0;
+        } else if (provinceY > (this.provincesCanvas.getHeight() - this.provincesPane.getHeight() / 2)) {
+            y = 1;
+        } else {
+            y = (provinceY - this.provincesPane.getHeight() / 2) / (this.provincesCanvas.getHeight() - this.provincesPane.getHeight());
+        }
+
+        this.provincesPane.setHvalue(this.provincesPane.getHmax() * x);
+        this.provincesPane.setVvalue(this.provincesPane.getVmax() * y);
+    }
+
+    private void selectProvince(SaveProvince province) {
+        if (this.selectedProvince != province) {
+            this.selectedProvince = province;
+            this.mapViewContainer.onProvinceSelected(this.selectedProvince);
+        }
     }
 }
