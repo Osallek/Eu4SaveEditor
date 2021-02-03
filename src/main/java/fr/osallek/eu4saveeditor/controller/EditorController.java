@@ -1,5 +1,6 @@
 package fr.osallek.eu4saveeditor.controller;
 
+import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.game.Culture;
 import fr.osallek.eu4parser.model.game.TradeGood;
@@ -181,7 +182,7 @@ public class EditorController implements Initializable {
                 SaveProvince province = this.provincesMap[(int) this.mouseProvinceImageX][(int) this.mouseProvinceImageY];
 
                 if (province != null) {
-                    this.tooltip.setText(province.getName() + " (" + province.getId() + ")");
+                    this.tooltip.setText(ClausewitzUtils.removeQuotes(province.getName()) + " (" + province.getId() + ")");
                     this.tooltip.setAnchorX(this.mouseSceneX + 20);
                     this.tooltip.setAnchorY(this.mouseSceneY - 20);
                 }

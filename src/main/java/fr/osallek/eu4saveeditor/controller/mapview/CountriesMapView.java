@@ -148,7 +148,8 @@ public class CountriesMapView extends AbstractMapView {
     @Override
     public String updateTitle(SaveProvince selectedProvince) {
         if (this.countryButton.isSelected()) {
-            return selectedProvince.getOwner() == null ? getTitle(selectedProvince) : selectedProvince.getOwner().getLocalizedName();
+            return selectedProvince.getOwner() == null ? getTitle(selectedProvince)
+                                                       : (selectedProvince.getOwner().getLocalizedName() + " (" + selectedProvince.getOwner().getTag() + ")");
         } else if (this.provinceButton.isSelected()) {
             return getTitle(selectedProvince);
         }
@@ -194,9 +195,10 @@ public class CountriesMapView extends AbstractMapView {
 
     private String getTitle(SaveProvince saveProvince) {
         String title = ClausewitzUtils.removeQuotes(saveProvince.getName());
+        title += " (" + saveProvince.getId() + ")";
 
         if (saveProvince.getOwner() != null) {
-            title += " (" + saveProvince.getController().getLocalizedName() + ")";
+            title += " - " + saveProvince.getController().getLocalizedName();
         }
 
         return title;
