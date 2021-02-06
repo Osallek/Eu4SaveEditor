@@ -198,7 +198,7 @@ public class CountriesMapView extends AbstractMapView {
         title += " (" + saveProvince.getId() + ")";
 
         if (saveProvince.getOwner() != null) {
-            title += " - " + saveProvince.getController().getLocalizedName();
+            title += " - " + saveProvince.getOwner().getLocalizedName();
         }
 
         return title;
