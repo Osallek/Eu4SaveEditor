@@ -1,6 +1,7 @@
 package fr.osallek.eu4saveeditor.controller.pane;
 
 import fr.osallek.eu4parser.model.save.Save;
+import fr.osallek.eu4saveeditor.Eu4SaveEditor;
 import fr.osallek.eu4saveeditor.common.Constants;
 import fr.osallek.eu4saveeditor.controller.control.CustomListSelectionView;
 import javafx.geometry.Pos;
@@ -38,7 +39,7 @@ public class ListSelectionViewDialog<S> extends Dialog<List<S>> {
         getDialogPane().setMaxWidth(Double.MAX_VALUE);
         getDialogPane().setContent(vBox);
         getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-        ((Stage) getDialogPane().getScene().getWindow()).getIcons().addAll(new Image(getClass().getResourceAsStream(Constants.IMAGE_ICON)));
+        ((Stage) getDialogPane().getScene().getWindow()).getIcons().addAll(new Image(Eu4SaveEditor.class.getResourceAsStream(Constants.IMAGE_ICON)));
         setResultConverter(button -> {
             if (button.getButtonData().isDefaultButton() && !button.getButtonData().isCancelButton()) {
                 return this.listSelectionView.getTargetItems();

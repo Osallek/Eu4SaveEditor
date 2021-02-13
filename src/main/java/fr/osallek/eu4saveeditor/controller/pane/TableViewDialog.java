@@ -1,6 +1,7 @@
 package fr.osallek.eu4saveeditor.controller.pane;
 
 import fr.osallek.eu4parser.model.save.Save;
+import fr.osallek.eu4saveeditor.Eu4SaveEditor;
 import fr.osallek.eu4saveeditor.common.Constants;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.ObservableList;
@@ -62,7 +63,7 @@ public class TableViewDialog<S> extends Dialog<List<S>> {
         dialogPane.setMaxWidth(Double.MAX_VALUE);
         dialogPane.setContent(vBox);
         dialogPane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-        ((Stage) dialogPane.getScene().getWindow()).getIcons().addAll(new Image(getClass().getResourceAsStream(Constants.IMAGE_ICON)));
+        ((Stage) dialogPane.getScene().getWindow()).getIcons().addAll(new Image(Eu4SaveEditor.class.getResourceAsStream(Constants.IMAGE_ICON)));
         setResultConverter(button -> {
             if (button.getButtonData().isDefaultButton() && !button.getButtonData().isCancelButton()) {
                 return this.tableView2.getItems();

@@ -1,6 +1,7 @@
 package fr.osallek.eu4saveeditor.controller;
 
 import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
+import fr.osallek.eu4saveeditor.Eu4SaveEditor;
 import fr.osallek.eu4saveeditor.common.Config;
 import fr.osallek.eu4saveeditor.common.Constants;
 import fr.osallek.eu4saveeditor.common.FileProperty;
@@ -25,16 +26,18 @@ import javafx.stage.Window;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.jar.Manifest;
 
 public class HomeController implements Initializable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HomeController.class);
 
-    private final FXMLLoader editorLoader = new FXMLLoader(getClass().getResource(Constants.TEMPLATE_EDITOR));
+    private final FXMLLoader editorLoader = new FXMLLoader(Eu4SaveEditor.class.getResource(Constants.TEMPLATE_EDITOR));
 
     private final DirectoryChooser gameDirectoryChooser = new DirectoryChooser();
 
@@ -42,11 +45,11 @@ public class HomeController implements Initializable {
 
     private final FileChooser saveFileChooser = new FileChooser();
 
-    private FileProperty gameDirectory;
+    private final FileProperty gameDirectory = new FileProperty(this, "gameDirectory");
 
-    private FileProperty modDirectory;
+    private final FileProperty modDirectory = new FileProperty(this, "modDirectory");
 
-    private FileProperty saveFile;
+    private final FileProperty saveFile = new FileProperty(this, "saveFile");
 
     private boolean canOpenGameDirectoryChoose = true;
 
@@ -95,10 +98,6 @@ public class HomeController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        this.gameDirectory = new FileProperty(this, "gameDirectory");
-        this.modDirectory = new FileProperty(this, "modDirectory");
-        this.saveFile = new FileProperty(this, "saveFile");
-
         this.selectGameFolderText.setText(MenusI18n.SELECT_GAME_FOLDER_DESC.getForDefaultLocale());
         this.selectModFolderText.setText(MenusI18n.SELECT_MOD_FOLDER_DESC.getForDefaultLocale());
         this.selectSaveFileText.setText(MenusI18n.SELECT_SAVE_FILE_DESC.getForDefaultLocale());
@@ -128,8 +127,45 @@ public class HomeController implements Initializable {
         this.saveFileChooser.setInitialDirectory(Config.getSaveFolder());
         this.selectedSaveFile.setText(Config.getSaveFile() == null ? null : Config.getSaveFile().getAbsolutePath());
 
-        this.versionText.setText("Version " + getClass().getPackage().getImplementationVersion() + " | Supported game version: " + Constants.SUPPORTED_GAME_VERSION);
+        try {
+            this.versionText.setText("Version "
+                                     + new Manifest(Eu4SaveEditor.class.getResourceAsStream("META-INF/MANIFEST.MF")).getMainAttributes()
+                                                                                                                     .getValue("Implementation-Version")
+                                     + " | Supported game version: " + Constants.SUPPORTED_GAME_VERSION);
+        } catch (IOException ignored) {
+        }
+
         enableStartExtractButton();
+    }
+
+    public boolean setGameDirectory(String gameDirectory) {
+        File file = new File(gameDirectory);
+
+        if (file.exists() && file.canRead() && file.isDirectory()) {
+            return chooseGameDirectory(file);
+        }
+
+        return false;
+    }
+
+    public boolean setModDirectory(String modDirectory) {
+        File file = new File(modDirectory);
+
+        if (file.exists() && file.canRead() && file.isDirectory()) {
+            return chooseModDirectory(file);
+        }
+
+        return false;
+    }
+
+    public boolean setSelectedSaveFile(String selectedSaveFile) {
+        File file = new File(selectedSaveFile);
+
+        if (file.exists() && file.canRead() && file.isFile()) {
+            return chooseSaveFile(file);
+        }
+
+        return false;
     }
 
     @FXML
@@ -138,15 +174,21 @@ public class HomeController implements Initializable {
             Node eventSource = (Node) event.getSource();
             Window actionStage = eventSource.getScene().getWindow();
 
-            this.gameDirectory.set(this.gameDirectoryChooser.showDialog(actionStage));
+            chooseGameDirectory(this.gameDirectoryChooser.showDialog(actionStage));
+        }
+    }
 
-            if (this.gameDirectory.getValue() == null) {
-                this.startExtractButton.setDisable(true);
-                this.selectedGameDirectory.setText(null);
-            } else {
-                enableStartExtractButton();
-                this.selectedGameDirectory.setText(this.gameDirectory.getValue().getPath());
-            }
+    private boolean chooseGameDirectory(File file) {
+        this.gameDirectory.set(file);
+
+        if (this.gameDirectory.getValue() == null) {
+            this.startExtractButton.setDisable(true);
+            this.selectedGameDirectory.setText(null);
+            return false;
+        } else {
+            enableStartExtractButton();
+            this.selectedGameDirectory.setText(this.gameDirectory.getValue().getPath());
+            return true;
         }
     }
 
@@ -156,15 +198,21 @@ public class HomeController implements Initializable {
             Node eventSource = (Node) event.getSource();
             Window actionStage = eventSource.getScene().getWindow();
 
-            this.modDirectory.set(this.modDirectoryChooser.showDialog(actionStage));
+            chooseModDirectory(this.modDirectoryChooser.showDialog(actionStage));
+        }
+    }
 
-            if (this.modDirectory.getValue() == null) {
-                this.startExtractButton.setDisable(true);
-                this.selectedModDirectory.setText(null);
-            } else {
-                enableStartExtractButton();
-                this.selectedModDirectory.setText(this.modDirectory.getValue().getPath());
-            }
+    private boolean chooseModDirectory(File file) {
+        this.modDirectory.set(file);
+
+        if (this.modDirectory.getValue() == null) {
+            this.startExtractButton.setDisable(true);
+            this.selectedModDirectory.setText(null);
+            return false;
+        } else {
+            enableStartExtractButton();
+            this.selectedModDirectory.setText(this.modDirectory.getValue().getPath());
+            return true;
         }
     }
 
@@ -174,7 +222,7 @@ public class HomeController implements Initializable {
             Node eventSource = (Node) event.getSource();
             Window actionStage = eventSource.getScene().getWindow();
 
-            this.saveFile.set(this.saveFileChooser.showOpenDialog(actionStage));
+            chooseSaveFile(this.saveFileChooser.showOpenDialog(actionStage));
 
             if (this.saveFile.getValue() == null) {
                 this.startExtractButton.setDisable(true);
@@ -186,8 +234,22 @@ public class HomeController implements Initializable {
         }
     }
 
+    private boolean chooseSaveFile(File file) {
+        this.saveFile.set(file);
+
+        if (this.saveFile.getValue() == null) {
+            this.startExtractButton.setDisable(true);
+            this.selectedSaveFile.setText(null);
+            return false;
+        } else {
+            enableStartExtractButton();
+            this.selectedSaveFile.setText(this.saveFile.getValue().getPath());
+            return true;
+        }
+    }
+
     @FXML
-    private void handleStartExtract(ActionEvent actionEvent) {
+    public void handleStartExtract(ActionEvent actionEvent) {
         this.startExtractButton.setDisable(true);
         this.canOpenGameDirectoryChoose = false;
         this.canOpenModDirectoryChoose = false;

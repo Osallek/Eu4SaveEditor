@@ -72,3 +72,4 @@ build/
 
 logs.txt.lck
 /config.txt
+/.gradle/

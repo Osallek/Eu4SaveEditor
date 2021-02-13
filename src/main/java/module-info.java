@@ -13,6 +13,7 @@ module fr.osallek.eu4saveeditor {
     requires org.apache.logging.log4j;
     requires org.apache.commons.collections4;
     requires org.apache.commons.lang3;
+    requires org.apache.logging.log4j.core;
 
     exports fr.osallek.eu4saveeditor;
     exports fr.osallek.eu4saveeditor.common;
