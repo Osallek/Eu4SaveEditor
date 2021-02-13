@@ -3,3 +3,5 @@
  */
 
 rootProject.name = 'Eu4SaveEditor'
+
+includeBuild '../Eu4-Parser'

@@ -15,6 +15,7 @@
  */
 package fr.osallek.eu4saveeditor.controller.pane;
 
+import fr.osallek.eu4saveeditor.Eu4SaveEditor;
 import javafx.scene.control.Control;
 
 abstract class CustomControlsFXControl extends Control {
@@ -41,7 +42,7 @@ abstract class CustomControlsFXControl extends Control {
          * For more information please see RT-40658
          */
         if (stylesheet == null) {
-            stylesheet = clazz.getResource("/styles/" + fileName).toExternalForm();
+            stylesheet = Eu4SaveEditor.class.getResource("styles/" + fileName).toExternalForm();
         }
 
         return stylesheet;

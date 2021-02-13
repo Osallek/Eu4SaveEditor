@@ -7,6 +7,7 @@ import fr.osallek.eu4parser.model.save.SaveReligion;
 import fr.osallek.eu4parser.model.save.country.Country;
 import fr.osallek.eu4parser.model.save.country.Heir;
 import fr.osallek.eu4parser.model.save.country.Monarch;
+import fr.osallek.eu4saveeditor.Eu4SaveEditor;
 import fr.osallek.eu4saveeditor.controller.control.ClearableComboBox;
 import fr.osallek.eu4saveeditor.controller.control.ClearableSpinnerInt;
 import fr.osallek.eu4saveeditor.controller.control.TableView2Personalities;
@@ -90,7 +91,7 @@ public class MonarchPropertySheet extends VBox {
         this.propertySheet.setSkin(this.propertySheetSkin);
 
         this.nameField = new ClearableTextItem(name, this.country.getSave().getGame().getLocalisation("LEDGER_NAME"));
-        this.nameField.getTextField().getStylesheets().add(getClass().getResource("/styles/propertySheetsStyle.css").toExternalForm());
+        this.nameField.getTextField().getStylesheets().add(Eu4SaveEditor.class.getResource("styles/propertySheetsStyle.css").toExternalForm());
         this.nameField.setValue(ClausewitzUtils.removeQuotes(this.monarch.getName()));
         this.nameField.setSupplier(() -> ClausewitzUtils.removeQuotes(this.monarch.getName()));
         items.add(this.nameField);

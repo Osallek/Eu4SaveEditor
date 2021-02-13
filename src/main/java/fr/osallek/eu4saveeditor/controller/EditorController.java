@@ -14,12 +14,12 @@ import fr.osallek.eu4saveeditor.common.Constants;
 import fr.osallek.eu4saveeditor.common.WriteSaveTask;
 import fr.osallek.eu4saveeditor.controller.converter.ProvinceCountryCallBack;
 import fr.osallek.eu4saveeditor.controller.converter.ProvinceCountryStringConverter;
+import fr.osallek.eu4saveeditor.controller.converter.SuggestionProvider;
 import fr.osallek.eu4saveeditor.controller.mapview.DrawableProvince;
 import fr.osallek.eu4saveeditor.controller.mapview.MapViewContainer;
 import fr.osallek.eu4saveeditor.controller.mapview.MapViewType;
 import fr.osallek.eu4saveeditor.controller.pane.ZoomableScrollPane;
 import fr.osallek.eu4saveeditor.i18n.MenusI18n;
-import impl.org.controlsfx.autocompletion.SuggestionProvider;
 import javafx.animation.PauseTransition;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -160,7 +160,7 @@ public class EditorController implements Initializable {
         this.saveFileChooser.setTitle(MenusI18n.SAVE_AS.getForDefaultLocale());
         this.saveFileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(MenusI18n.EU4_EXT_DESC.getForDefaultLocale(), "*.eu4"));
 
-        if (Constants.DOCUMENTS_FOLDER.exists()) {
+        if (Constants.EU4_DOCUMENTS_FOLDER.exists()) {
             this.saveFileChooser.setInitialDirectory(Constants.SAVES_FOLDER);
         }
 

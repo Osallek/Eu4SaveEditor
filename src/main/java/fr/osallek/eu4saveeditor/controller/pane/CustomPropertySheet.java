@@ -15,6 +15,7 @@
  */
 package fr.osallek.eu4saveeditor.controller.pane;
 
+import fr.osallek.eu4saveeditor.Eu4SaveEditor;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -207,7 +208,7 @@ public class CustomPropertySheet extends CustomControlsFXControl {
      */
     @Override
     public String getUserAgentStylesheet() {
-        return getUserAgentStylesheet(CustomPropertySheet.class, "propertysheet.css");
+        return Eu4SaveEditor.class.getResource("styles/propertysheet.css").toExternalForm();
     }
 
 

@@ -1,11 +1,15 @@
 package fr.osallek.eu4saveeditor.common;
 
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Properties;
 
 public class Config {
@@ -18,7 +22,7 @@ public class Config {
 
     private static final Properties PROPERTIES = new Properties();
 
-    private static final String CONFIG_FILE_PATH = "config.txt";
+    private static final Path CONFIG_FILE_PATH = Constants.EDITOR_FOLDER.toPath().resolve("config").resolve("config.txt");
     private static final String GAME_FOLDER_PROP = "game_folder";
     private static final String MOD_FOLDER_PROP = "mod_folder";
     private static final String SAVE_FOLDER_PROP = "save_folder";
@@ -136,7 +140,7 @@ public class Config {
     }
 
     private static void load() {
-        File file = new File(CONFIG_FILE_PATH);
+        File file = CONFIG_FILE_PATH.toFile();
 
         if (!file.exists()) {
             if (Constants.DEFAULT_INSTALLATION_FOLDER.exists() && Constants.DEFAULT_INSTALLATION_FOLDER.canRead()) {
@@ -154,7 +158,9 @@ public class Config {
             store();
         } else {
             try {
-                PROPERTIES.load(Files.newInputStream(file.toPath()));
+                try (InputStream inputStream = Files.newInputStream(file.toPath())) {
+                    PROPERTIES.load(inputStream);
+                }
 
                 if (!PROPERTIES.containsKey(GAME_FOLDER_PROP) && Constants.DEFAULT_INSTALLATION_FOLDER.exists() && Constants.DEFAULT_INSTALLATION_FOLDER.canRead()) {
                     PROPERTIES.setProperty(GAME_FOLDER_PROP, Constants.DEFAULT_INSTALLATION_FOLDER.getAbsolutePath());
@@ -180,14 +186,16 @@ public class Config {
     }
 
     private static void store() {
-        File file = new File(CONFIG_FILE_PATH);
+        File file = CONFIG_FILE_PATH.toFile();
 
         try {
             if (!file.exists()) {
-                file.createNewFile();
+                FileUtils.forceMkdirParent(file);
             }
 
-            PROPERTIES.store(Files.newOutputStream(file.toPath()), null);
+            try (OutputStream outputStream = Files.newOutputStream(file.toPath())) {
+                PROPERTIES.store(outputStream, null);
+            }
         } catch (IOException e) {
             LOGGER.error("An error occurred while writing config file: {}", e.getMessage());
         }

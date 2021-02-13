@@ -17,6 +17,7 @@ import fr.osallek.eu4parser.model.save.SaveReligion;
 import fr.osallek.eu4parser.model.save.country.Country;
 import fr.osallek.eu4parser.model.save.country.LeaderType;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
+import fr.osallek.eu4saveeditor.Eu4SaveEditor;
 import fr.osallek.eu4saveeditor.common.Eu4SaveEditorUtils;
 import fr.osallek.eu4saveeditor.controller.control.ClearableCheckComboBox;
 import fr.osallek.eu4saveeditor.controller.control.ClearableColorPicker;
@@ -325,7 +326,7 @@ public class CountryPropertySheet extends VBox {
         this.nameField = new ClearableTextItem(SheetCategory.GENERAL, save.getGame().getLocalisation("LEDGER_NAME"));
         this.nameField.getTextField()
                       .getStylesheets()
-                      .add(getClass().getResource("/styles/propertySheetsStyle.css").toExternalForm());
+                      .add(Eu4SaveEditor.class.getResource("styles/propertySheetsStyle.css").toExternalForm());
 
         this.wasPlayerField = new CheckBoxItem(SheetCategory.GENERAL, save.getGame().getLocalisationClean("WAS_PLAYER"), false);
 
