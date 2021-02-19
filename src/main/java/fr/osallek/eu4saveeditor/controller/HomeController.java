@@ -128,10 +128,9 @@ public class HomeController implements Initializable {
         this.selectedSaveFile.setText(Config.getSaveFile() == null ? null : Config.getSaveFile().getAbsolutePath());
 
         try {
-            this.versionText.setText("Version "
-                                     + new Manifest(Eu4SaveEditor.class.getResourceAsStream("META-INF/MANIFEST.MF")).getMainAttributes()
-                                                                                                                     .getValue("Implementation-Version")
-                                     + " | Supported game version: " + Constants.SUPPORTED_GAME_VERSION);
+            Manifest manifest = new Manifest(Eu4SaveEditor.class.getResourceAsStream("META-INF/MANIFEST.MF"));
+            this.versionText.setText("Version " + manifest.getMainAttributes().getValue("Implementation-Version")
+                                     + " | Supported game version: " + manifest.getMainAttributes().getValue("Supported-Version"));
         } catch (IOException ignored) {
         }
 

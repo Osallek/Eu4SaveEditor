@@ -8,8 +8,6 @@ public final class Constants {
     private Constants() {
     }
 
-    public static final String SUPPORTED_GAME_VERSION = "1.30.4";
-
     //Args
     public static final String GAME_FOLDER_ARG= "game_folder";
     public static final String MODS_FOLDER_ARG= "mods_folder";

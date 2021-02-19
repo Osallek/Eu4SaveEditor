@@ -40,9 +40,10 @@ dependencies {
 group = 'fr.osallek'
 version = '1.1.1'
 description = 'Eu4SaveEditor'
+def supported_version = '1.30.4'
 
 processResources {
-    filter(ReplaceTokens, tokens: [version: project.version])
+    filter(ReplaceTokens, tokens: [version: project.version, supported_version: supported_version])
 }
 
 java {
@@ -143,8 +144,11 @@ task createImage(type: JlinkTask, dependsOn: [copyModules, copyOutput]) {
 }
 
 task copyResourcesJlink(type: Copy, dependsOn: [createImage]) {
+    from("${projectDir}/src/assembly/jlink") {
+        filter(ReplaceTokens, tokens: [supported_version: supported_version])
+    }
+
     into "${buildDir}/image"
-    from "${projectDir}/src/assembly/jlink"
 }
 
 task createJlinkZip(type: Zip, dependsOn: [copyResourcesJlink]) {
@@ -173,6 +177,7 @@ task customFatJar(type: Jar, dependsOn: [copyResourcesFat]) {
     manifest {
         attributes 'Main-Class': 'fr.osallek.eu4saveeditor.Main'
         attributes 'Implementation-Version': project.version
+        attributes 'Supported-Version': supported_version
     }
 
     from {
