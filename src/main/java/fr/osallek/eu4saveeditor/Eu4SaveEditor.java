@@ -8,6 +8,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +29,8 @@ public class Eu4SaveEditor extends Application {
     private static String modsFolderArg;
 
     private static String saveFileArg;
+
+    public static boolean override;
 
     private boolean validArgs = true;
 
@@ -84,6 +87,7 @@ public class Eu4SaveEditor extends Application {
         gameFolderArg = Eu4SaveEditorUtils.readArg(args, Constants.GAME_FOLDER_ARG);
         modsFolderArg = Eu4SaveEditorUtils.readArg(args, Constants.MODS_FOLDER_ARG);
         saveFileArg = Eu4SaveEditorUtils.readArg(args, Constants.SAVE_FILE_ARG);
+        override = BooleanUtils.toBoolean(Eu4SaveEditorUtils.readArg(args, Constants.OVERRIDE_ARG));
         launch();
     }
 }

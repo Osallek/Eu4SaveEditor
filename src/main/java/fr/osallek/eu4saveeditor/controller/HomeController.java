@@ -273,7 +273,7 @@ public class HomeController implements Initializable {
                 this.progressBar.progressProperty().unbind();
                 this.progressBar.setProgress(1);
                 Parent editorNode = this.editorLoader.load();
-                ((EditorController) this.editorLoader.getController()).load(task.getValue(), this.saveFile.get().getParentFile());
+                ((EditorController) this.editorLoader.getController()).load(task.getValue(), this.saveFile.get());
                 this.startExtractButton.getScene().setRoot(editorNode);
                 ((EditorController) this.editorLoader.getController()).maximize();
             } catch (IOException e) {

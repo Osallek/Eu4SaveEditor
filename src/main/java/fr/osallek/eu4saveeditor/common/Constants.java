@@ -9,9 +9,10 @@ public final class Constants {
     }
 
     //Args
-    public static final String GAME_FOLDER_ARG= "game_folder";
-    public static final String MODS_FOLDER_ARG= "mods_folder";
-    public static final String SAVE_FILE_ARG= "save_file";
+    public static final String GAME_FOLDER_ARG = "game_folder";
+    public static final String MODS_FOLDER_ARG = "mods_folder";
+    public static final String SAVE_FILE_ARG = "save_file";
+    public static final String OVERRIDE_ARG = "override";
 
     //Templates
     public static final String TEMPLATES_PATH = "templates/";

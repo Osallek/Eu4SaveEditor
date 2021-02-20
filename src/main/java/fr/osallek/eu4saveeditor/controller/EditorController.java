@@ -10,6 +10,7 @@ import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.SaveReligion;
 import fr.osallek.eu4parser.model.save.country.Country;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
+import fr.osallek.eu4saveeditor.Eu4SaveEditor;
 import fr.osallek.eu4saveeditor.common.Constants;
 import fr.osallek.eu4saveeditor.common.WriteSaveTask;
 import fr.osallek.eu4saveeditor.controller.converter.ProvinceCountryCallBack;
@@ -79,6 +80,8 @@ public class EditorController implements Initializable {
     private static final DateTimeFormatter PRETTY_DATE_FORMAT = DateTimeFormatter.ofPattern("dd MMMM yyyy");
 
     private final FileChooser saveFileChooser = new FileChooser();
+
+    private File saveFile;
 
     private Save save;
 
@@ -225,7 +228,7 @@ public class EditorController implements Initializable {
     @FXML
     public void onClickExportButton(MouseEvent mouseEvent) {
         if (MouseButton.PRIMARY.equals(mouseEvent.getButton())) {
-            File file = this.saveFileChooser.showSaveDialog(((Node) mouseEvent.getSource()).getScene().getWindow());
+            File file = Eu4SaveEditor.override ? this.saveFile : this.saveFileChooser.showSaveDialog(((Node) mouseEvent.getSource()).getScene().getWindow());
 
             if (file != null) {
                 WriteSaveTask task = new WriteSaveTask(this.save, file, Eu4Language.getByLocale(Locale.getDefault()));
@@ -253,13 +256,14 @@ public class EditorController implements Initializable {
         }
     }
 
-    public void load(Save save, File parentFile) {
+    public void load(Save save, File saveFile) {
         this.save = save;
+        this.saveFile = saveFile;
         int extIndex = FilenameUtils.indexOfExtension(this.save.getName());
         this.saveFileChooser.setInitialFileName(this.save.getName().substring(0, extIndex) + "_edit" + this.save.getName().substring(extIndex));
 
-        if (parentFile != null && parentFile.isDirectory() && parentFile.isAbsolute()) {
-            this.saveFileChooser.setInitialDirectory(parentFile);
+        if (saveFile != null && saveFile.getParentFile() != null && saveFile.getParentFile().isDirectory() && saveFile.getParentFile().isAbsolute()) {
+            this.saveFileChooser.setInitialDirectory(saveFile.getParentFile());
         }
 
         try {
