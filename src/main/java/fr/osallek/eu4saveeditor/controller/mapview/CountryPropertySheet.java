@@ -1822,7 +1822,9 @@ public class CountryPropertySheet extends VBox {
                                                                                 () -> this.country.removeModifier(saveModifier.getModifier())));
         }
 
-        if (this.country.getFlags().getAll().size() != this.flags.size() || this.flags.stream().anyMatch(StringDate::isChanged)) {
+        if ((this.country.getFlags() != null && CollectionUtils.isNotEmpty(this.flags))
+            || (this.country.getFlags() != null && this.country.getFlags().getAll().size() != this.flags.size())
+            || this.flags.stream().anyMatch(StringDate::isChanged)) {
             this.country.getFlags()
                         .getAll()
                         .forEach((s, date) -> this.flags.stream()
@@ -1838,7 +1840,9 @@ public class CountryPropertySheet extends VBox {
                                                                          () -> this.country.getFlags().remove(s)));
         }
 
-        if (this.country.getHiddenFlags().getAll().size() != this.hiddenFlags.size() || this.hiddenFlags.stream().anyMatch(StringDate::isChanged)) {
+        if ((this.country.getHiddenFlags() != null && CollectionUtils.isNotEmpty(this.hiddenFlags))
+            || (this.country.getHiddenFlags() != null && this.country.getHiddenFlags().getAll().size() != this.hiddenFlags.size())
+            || this.hiddenFlags.stream().anyMatch(StringDate::isChanged)) {
             this.country.getHiddenFlags()
                         .getAll()
                         .forEach((s, date) -> this.hiddenFlags.stream()
