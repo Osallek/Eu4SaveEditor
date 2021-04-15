@@ -3,6 +3,7 @@ package fr.osallek.eu4saveeditor.controller.pane;
 import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4saveeditor.Eu4SaveEditor;
 import fr.osallek.eu4saveeditor.common.Constants;
+import fr.osallek.eu4saveeditor.common.Copy;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Button;
@@ -22,8 +23,9 @@ import org.controlsfx.glyphfont.Glyph;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
-public class TableViewDialog<S> extends Dialog<List<S>> {
+public class TableViewDialog<S extends Copy<S>> extends Dialog<List<S>> {
 
     private final TableView<S> tableView2;
 
@@ -53,7 +55,7 @@ public class TableViewDialog<S> extends Dialog<List<S>> {
         hBox.getChildren().add(this.addButton);
         vBox.getChildren().add(hBox);
 
-        resetButton.setOnAction(event -> this.tableView2.getItems().setAll(clearSupplier.get()));
+        resetButton.setOnAction(event -> this.tableView2.getItems().setAll(clearSupplier.get().stream().map(Copy::copy).collect(Collectors.toList())));
         this.addButton.setOnAction(event -> this.tableView2.getItems().add(supplier.apply(getItems())));
 
         setDisableAddProperty(disableAdd);

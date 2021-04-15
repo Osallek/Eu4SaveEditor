@@ -2,11 +2,12 @@ package fr.osallek.eu4saveeditor.controller.object;
 
 import fr.osallek.eu4parser.model.game.SubjectType;
 import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4saveeditor.common.Copy;
 
 import java.time.LocalDate;
 import java.util.Objects;
 
-public class CountrySubject {
+public class CountrySubject extends Copy<CountrySubject> {
 
     private final Country overlord;
 
@@ -35,6 +36,11 @@ public class CountrySubject {
         this.subject = other.subject;
         this.subjectType = other.subjectType;
         this.startDate = other.startDate;
+    }
+
+    @Override
+    public CountrySubject copy() {
+        return new CountrySubject(this);
     }
 
     public Country getOverlord() {

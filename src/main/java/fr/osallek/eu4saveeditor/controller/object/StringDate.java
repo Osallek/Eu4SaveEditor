@@ -1,10 +1,12 @@
 package fr.osallek.eu4saveeditor.controller.object;
 
+import fr.osallek.eu4saveeditor.common.Copy;
+
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.Objects;
 
-public class StringDate {
+public class StringDate extends Copy<StringDate> {
 
     private String name;
 
@@ -28,6 +30,11 @@ public class StringDate {
         this.name = entry.getKey();
         this.date = entry.getValue();
         this.changed = false;
+    }
+
+    @Override
+    public StringDate copy() {
+        return new StringDate(this);
     }
 
     public String getName() {

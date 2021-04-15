@@ -1,9 +1,11 @@
 package fr.osallek.eu4saveeditor.controller.object;
 
+import fr.osallek.eu4saveeditor.common.Copy;
+
 import java.time.LocalDate;
 import java.util.Objects;
 
-public class Loan {
+public class Loan extends Copy<Loan> {
 
     private final Integer id;
 
@@ -36,6 +38,11 @@ public class Loan {
         this.interest = other.interest;
         this.expiryDate = other.expiryDate;
         this.changed = other.changed;
+    }
+
+    @Override
+    public Loan copy() {
+        return new Loan(this);
     }
 
     public Integer getId() {

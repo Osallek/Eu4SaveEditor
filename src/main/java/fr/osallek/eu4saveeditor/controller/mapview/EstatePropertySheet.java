@@ -98,7 +98,7 @@ public class EstatePropertySheet extends VBox {
                                                                            .findFirst()
                                                                            .get(),
                                                                 this.country.getSave().getDate()),
-                                          () -> this.privileges);
+                                          () -> this.privileges.stream().map(Privilege::new).collect(Collectors.toCollection(FXCollections::observableArrayList)));
             dialog.setDisableAddProperty(tableView2Privilege.disableAddPropertyProperty());
             Optional<List<Privilege>> privilegeList = dialog.showAndWait();
 

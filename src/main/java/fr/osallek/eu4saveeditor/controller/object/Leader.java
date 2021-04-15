@@ -4,10 +4,11 @@ import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.eu4parser.model.game.LeaderPersonality;
 import fr.osallek.eu4parser.model.save.country.Country;
 import fr.osallek.eu4parser.model.save.country.LeaderType;
+import fr.osallek.eu4saveeditor.common.Copy;
 
 import java.time.LocalDate;
 
-public class Leader {
+public class Leader extends Copy<Leader> {
 
     private final Country country;
 
@@ -71,6 +72,11 @@ public class Leader {
         this.personality = other.personality;
         this.birthDate = other.birthDate;
         this.changed = other.changed;
+    }
+
+    @Override
+    public Leader copy() {
+        return new Leader(this);
     }
 
     public boolean personalityAllowed(LeaderPersonality leaderPersonality) {

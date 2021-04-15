@@ -1,11 +1,12 @@
 package fr.osallek.eu4saveeditor.controller.object;
 
 import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4saveeditor.common.Copy;
 
 import java.time.LocalDate;
 import java.util.Objects;
 
-public class Rival {
+public class Rival extends Copy<Rival> {
 
     private final Country source;
 
@@ -33,6 +34,11 @@ public class Rival {
         this.target = other.target;
         this.date = other.date;
         this.changed = other.changed;
+    }
+
+    @Override
+    public Rival copy() {
+        return new Rival(this);
     }
 
     public Country getSource() {

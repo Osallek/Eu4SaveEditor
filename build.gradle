@@ -38,7 +38,7 @@ dependencies {
 }
 
 group = 'fr.osallek'
-version = '1.1.4'
+version = '1.1.5'
 description = 'Eu4SaveEditor'
 def supported_version = '1.30.6'
 

@@ -1,11 +1,12 @@
 package fr.osallek.eu4saveeditor.controller.object;
 
 import fr.osallek.eu4parser.model.game.Policy;
+import fr.osallek.eu4saveeditor.common.Copy;
 
 import java.time.LocalDate;
 import java.util.Objects;
 
-public class ActivePolicy {
+public class ActivePolicy extends Copy<ActivePolicy> {
 
     private Policy policy;
 
@@ -28,6 +29,11 @@ public class ActivePolicy {
         this.policy = other.policy;
         this.date = other.date;
         this.changed = other.changed;
+    }
+
+    @Override
+    public ActivePolicy copy() {
+        return new ActivePolicy(this);
     }
 
     public Policy getPolicy() {

@@ -1,10 +1,12 @@
 package fr.osallek.eu4saveeditor.controller.object;
 
 import fr.osallek.eu4parser.model.game.IdeaGroup;
+import fr.osallek.eu4parser.model.save.Id;
+import fr.osallek.eu4saveeditor.common.Copy;
 
 import java.util.Map;
 
-public class Idea {
+public class Idea extends Copy<Idea> {
 
     private IdeaGroup ideaGroup;
 
@@ -32,6 +34,11 @@ public class Idea {
     public Idea(Map.Entry<IdeaGroup, Integer> entry) {
         this.ideaGroup = entry.getKey();
         this.level = entry.getValue();
+    }
+
+    @Override
+    public Idea copy() {
+        return new Idea(this);
     }
 
     public IdeaGroup getIdeaGroup() {

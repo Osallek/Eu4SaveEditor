@@ -2,10 +2,11 @@ package fr.osallek.eu4saveeditor.controller.object;
 
 import fr.osallek.eu4parser.model.game.EstatePrivilege;
 import fr.osallek.eu4parser.model.save.country.EstateInteraction;
+import fr.osallek.eu4saveeditor.common.Copy;
 
 import java.time.LocalDate;
 
-public class Privilege {
+public class Privilege extends Copy<Privilege> {
 
     private EstatePrivilege estatePrivilege;
 
@@ -29,6 +30,11 @@ public class Privilege {
         this.estatePrivilege = other.estatePrivilege;
         this.startDate = other.startDate;
         this.changed = other.changed;
+    }
+
+    @Override
+    public Privilege copy() {
+        return new Privilege(this);
     }
 
     public EstatePrivilege getPrivilege() {

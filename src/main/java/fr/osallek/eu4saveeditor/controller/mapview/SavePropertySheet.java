@@ -6,7 +6,6 @@ import fr.osallek.eu4parser.model.game.Event;
 import fr.osallek.eu4parser.model.game.ImperialReform;
 import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.SaveReligion;
-import fr.osallek.eu4parser.model.save.changeprices.ChangePrice;
 import fr.osallek.eu4parser.model.save.changeprices.ChangePriceGood;
 import fr.osallek.eu4parser.model.save.country.Country;
 import fr.osallek.eu4parser.model.save.empire.HreReligionStatus;
@@ -17,7 +16,7 @@ import fr.osallek.eu4saveeditor.controller.control.ClearableComboBox;
 import fr.osallek.eu4saveeditor.controller.control.CustomListSelectionView;
 import fr.osallek.eu4saveeditor.controller.control.ListSelectionViewImperialReform;
 import fr.osallek.eu4saveeditor.controller.control.RequiredComboBox;
-import fr.osallek.eu4saveeditor.controller.control.TableView2ChangePrice;
+import fr.osallek.eu4saveeditor.controller.control.TableView2PriceChange;
 import fr.osallek.eu4saveeditor.controller.converter.CountryStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.CountryStringConverter;
 import fr.osallek.eu4saveeditor.controller.converter.CustomNationDifficultyStringCellFactory;
@@ -31,6 +30,7 @@ import fr.osallek.eu4saveeditor.controller.converter.HreReligionStatusStringCell
 import fr.osallek.eu4saveeditor.controller.converter.HreReligionStatusStringConverter;
 import fr.osallek.eu4saveeditor.controller.converter.ProvinceStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.ProvinceStringConverter;
+import fr.osallek.eu4saveeditor.controller.object.PriceChange;
 import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
 import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheetSkin;
 import fr.osallek.eu4saveeditor.controller.pane.ListSelectionViewDialog;
@@ -68,7 +68,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -76,7 +75,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -134,7 +132,7 @@ public class SavePropertySheet extends VBox {
 
     private final List<ClearableComboBoxItem<SaveProvince>> institutionOriginFields;
 
-    private final Map<String, List<ChangePrice>> goodsChangePrices;
+    private final Map<String, List<PriceChange>> goodsChangePrices;
 
     private ClearableComboBoxItem<Country> hreEmperor;
 
@@ -357,7 +355,7 @@ public class SavePropertySheet extends VBox {
         this.goodsChangePrices = new HashMap<>();
         for (int i = 0; i < this.save.getChangePrices().getGoods().size(); i++) {
             ChangePriceGood good = this.save.getChangePrices().getGood(i);
-            this.goodsChangePrices.put(good.getName(), new ArrayList<>(good.getChangePrices()));
+            this.goodsChangePrices.put(good.getName(), new ArrayList<>(good.getChangePrices().stream().map(PriceChange::new).collect(Collectors.toList())));
             Text priceText = new Text(goodToPrice(good));
             Text modifsText = new Text(goodToModifs(good));
 
@@ -366,25 +364,18 @@ public class SavePropertySheet extends VBox {
                                                    save.getGame().getLocalisationClean("TSI_CURR_MOD_BY"));
 
             buttonItem.getButton().setOnAction(event -> {
-                Function<ObservableList<ChangePrice>, ChangePrice> supplier = (list) -> {
-                    ChangePrice changePrice = new ChangePrice(good.getName() + "_modifier_" + (this.goodsChangePrices.get(good.getName()).size() + 1), 0,
-                                                              LocalDate.now());
-                    this.goodsChangePrices.get(good.getName()).add(changePrice);
-                    return changePrice;
-                };
-
-                TableViewDialog<ChangePrice> dialog = new TableViewDialog<>(this.save,
-                                                                            new TableView2ChangePrice(this.goodsChangePrices.get(good.getName()), this.save),
+                TableViewDialog<PriceChange> dialog = new TableViewDialog<>(this.save,
+                                                                            new TableView2PriceChange(this.goodsChangePrices.get(good.getName()), this.save),
                                                                             this.save.getGame().getLocalisationClean("TSI_CURR_MOD_BY"),
                                                                             null,
-                                                                            good::getChangePrices);
+                                                                            () -> good.getChangePrices().stream().map(PriceChange::new).collect(Collectors.toList()));
                 dialog.setDisableAddProperty(new SimpleBooleanProperty(true));
-                Optional<List<ChangePrice>> changePrices = dialog.showAndWait();
+                Optional<List<PriceChange>> changePrices = dialog.showAndWait();
 
                 if (changePrices.isPresent()) {
                     this.goodsChangePrices.put(good.getName(), changePrices.get());
                 } else {
-                    this.goodsChangePrices.put(good.getName(), good.getChangePrices());
+                    this.goodsChangePrices.put(good.getName(), good.getChangePrices().stream().map(PriceChange::new).collect(Collectors.toList()));
                 }
 
                 priceText.setText(goodToPrice(good));
@@ -762,7 +753,7 @@ public class SavePropertySheet extends VBox {
         this.goodsChangePrices.clear();
         this.save.getChangePrices()
                  .getGoods()
-                 .forEach((name, changePriceGood) -> this.goodsChangePrices.put(name, new ArrayList<>(changePriceGood.getChangePrices())));
+                 .forEach((name, changePriceGood) -> this.goodsChangePrices.put(name, new ArrayList<>(changePriceGood.getChangePrices().stream().map(PriceChange::new).collect(Collectors.toList()))));
 
         //HRE
         if (!this.save.getHre().dismantled()) {
@@ -906,7 +897,7 @@ public class SavePropertySheet extends VBox {
         if (!this.goodsChangePrices.isEmpty()) {
             this.goodsChangePrices.forEach((name, changePrices) -> {
                 if (!changePrices.equals(this.save.getChangePrices().getGood(name).getChangePrices())) {
-                    this.save.getChangePrices().getGood(name).setChangePrices(changePrices);
+                    this.save.getChangePrices().getGood(name).setChangePrices(changePrices.stream().map(PriceChange::toChangePrice).collect(Collectors.toList()));
                 }
             });
         }
@@ -978,7 +969,7 @@ public class SavePropertySheet extends VBox {
     private String goodToModifs(ChangePriceGood good) {
         double modifiersSum = this.goodsChangePrices.get(good.getName())
                                                     .stream()
-                                                    .mapToDouble(ChangePrice::getValue)
+                                                    .mapToDouble(PriceChange::getValue)
                                                     .sum();
 
         return "("
@@ -991,7 +982,7 @@ public class SavePropertySheet extends VBox {
     private String goodToPrice(ChangePriceGood good) {
         double modifiersSum = this.goodsChangePrices.get(good.getName())
                                                     .stream()
-                                                    .mapToDouble(ChangePrice::getValue)
+                                                    .mapToDouble(PriceChange::getValue)
                                                     .sum();
 
         return BigDecimal.valueOf(good.getBasicPrice())

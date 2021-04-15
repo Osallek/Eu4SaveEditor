@@ -2,10 +2,11 @@ package fr.osallek.eu4saveeditor.controller.object;
 
 import fr.osallek.eu4parser.model.save.SaveReligion;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
+import fr.osallek.eu4saveeditor.common.Copy;
 
 import java.util.Objects;
 
-public class ReformationCenter {
+public class ReformationCenter extends Copy<ReformationCenter> {
 
     private final SaveReligion religion;
 
@@ -28,6 +29,11 @@ public class ReformationCenter {
         this.religion = other.religion;
         this.province = other.province;
         this.changed = other.changed;
+    }
+
+    @Override
+    public ReformationCenter copy() {
+        return new ReformationCenter(this);
     }
 
     public SaveReligion getReligion() {

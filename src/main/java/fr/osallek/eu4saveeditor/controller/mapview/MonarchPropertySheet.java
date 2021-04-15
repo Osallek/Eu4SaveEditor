@@ -15,6 +15,7 @@ import fr.osallek.eu4saveeditor.controller.converter.CultureStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.CultureStringConverter;
 import fr.osallek.eu4saveeditor.controller.converter.ReligionStringConverter;
 import fr.osallek.eu4saveeditor.controller.converter.SaveReligionStringCellFactory;
+import fr.osallek.eu4saveeditor.controller.object.Personality;
 import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
 import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheetSkin;
 import fr.osallek.eu4saveeditor.controller.pane.TableViewDialog;
@@ -69,7 +70,7 @@ public class MonarchPropertySheet extends VBox {
 
     private final ButtonItem personalitiesButton;
 
-    private final ObservableList<RulerPersonality> personalities = FXCollections.observableArrayList();
+    private final ObservableList<Personality> personalities = FXCollections.observableArrayList();
 
     private final ValidationSupport validationSupport;
 
@@ -162,7 +163,11 @@ public class MonarchPropertySheet extends VBox {
             this.claimField = null;
         }
 
-        this.personalities.setAll(this.monarch.getPersonalities() == null ? new ArrayList<>() : this.monarch.getPersonalities().getPersonalities());
+        this.personalities.setAll(this.monarch.getPersonalities() == null ? new ArrayList<>() : this.monarch.getPersonalities()
+                                                                                                            .getPersonalities()
+                                                                                                            .stream()
+                                                                                                            .map(Personality::new)
+                                                                                                            .collect(Collectors.toList()));
         this.personalitiesButton = new ButtonItem(name, null, this.country.getSave().getGame().getLocalisationClean("LEDGER_PERSONALITIES"), 2);
         this.personalitiesButton.getButton().setOnAction(event -> {
             TableView2Personalities view2Personalities = new TableView2Personalities(this.country, this.monarch, this.personalities,
@@ -170,9 +175,9 @@ public class MonarchPropertySheet extends VBox {
                                                                                                  .getGame()
                                                                                                  .getRulerPersonalities()
                                                                                                  .stream()
-                                                                                                 .collect(Collectors.toCollection(
-                                                                                                         FXCollections::observableArrayList)));
-            TableViewDialog<RulerPersonality> dialog =
+                                                                                                 .map(Personality::new)
+                                                                                                 .collect(Collectors.toCollection(FXCollections::observableArrayList)));
+            TableViewDialog<Personality> dialog =
                     new TableViewDialog<>(this.country.getSave(),
                                           view2Personalities,
                                           this.country.getSave().getGame().getLocalisationClean("LEDGER_PERSONALITIES"),
@@ -180,13 +185,14 @@ public class MonarchPropertySheet extends VBox {
                                                               .getGame()
                                                               .getRulerPersonalities()
                                                               .stream()
+                                                              .map(Personality::new)
                                                               .filter(personality -> list.stream().noneMatch(i -> i.equals(personality)))
-                                                              .filter(personality -> personality.isMonarchValid(monarch))
+                                                              .filter(personality -> personality.getRulerPersonality().isMonarchValid(monarch))
                                                               .findFirst()
                                                               .get(),
                                           () -> this.personalities);
             dialog.setDisableAddProperty(view2Personalities.disableAddPropertyProperty());
-            Optional<List<RulerPersonality>> rulerPersonalities = dialog.showAndWait();
+            Optional<List<Personality>> rulerPersonalities = dialog.showAndWait();
 
             rulerPersonalities.ifPresent(this.personalities::setAll);
         });
@@ -233,18 +239,19 @@ public class MonarchPropertySheet extends VBox {
         }
 
         if ((this.monarch.getPersonalities() == null && CollectionUtils.isNotEmpty(this.personalities))
-            || (this.monarch.getPersonalities() != null && !Objects.equals(this.monarch.getPersonalities().getPersonalities(), this.personalities))) {
+            || (this.monarch.getPersonalities() != null
+                && !Objects.equals(this.monarch.getPersonalities().getPersonalities().stream().map(Personality::new).collect(Collectors.toList()), this.personalities))) {
             if (this.monarch.getPersonalities() != null) {
                 this.monarch.getPersonalities()
                             .getPersonalities()
                             .forEach(personality -> this.personalities.stream()
-                                                                      .filter(personality::equals)
+                                                                      .filter(p -> p.getRulerPersonality().equals(personality))
                                                                       .findFirst()
                                                                       .ifPresentOrElse(this.personalities::remove,
                                                                                        () -> this.monarch.removePersonality(personality)));
             }
 
-            this.personalities.forEach(this.monarch::addPersonality);
+            this.personalities.stream().map(Personality::getRulerPersonality).forEach(this.monarch::addPersonality);
         }
     }
 
