@@ -24,6 +24,7 @@ import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ButtonItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableComboBoxItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableDatePickerItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderIntItem;
+import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSpinnerItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableTextItem;
 import fr.osallek.eu4saveeditor.controller.validator.CustomGraphicValidationDecoration;
@@ -66,7 +67,7 @@ public class MonarchPropertySheet extends VBox {
 
     private final ClearableDatePickerItem birthDateField;
 
-    private ClearableSliderIntItem claimField;
+    private ClearableSliderItem claimField;
 
     private final ButtonItem personalitiesButton;
 
@@ -156,8 +157,8 @@ public class MonarchPropertySheet extends VBox {
         items.add(this.birthDateField);
 
         if (Heir.class.equals(this.monarch.getClass()) && ((Heir) this.monarch).getClaim() != null) {
-            this.claimField = new ClearableSliderIntItem(name, this.country.getSave().getGame().getLocalisationClean("legitimacy"), 0, 100,
-                                                         ((Heir) this.monarch).getClaim(), ((Heir) this.monarch)::getClaim);
+            this.claimField = new ClearableSliderItem(name, this.country.getSave().getGame().getLocalisationClean("legitimacy"), 0, 100,
+                                                      ((Heir) this.monarch).getClaim(), ((Heir) this.monarch)::getClaim);
             items.add(this.claimField);
         } else {
             this.claimField = null;
@@ -234,8 +235,8 @@ public class MonarchPropertySheet extends VBox {
             this.monarch.setBirthDate(this.birthDateField.getTrueValue());
         }
 
-        if (this.claimField != null && !Objects.deepEquals(((Heir) this.monarch).getClaim(), this.claimField.getIntValue())) {
-            ((Heir) this.monarch).setClaim(this.claimField.getIntValue());
+        if (this.claimField != null && !Objects.deepEquals(((Heir) this.monarch).getClaim(), this.claimField.getDoubleValue())) {
+            ((Heir) this.monarch).setClaim(this.claimField.getDoubleValue());
         }
 
         if ((this.monarch.getPersonalities() == null && CollectionUtils.isNotEmpty(this.personalities))
