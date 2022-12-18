@@ -1,12 +1,11 @@
 package fr.osallek.eu4saveeditor.controller.control;
 
+import java.util.function.Supplier;
 import javafx.scene.Node;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.layout.Priority;
 import javafx.util.StringConverter;
-
-import java.util.function.Supplier;
 
 public class ClearableSpinnerDouble extends ClearableSpinner<Double> {
 

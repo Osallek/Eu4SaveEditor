@@ -2,15 +2,14 @@ package fr.osallek.eu4saveeditor.controller.object;
 
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.eu4parser.model.game.LeaderPersonality;
-import fr.osallek.eu4parser.model.save.country.Country;
 import fr.osallek.eu4parser.model.save.country.LeaderType;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4saveeditor.common.Copy;
-
 import java.time.LocalDate;
 
 public class Leader extends Copy<Leader> {
 
-    private final Country country;
+    private final SaveCountry country;
 
     private final Integer id;
 
@@ -45,7 +44,7 @@ public class Leader extends Copy<Leader> {
         this.birthDate = leader.getBirthDate();
     }
 
-    public Leader(Country country, String name, LeaderType type, int manuever, int fire, int shock, int siege, LeaderPersonality personality,
+    public Leader(SaveCountry country, String name, LeaderType type, int manuever, int fire, int shock, int siege, LeaderPersonality personality,
                   LocalDate birthDate) {
         this.country = country;
         this.id = null;

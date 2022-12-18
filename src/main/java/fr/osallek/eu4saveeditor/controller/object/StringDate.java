@@ -1,7 +1,6 @@
 package fr.osallek.eu4saveeditor.controller.object;
 
 import fr.osallek.eu4saveeditor.common.Copy;
-
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.Objects;

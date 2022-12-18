@@ -1,8 +1,7 @@
 package fr.osallek.eu4saveeditor.controller.converter;
 
-import javafx.util.StringConverter;
-
 import java.util.Locale;
+import javafx.util.StringConverter;
 
 public class DoubleStringConverter extends StringConverter<Double> {
 

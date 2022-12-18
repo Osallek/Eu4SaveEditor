@@ -2,15 +2,14 @@ package fr.osallek.eu4saveeditor.controller.propertyeditor.item;
 
 import fr.osallek.eu4saveeditor.controller.control.SelectableGridView;
 import fr.osallek.eu4saveeditor.i18n.SheetCategory;
+import java.io.File;
+import java.util.Optional;
+import java.util.function.Function;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
-
-import java.io.File;
-import java.util.Optional;
-import java.util.function.Function;
 
 public class SelectableGridViewItem<U> implements CustomItem<U> {
 

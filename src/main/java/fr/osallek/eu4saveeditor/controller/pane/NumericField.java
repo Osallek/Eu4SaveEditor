@@ -15,14 +15,13 @@
  */
 package fr.osallek.eu4saveeditor.controller.pane;
 
+import java.math.BigInteger;
 import javafx.beans.binding.NumberExpression;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.IndexRange;
 import javafx.scene.control.TextField;
-
-import java.math.BigInteger;
 
 /*
  * TODO replace this with proper API when it becomes available:

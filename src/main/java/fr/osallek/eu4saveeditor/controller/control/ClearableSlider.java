@@ -1,5 +1,6 @@
 package fr.osallek.eu4saveeditor.controller.control;
 
+import java.util.function.DoubleSupplier;
 import javafx.beans.property.DoubleProperty;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -11,8 +12,6 @@ import javafx.scene.layout.Priority;
 import javafx.util.StringConverter;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
-
-import java.util.function.DoubleSupplier;
 
 public class ClearableSlider extends HBox {
 

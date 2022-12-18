@@ -1,5 +1,6 @@
 package fr.osallek.eu4saveeditor.controller.propertyeditor.item;
 
+import java.util.Optional;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
@@ -11,8 +12,6 @@ import javafx.scene.control.ListView;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import org.controlsfx.control.CheckComboBox;
-
-import java.util.Optional;
 
 public class CheckComboBoxItem<U> implements CustomItem<U> {
 

@@ -1,7 +1,9 @@
 package fr.osallek.eu4saveeditor.controller.mapview;
 
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.country.SaveEstate;
+import fr.osallek.eu4saveeditor.common.Eu4SaveEditorUtils;
 import fr.osallek.eu4saveeditor.controller.control.TableView2Privilege;
 import fr.osallek.eu4saveeditor.controller.object.Privilege;
 import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
@@ -11,6 +13,11 @@ import fr.osallek.eu4saveeditor.controller.propertyeditor.CustomPropertyEditorFa
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ButtonItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderItem;
 import fr.osallek.eu4saveeditor.controller.validator.CustomGraphicValidationDecoration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import javafx.beans.binding.DoubleExpression;
 import javafx.beans.property.DoubleProperty;
 import javafx.collections.FXCollections;
@@ -21,15 +28,9 @@ import org.controlsfx.validation.ValidationSupport;
 import org.controlsfx.validation.decoration.CompoundValidationDecoration;
 import org.controlsfx.validation.decoration.StyleClassValidationDecoration;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 public class EstatePropertySheet extends VBox {
 
-    private final Country country;
+    private final SaveCountry country;
 
     private final SaveEstate estate;
 
@@ -49,7 +50,7 @@ public class EstatePropertySheet extends VBox {
 
     private final List<DoubleProperty> countryEstatesTerritory = FXCollections.observableArrayList();
 
-    public EstatePropertySheet(Country country, SaveEstate estate) {
+    public EstatePropertySheet(SaveCountry country, SaveEstate estate) {
         this.country = country;
         this.estate = estate;
         this.propertySheet = new CustomPropertySheet();
@@ -63,13 +64,13 @@ public class EstatePropertySheet extends VBox {
         this.propertySheetSkin = new CustomPropertySheetSkin(this.propertySheet);
         this.propertySheet.setSkin(this.propertySheetSkin);
 
-        this.loyaltyField = new ClearableSliderItem(this.estate.getEstateGame().getLocalizedName(),
-                                                    this.country.getSave().getGame().getLocalisation("LOYALTY"),
+        this.loyaltyField = new ClearableSliderItem(Eu4SaveEditorUtils.localize(this.estate.getEstateGame().getName(), this.country.getSave().getGame()),
+                                                    this.country.getSave().getGame().getLocalisationClean("LOYALTY", Eu4Language.getDefault()),
                                                     0, 100, this.estate.getLoyalty(), this.estate::getLoyalty);
         items.add(this.loyaltyField);
 
-        this.territoryField = new ClearableSliderItem(this.estate.getEstateGame().getLocalizedName(),
-                                                      this.country.getSave().getGame().getLocalisation("TERRITORY"),
+        this.territoryField = new ClearableSliderItem(Eu4SaveEditorUtils.localize(this.estate.getEstateGame().getName(), this.country.getSave().getGame()),
+                                                      this.country.getSave().getGame().getLocalisationClean("TERRITORY", Eu4Language.getDefault()),
                                                       0, 100, this.estate.getTerritory(), this.estate::getTerritory);
         this.territoryField.getObservableDoubleValue().addListener((observable, oldValue, newValue) -> {
             if ((oldValue.doubleValue() == 100d || newValue.doubleValue() == 100d || !Objects.equals(oldValue, newValue))
@@ -80,8 +81,8 @@ public class EstatePropertySheet extends VBox {
         items.add(this.territoryField);
 
         this.privileges = FXCollections.observableArrayList(this.estate.getGrantedPrivileges().stream().map(Privilege::new).collect(Collectors.toList()));
-        this.privilegeButton = new ButtonItem(this.estate.getEstateGame().getLocalizedName(), null,
-                                              country.getSave().getGame().getLocalisationClean("PRIVILEGE_PICKER_TITLE"), 2);
+        this.privilegeButton = new ButtonItem(Eu4SaveEditorUtils.localize(this.estate.getEstateGame().getName(), this.country.getSave().getGame()), null,
+                                              country.getSave().getGame().getLocalisationClean("PRIVILEGE_PICKER_TITLE", Eu4Language.getDefault()), 2);
         this.privilegeButton.getButton().setOnAction(event -> {
             TableView2Privilege tableView2Privilege = new TableView2Privilege(this.country, this.estate, this.privileges,
                                                                               FXCollections.observableArrayList(
@@ -89,7 +90,7 @@ public class EstatePropertySheet extends VBox {
             TableViewDialog<Privilege> dialog =
                     new TableViewDialog<>(this.country.getSave(),
                                           tableView2Privilege,
-                                          this.country.getSave().getGame().getLocalisationClean("PRIVILEGE_PICKER_TITLE"),
+                                          this.country.getSave().getGame().getLocalisationClean("PRIVILEGE_PICKER_TITLE", Eu4Language.getDefault()),
                                           list -> new Privilege(this.estate.getEstateGame()
                                                                            .getPrivileges()
                                                                            .values()
@@ -98,7 +99,9 @@ public class EstatePropertySheet extends VBox {
                                                                            .findFirst()
                                                                            .get(),
                                                                 this.country.getSave().getDate()),
-                                          () -> this.privileges.stream().map(Privilege::new).collect(Collectors.toCollection(FXCollections::observableArrayList)));
+                                          () -> this.privileges.stream()
+                                                               .map(Privilege::new)
+                                                               .collect(Collectors.toCollection(FXCollections::observableArrayList)));
             dialog.setDisableAddProperty(tableView2Privilege.disableAddPropertyProperty());
             Optional<List<Privilege>> privilegeList = dialog.showAndWait();
 

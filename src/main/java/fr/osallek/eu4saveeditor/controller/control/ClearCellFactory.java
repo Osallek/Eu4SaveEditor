@@ -1,5 +1,6 @@
 package fr.osallek.eu4saveeditor.controller.control;
 
+import java.util.function.Function;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableCell;
@@ -8,8 +9,6 @@ import javafx.scene.layout.HBox;
 import javafx.util.Callback;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
-
-import java.util.function.Function;
 
 public class ClearCellFactory<T> extends TableCell<T, Void> {
 

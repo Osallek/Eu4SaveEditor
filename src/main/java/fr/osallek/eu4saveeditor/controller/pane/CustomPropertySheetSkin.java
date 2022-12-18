@@ -18,6 +18,11 @@ package fr.osallek.eu4saveeditor.controller.pane;
 import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheet.Item;
 import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheet.Mode;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.CustomItem;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.Insets;
@@ -30,25 +35,17 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.Tooltip;
-import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.stage.PopupWindow;
-import org.controlsfx.control.GridCell;
 import org.controlsfx.control.SegmentedButton;
 import org.controlsfx.control.action.Action;
 import org.controlsfx.control.action.ActionUtils;
 import org.controlsfx.control.textfield.TextFields;
 import org.controlsfx.property.editor.PropertyEditor;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 public class CustomPropertySheetSkin extends SkinBase<CustomPropertySheet> {
 

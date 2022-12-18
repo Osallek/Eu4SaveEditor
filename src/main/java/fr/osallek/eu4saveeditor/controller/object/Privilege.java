@@ -3,7 +3,7 @@ package fr.osallek.eu4saveeditor.controller.object;
 import fr.osallek.eu4parser.model.game.EstatePrivilege;
 import fr.osallek.eu4parser.model.save.country.EstateInteraction;
 import fr.osallek.eu4saveeditor.common.Copy;
-
+import fr.osallek.eu4saveeditor.common.Eu4SaveEditorUtils;
 import java.time.LocalDate;
 
 public class Privilege extends Copy<Privilege> {
@@ -65,6 +65,6 @@ public class Privilege extends Copy<Privilege> {
 
     @Override
     public String toString() {
-        return this.estatePrivilege.getLocalizedName();
+        return Eu4SaveEditorUtils.localize(this.estatePrivilege.getName(), this.estatePrivilege.getGame());
     }
 }

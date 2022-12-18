@@ -1,30 +1,29 @@
 package fr.osallek.eu4saveeditor.controller.object;
 
 import fr.osallek.eu4parser.model.game.SubjectType;
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4saveeditor.common.Copy;
-
 import java.time.LocalDate;
 import java.util.Objects;
 
 public class CountrySubject extends Copy<CountrySubject> {
 
-    private final Country overlord;
+    private final SaveCountry overlord;
 
-    private Country subject;
+    private SaveCountry subject;
 
     private SubjectType subjectType;
 
     private LocalDate startDate;
 
-    public CountrySubject(Country subject) {
+    public CountrySubject(SaveCountry subject) {
         this.subject = subject;
         this.overlord = this.subject.getOverlord();
         this.subjectType = this.subject.getSubjectType();
         this.startDate = this.subject.getSubjectStartDate();
     }
 
-    public CountrySubject(Country overlord, Country subject, SubjectType subjectType, LocalDate startDate) {
+    public CountrySubject(SaveCountry overlord, SaveCountry subject, SubjectType subjectType, LocalDate startDate) {
         this.overlord = overlord;
         this.subject = subject;
         this.subjectType = subjectType;
@@ -43,15 +42,15 @@ public class CountrySubject extends Copy<CountrySubject> {
         return new CountrySubject(this);
     }
 
-    public Country getOverlord() {
+    public SaveCountry getOverlord() {
         return overlord;
     }
 
-    public Country getSubject() {
+    public SaveCountry getSubject() {
         return subject;
     }
 
-    public void setSubject(Country subject) {
+    public void setSubject(SaveCountry subject) {
         this.subject = subject;
     }
 

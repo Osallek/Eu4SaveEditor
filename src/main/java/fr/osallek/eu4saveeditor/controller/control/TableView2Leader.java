@@ -2,11 +2,17 @@ package fr.osallek.eu4saveeditor.controller.control;
 
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.game.LeaderPersonality;
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.save.country.LeaderType;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
+import fr.osallek.eu4saveeditor.common.Eu4SaveEditorUtils;
 import fr.osallek.eu4saveeditor.controller.converter.LeaderPersonalityStringConverter;
 import fr.osallek.eu4saveeditor.controller.converter.LeaderTypeStringConverter;
 import fr.osallek.eu4saveeditor.controller.object.Leader;
+import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -15,29 +21,26 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.util.converter.IntegerStringConverter;
 
-import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 public class TableView2Leader extends TableView<Leader> {
 
-    public TableView2Leader(Country country, ObservableList<Leader> leaders) {
-        TableColumn<Leader, String> name = new TableColumn<>(country.getSave().getGame().getLocalisation("NAME"));
+    public TableView2Leader(SaveCountry country, ObservableList<Leader> leaders) {
+        TableColumn<Leader, String> name = new TableColumn<>(country.getSave().getGame().getLocalisationClean("NAME", Eu4Language.getDefault()));
         name.setCellValueFactory(p -> p.getValue() == null ? null : new ReadOnlyObjectWrapper<>(p.getValue().getName()));
         name.setCellFactory(TextFieldTableCell.forTableColumn());
         name.setOnEditCommit(event -> event.getRowValue().setName(event.getNewValue()));
         name.setPrefWidth(150);
         name.setStyle("-fx-alignment: CENTER-LEFT");
 
-        TableColumn<Leader, LeaderType> type = new TableColumn<>(country.getSave().getGame().getLocalisationCleanNoPunctuation("LEDGER_TYPE"));
+        TableColumn<Leader, LeaderType> type = new TableColumn<>(country.getSave()
+                                                                        .getGame()
+                                                                        .getLocalisationCleanNoPunctuation("LEDGER_TYPE", Eu4Language.getDefault()));
         type.setCellValueFactory(p -> p.getValue() == null ? null : new ReadOnlyObjectWrapper<>(p.getValue().getType()));
         type.setCellFactory(ComboBoxTableCell.forTableColumn(new LeaderTypeStringConverter(country.getSave().getGame()), LeaderType.values()));
         type.setOnEditCommit(event -> event.getRowValue().setType(event.getNewValue()));
         type.setPrefWidth(100);
         type.setStyle("-fx-alignment: CENTER-LEFT");
 
-        TableColumn<Leader, Integer> fire = new TableColumn<>(country.getSave().getGame().getLocalisationCleanNoPunctuation("FIRE"));
+        TableColumn<Leader, Integer> fire = new TableColumn<>(country.getSave().getGame().getLocalisationCleanNoPunctuation("FIRE", Eu4Language.getDefault()));
         fire.setCellValueFactory(p -> p.getValue() == null ? null : new ReadOnlyObjectWrapper<>(p.getValue().getFire()));
         fire.setCellFactory(SpinnerTableCell.forTableColumn(0, 6, 1, new IntegerStringConverter()));
         fire.setOnEditCommit(event -> event.getRowValue().setFire(event.getNewValue()));
@@ -45,7 +48,9 @@ public class TableView2Leader extends TableView<Leader> {
         fire.setEditable(true);
         fire.setStyle("-fx-alignment: CENTER-LEFT");
 
-        TableColumn<Leader, Integer> shock = new TableColumn<>(country.getSave().getGame().getLocalisationCleanNoPunctuation("SHOCK"));
+        TableColumn<Leader, Integer> shock = new TableColumn<>(country.getSave()
+                                                                      .getGame()
+                                                                      .getLocalisationCleanNoPunctuation("SHOCK", Eu4Language.getDefault()));
         shock.setCellValueFactory(p -> p.getValue() == null ? null : new ReadOnlyObjectWrapper<>(p.getValue().getShock()));
         shock.setCellFactory(SpinnerTableCell.forTableColumn(0, 6, 1, new IntegerStringConverter()));
         shock.setOnEditCommit(event -> event.getRowValue().setShock(event.getNewValue()));
@@ -53,7 +58,9 @@ public class TableView2Leader extends TableView<Leader> {
         shock.setEditable(true);
         shock.setStyle("-fx-alignment: CENTER-LEFT");
 
-        TableColumn<Leader, Integer> maneuever = new TableColumn<>(country.getSave().getGame().getLocalisationCleanNoPunctuation("MANEUEVER"));
+        TableColumn<Leader, Integer> maneuever = new TableColumn<>(country.getSave()
+                                                                          .getGame()
+                                                                          .getLocalisationCleanNoPunctuation("MANEUEVER", Eu4Language.getDefault()));
         maneuever.setCellValueFactory(p -> p.getValue() == null ? null : new ReadOnlyObjectWrapper<>(p.getValue().getManuever()));
         maneuever.setCellFactory(SpinnerTableCell.forTableColumn(0, 6, 1, new IntegerStringConverter()));
         maneuever.setOnEditCommit(event -> event.getRowValue().setManuever(event.getNewValue()));
@@ -61,7 +68,9 @@ public class TableView2Leader extends TableView<Leader> {
         maneuever.setEditable(true);
         maneuever.setStyle("-fx-alignment: CENTER-LEFT");
 
-        TableColumn<Leader, Integer> siege = new TableColumn<>(country.getSave().getGame().getLocalisationCleanNoPunctuation("SIEGE"));
+        TableColumn<Leader, Integer> siege = new TableColumn<>(country.getSave()
+                                                                      .getGame()
+                                                                      .getLocalisationCleanNoPunctuation("SIEGE", Eu4Language.getDefault()));
         siege.setCellValueFactory(p -> p.getValue() == null ? null : new ReadOnlyObjectWrapper<>(p.getValue().getSiege()));
         siege.setCellFactory(SpinnerTableCell.forTableColumn(0, 6, 1, new IntegerStringConverter()));
         siege.setOnEditCommit(event -> event.getRowValue().setSiege(event.getNewValue()));
@@ -69,19 +78,26 @@ public class TableView2Leader extends TableView<Leader> {
         siege.setEditable(true);
         siege.setStyle("-fx-alignment: CENTER-LEFT");
 
-        TableColumn<Leader, LeaderPersonality> personality = new TableColumn<>(country.getSave().getGame().getLocalisationCleanNoPunctuation("PERSONALITY"));
+        TableColumn<Leader, LeaderPersonality> personality = new TableColumn<>(country.getSave()
+                                                                                      .getGame()
+                                                                                      .getLocalisationCleanNoPunctuation("PERSONALITY", Eu4Language.getDefault()));
         personality.setCellValueFactory(p -> p.getValue() == null ? null : new ReadOnlyObjectWrapper<>(p.getValue().getPersonality()));
-        personality.setCellFactory(ComboBoxTableCell.forTableColumn(new LeaderPersonalityStringConverter(),
+        personality.setCellFactory(ComboBoxTableCell.forTableColumn(new LeaderPersonalityStringConverter(country.getSave().getGame()),
                                                                     Stream.concat(country.getSave().getGame().getLeaderPersonalities().stream(),
                                                                                   Stream.of((LeaderPersonality) null))
                                                                           .sorted(Comparator.nullsFirst(
-                                                                                  Comparator.comparing(LeaderPersonality::getLocalizedName, Eu4Utils.COLLATOR)))
+                                                                                  Comparator.comparing(l -> Eu4SaveEditorUtils.localize(l.getName(),
+                                                                                                                                        country.getSave()
+                                                                                                                                               .getGame()),
+                                                                                                       Eu4Utils.COLLATOR)))
                                                                           .collect(Collectors.toCollection(FXCollections::observableArrayList))));
         personality.setOnEditCommit(event -> event.getRowValue().setPersonality(event.getNewValue()));
         personality.setPrefWidth(200);
         personality.setStyle("-fx-alignment: CENTER-LEFT");
 
-        TableColumn<Leader, LocalDate> birthDate = new TableColumn<>(country.getSave().getGame().getLocalisationCleanNoPunctuation("DATE_OF_BIRTH_REQUIRED"));
+        TableColumn<Leader, LocalDate> birthDate = new TableColumn<>(country.getSave()
+                                                                            .getGame()
+                                                                            .getLocalisationCleanNoPunctuation("DATE_OF_BIRTH_REQUIRED", Eu4Language.getDefault()));
         birthDate.setCellValueFactory(p -> p.getValue() == null ? null : new ReadOnlyObjectWrapper<>(p.getValue().getBirthDate()));
         birthDate.setCellFactory(DatePickerCell.forTableColumn(null, country.getSave().getDate()));
         birthDate.setOnEditCommit(event -> event.getRowValue().setBirthDate(event.getNewValue()));

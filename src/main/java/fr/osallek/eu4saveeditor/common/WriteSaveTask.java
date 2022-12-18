@@ -4,10 +4,9 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.Eu4Parser;
 import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.save.Save;
-import javafx.concurrent.Task;
-
 import java.io.File;
 import java.util.Map;
+import javafx.concurrent.Task;
 
 public class WriteSaveTask extends Task<Void> {
 
@@ -27,7 +26,7 @@ public class WriteSaveTask extends Task<Void> {
     protected Void call() throws Exception {
         this.updateProgress(WriteSaveStep.values()[0].step, WriteSaveStep.NB_STEPS);
         this.updateTitle(WriteSaveStep.values()[0].getText(this.eu4Language));
-        Eu4Parser.writeSave(this.save, this.file.toString(), Map.of(item -> ClausewitzItem.DEFAULT_NAME.equals(item.getParent().getName()), this::getProgress));
+        Eu4Parser.writeSave(this.save, this.file.toPath(), Map.of(item -> ClausewitzItem.DEFAULT_NAME.equals(item.getParent().getName()), this::getProgress));
         return null;
     }
 

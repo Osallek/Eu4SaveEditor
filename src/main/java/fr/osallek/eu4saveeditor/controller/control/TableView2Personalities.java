@@ -1,11 +1,14 @@
 package fr.osallek.eu4saveeditor.controller.control;
 
 import fr.osallek.eu4parser.common.Eu4Utils;
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.save.country.Monarch;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
+import fr.osallek.eu4saveeditor.common.Eu4SaveEditorUtils;
 import fr.osallek.eu4saveeditor.controller.converter.PersonalityStringConverter;
-import fr.osallek.eu4saveeditor.controller.converter.RulerPersonalityStringConverter;
 import fr.osallek.eu4saveeditor.controller.object.Personality;
+import java.util.Comparator;
+import java.util.stream.Collectors;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -17,9 +20,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import org.apache.commons.collections4.CollectionUtils;
 
-import java.util.Comparator;
-import java.util.stream.Collectors;
-
 public class TableView2Personalities extends TableView<Personality> {
 
     private final BooleanProperty disableAddProperty;
@@ -30,17 +30,20 @@ public class TableView2Personalities extends TableView<Personality> {
 
     private final ObservableMap<Personality, ObservableList<Personality>> personalitiesMap = FXCollections.observableHashMap();
 
-    public TableView2Personalities(Country country, Monarch monarch, ObservableList<Personality> enactedPersonalities,
+    public TableView2Personalities(SaveCountry country, Monarch monarch, ObservableList<Personality> enactedPersonalities,
                                    ObservableList<Personality> personalities) {
         this.personalities = personalities;
         this.monarch = monarch;
         TableColumn<Personality, Personality> rulerPersonality = new TableColumn<>(country.getSave()
-                                                                                                    .getGame()
-                                                                                                    .getLocalisationCleanNoPunctuation("LEDGER_PERSONALITIES"));
+                                                                                          .getGame()
+                                                                                          .getLocalisationCleanNoPunctuation("LEDGER_PERSONALITIES", Eu4Language.getDefault()));
         rulerPersonality.setCellValueFactory(p -> p.getValue() == null ? null : new ReadOnlyObjectWrapper<>(p.getValue()));
-        rulerPersonality.setCellFactory(UniqueComboBoxTableCell.forTableColumn(new PersonalityStringConverter(),
+        rulerPersonality.setCellFactory(UniqueComboBoxTableCell.forTableColumn(new PersonalityStringConverter(country.getSave().getGame()),
                                                                                this.personalitiesMap,
-                                                                               Comparator.comparing(p -> p.getRulerPersonality().getLocalizedName(), Eu4Utils.COLLATOR),
+                                                                               Comparator.comparing(p -> Eu4SaveEditorUtils.localize(p.getRulerPersonality()
+                                                                                                                                      .getName(), country.getSave()
+                                                                                                                                                         .getGame()),
+                                                                                                    Eu4Utils.COLLATOR),
                                                                                getItems(),
                                                                                this::getNewList
                                                                               ));

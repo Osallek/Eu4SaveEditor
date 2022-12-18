@@ -1,140 +1,216 @@
 package fr.osallek.eu4saveeditor.controller;
 
-import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
-import fr.osallek.eu4saveeditor.Eu4SaveEditor;
 import fr.osallek.eu4saveeditor.common.Config;
 import fr.osallek.eu4saveeditor.common.Constants;
+import fr.osallek.eu4saveeditor.common.Eu4SaveEditorUtils;
 import fr.osallek.eu4saveeditor.common.FileProperty;
 import fr.osallek.eu4saveeditor.common.ReadSaveTask;
+import fr.osallek.eu4saveeditor.config.ApplicationProperties;
 import fr.osallek.eu4saveeditor.controller.converter.FileStringConverter;
-import fr.osallek.eu4saveeditor.i18n.MenusI18n;
+import fr.osallek.eu4saveeditor.controller.object.BootstrapColumn;
+import fr.osallek.eu4saveeditor.controller.object.BootstrapPane;
+import fr.osallek.eu4saveeditor.controller.object.BootstrapRow;
+import fr.osallek.eu4saveeditor.controller.object.LocalSaveListCell;
+import java.io.File;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.collections.FXCollections;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
 import javafx.stage.Window;
+import org.apache.commons.collections4.CollectionUtils;
+import org.kordamp.bootstrapfx.scene.layout.Panel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.MessageSource;
+import org.springframework.stereotype.Component;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.Locale;
-import java.util.ResourceBundle;
-import java.util.jar.Manifest;
-
-public class HomeController implements Initializable {
+@Component
+public class HomeController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HomeController.class);
 
-    private final FXMLLoader editorLoader = new FXMLLoader(Eu4SaveEditor.class.getResource(Constants.TEMPLATE_EDITOR));
+    private final ApplicationProperties properties;
+
+    private final MessageSource messageSource;
+
+    private final EditorController editorController;
 
     private final DirectoryChooser gameDirectoryChooser = new DirectoryChooser();
 
-    private final DirectoryChooser modDirectoryChooser = new DirectoryChooser();
-
-    private final FileChooser saveFileChooser = new FileChooser();
-
     private final FileProperty gameDirectory = new FileProperty(this, "gameDirectory");
 
-    private final FileProperty modDirectory = new FileProperty(this, "modDirectory");
+    private final BooleanProperty loading = new SimpleBooleanProperty(false);
 
-    private final FileProperty saveFile = new FileProperty(this, "saveFile");
+    private BootstrapPane root;
 
-    private boolean canOpenGameDirectoryChoose = true;
-
-    private boolean canOpenModDirectoryChoose = true;
-
-    private boolean canOpenSaveFileChooser = true;
-
-    @FXML
-    public Text selectGameFolderText;
-
-    @FXML
-    public Text selectModFolderText;
-
-    @FXML
-    public Text selectSaveFileText;
-
-    @FXML
     private TextField selectedGameDirectory;
 
-    @FXML
-    private TextField selectedModDirectory;
-
-    @FXML
-    private TextField selectedSaveFile;
-
-    @FXML
     public Button chooseGameFolderButton;
 
-    @FXML
-    public Button chooseModFolderButton;
+    private ComboBox<Path> localSavesCombo;
 
-    @FXML
-    public Button chooseSaveFileButton;
-
-    @FXML
     private Button startExtractButton;
 
-    @FXML
-    private Text infoText;
+    private Text progressText;
 
-    @FXML
     private ProgressBar progressBar;
 
-    @FXML
-    private Text versionText;
+    public HomeController(ApplicationProperties properties, MessageSource messageSource, EditorController editorController) {
+        this.properties = properties;
+        this.messageSource = messageSource;
+        this.editorController = editorController;
+    }
 
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        this.selectGameFolderText.setText(MenusI18n.SELECT_GAME_FOLDER_DESC.getForDefaultLocale());
-        this.selectModFolderText.setText(MenusI18n.SELECT_MOD_FOLDER_DESC.getForDefaultLocale());
-        this.selectSaveFileText.setText(MenusI18n.SELECT_SAVE_FILE_DESC.getForDefaultLocale());
+    public void initialize() {
+        this.root = new BootstrapPane();
+        this.root.setPadding(new Insets(50));
+        this.root.setVgap(25);
+        this.root.setHgap(25);
+        this.root.setBackground(new Background(new BackgroundFill(null, null, null)));
 
-        this.chooseGameFolderButton.setText(MenusI18n.CHOOSE_FOLDER.getForDefaultLocale());
-        this.chooseModFolderButton.setText(MenusI18n.CHOOSE_FOLDER.getForDefaultLocale());
-        this.chooseSaveFileButton.setText(MenusI18n.CHOOSE_FILE.getForDefaultLocale());
+        BootstrapRow titleRow = new BootstrapRow(true);
+        Label title = new Label("Eu4 Save Editor");
+        title.setAlignment(Pos.TOP_CENTER);
+        title.setMaxWidth(Double.MAX_VALUE);
+        title.getStyleClass().add("h1");
+        titleRow.addColumn(new BootstrapColumn(title, new int[] {12, 12, 10, 8, 6}));
 
-        this.startExtractButton.setText(MenusI18n.START_EXTRACT.getForDefaultLocale());
+        this.startExtractButton = new Button();
+        this.startExtractButton.onActionProperty().set(this::handleStartExtract);
+        this.startExtractButton.setDisable(true);
+        this.startExtractButton.setAlignment(Pos.CENTER);
+        this.startExtractButton.setText(this.messageSource.getMessage("ose.start-extract", null, Constants.LOCALE));
 
-        this.gameDirectoryChooser.setTitle(MenusI18n.SELECT_GAME_FOLDER.getForDefaultLocale());
-        this.modDirectoryChooser.setTitle(MenusI18n.SELECT_GAME_FOLDER.getForDefaultLocale());
+        VBox extract = new VBox();
+        extract.setAlignment(Pos.CENTER);
+        extract.getChildren().add(this.startExtractButton);
 
-        this.saveFileChooser.setTitle(MenusI18n.SELECT_SAVE_FILE.getForDefaultLocale());
-        this.saveFileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(MenusI18n.EU4_EXT_DESC.getForDefaultLocale(), "*.eu4"));
+        BootstrapRow extractRow = new BootstrapRow(true);
+        extractRow.addColumn(new BootstrapColumn(extract, new int[] {12, 12, 10, 8, 6}));
 
+        BootstrapRow gameDirectoryRow = new BootstrapRow(true);
+        Panel gameDirectoryPanel = new Panel();
+        gameDirectoryPanel.getStyleClass().add("panel-default");
+
+        Label gameDirectoryTitleLabel = new Label(this.messageSource.getMessage("ose.game-directory", null, Constants.LOCALE));
+        gameDirectoryTitleLabel.getStyleClass().addAll("h5", "b");
+        gameDirectoryPanel.setHeading(gameDirectoryTitleLabel);
+
+        this.gameDirectoryChooser.setTitle(this.messageSource.getMessage("ose.game-directory", null, Constants.LOCALE));
+
+        this.chooseGameFolderButton = new Button();
+        this.chooseGameFolderButton.onActionProperty().set(this::handleOpenGameDirectoryChoose);
+        this.chooseGameFolderButton.setText(this.messageSource.getMessage("ose.choose-folder", null, Constants.LOCALE));
+        this.chooseGameFolderButton.disableProperty().bind(this.loading);
+
+        this.selectedGameDirectory = new TextField();
+        this.selectedGameDirectory.setEditable(false);
+        this.selectedGameDirectory.prefWidth(Double.POSITIVE_INFINITY);
         this.selectedGameDirectory.textProperty().bindBidirectional(this.gameDirectory, new FileStringConverter());
-        this.selectedModDirectory.textProperty().bindBidirectional(this.modDirectory, new FileStringConverter());
-        this.selectedSaveFile.textProperty().bindBidirectional(this.saveFile, new FileStringConverter());
+        HBox.setHgrow(this.selectedGameDirectory, Priority.ALWAYS);
 
-        this.gameDirectoryChooser.setInitialDirectory(Config.getGameFolder());
-        this.gameDirectory.set(Config.getGameFolder());
+        HBox gameDirectoryHbox = new HBox();
+        gameDirectoryHbox.setSpacing(3);
+        gameDirectoryHbox.setAlignment(Pos.CENTER_LEFT);
+        gameDirectoryHbox.getChildren().add(this.selectedGameDirectory);
+        gameDirectoryHbox.getChildren().add(this.chooseGameFolderButton);
 
-        this.modDirectoryChooser.setInitialDirectory(Config.getModFolder());
-        this.modDirectory.set(Config.getModFolder());
+        gameDirectoryPanel.setBody(gameDirectoryHbox);
 
-        this.saveFileChooser.setInitialDirectory(Config.getSaveFolder());
-        this.selectedSaveFile.setText(Config.getSaveFile() == null ? null : Config.getSaveFile().getAbsolutePath());
+        gameDirectoryRow.addColumn(new BootstrapColumn(gameDirectoryPanel, new int[] {12, 12, 10, 8, 6}));
 
-        try {
-            Manifest manifest = new Manifest(Eu4SaveEditor.class.getResourceAsStream("META-INF/MANIFEST.MF"));
-            this.versionText.setText("Version " + manifest.getMainAttributes().getValue("Implementation-Version")
-                                     + " | Supported game version: " + manifest.getMainAttributes().getValue("Supported-Version"));
-        } catch (IOException ignored) {
+        BootstrapRow localSavesRow = new BootstrapRow(true);
+        Panel localSavesPanel = new Panel();
+        localSavesPanel.getStyleClass().add("panel-default");
+
+        Label localSavesTitleLabel = new Label(this.messageSource.getMessage("ose.local-saves", null, Constants.LOCALE));
+        localSavesTitleLabel.getStyleClass().addAll("h5", "b");
+        localSavesPanel.setHeading(localSavesTitleLabel);
+
+        List<Path> localSaves = Config.getSaveFolder().map(Eu4SaveEditorUtils::getSaves).orElse(new ArrayList<>());
+
+        if (CollectionUtils.isNotEmpty(localSaves)) {
+            this.localSavesCombo = new ComboBox<>(FXCollections.observableArrayList(localSaves));
+            this.localSavesCombo.setVisibleRowCount(20);
+            this.localSavesCombo.setCellFactory(param -> new LocalSaveListCell(Config.getSaveFolder().map(File::toPath).orElse(null)));
+            this.localSavesCombo.setButtonCell(new LocalSaveListCell(Config.getSaveFolder().map(File::toPath).orElse(null)));
+            this.localSavesCombo.setPromptText(this.messageSource.getMessage("ose.local-saves.choose", null, Constants.LOCALE));
+            this.localSavesCombo.disableProperty().bind(this.loading);
+
+            localSavesPanel.setBody(this.localSavesCombo);
+        } else {
+            localSavesPanel.setBody(new Text(this.messageSource.getMessage("ose.saves.none", null, Constants.LOCALE)));
         }
 
-        enableStartExtractButton();
+        localSavesRow.addColumn(new BootstrapColumn(localSavesPanel, new int[] {12, 12, 10, 8, 6}));
+
+        this.startExtractButton.disableProperty().bind(this.localSavesCombo.getSelectionModel().selectedItemProperty().isNull()
+                                                                           .or(this.gameDirectory.isNull()));
+
+        this.progressText = new Text();
+        this.progressText.setVisible(false);
+        this.progressText.setTextAlignment(TextAlignment.CENTER);
+
+        this.progressBar = new ProgressBar();
+        this.progressBar.setVisible(false);
+        this.progressBar.getStyleClass().add("progress-bar-primary");
+        this.progressBar.setMaxWidth(Double.MAX_VALUE);
+
+        VBox info = new VBox(10);
+        info.setAlignment(Pos.CENTER);
+        info.getChildren().add(this.progressText);
+        info.getChildren().add(this.progressBar);
+
+        BootstrapRow infoRow = new BootstrapRow(true);
+        infoRow.addColumn(new BootstrapColumn(info, new int[] {12, 12, 10, 8, 6}));
+
+        BootstrapRow versionRow = new BootstrapRow(true);
+        Label version = new Label(this.messageSource.getMessage("ose.version", new Object[] {this.properties.getVersion(), this.properties.getGameVersion()}, Constants.LOCALE));
+        version.setAlignment(Pos.BOTTOM_CENTER);
+        version.setMaxWidth(Double.MAX_VALUE);
+        version.getStyleClass().add("h6");
+        versionRow.addColumn(new BootstrapColumn(version, new int[] {12, 12, 10, 8, 6}));
+
+        this.root.addRow(titleRow);
+        this.root.addRow(gameDirectoryRow);
+        this.root.addRow(localSavesRow);
+        this.root.addRow(extractRow);
+        this.root.addRow(infoRow);
+        this.root.addRow(versionRow);
+
+        Config.getGameFolder().ifPresent(this.gameDirectoryChooser::setInitialDirectory);
+        Config.getGameFolder().ifPresent(this.gameDirectory::set);
+        Config.getSaveFolder().ifPresent(file -> this.setSelectedSaveFile(file.getAbsolutePath()));
+    }
+
+    public GridPane getScene() {
+        if (this.root == null) {
+            initialize();
+        }
+
+        return this.root;
     }
 
     public boolean setGameDirectory(String gameDirectory) {
@@ -147,29 +223,21 @@ public class HomeController implements Initializable {
         return false;
     }
 
-    public boolean setModDirectory(String modDirectory) {
-        File file = new File(modDirectory);
-
-        if (file.exists() && file.canRead() && file.isDirectory()) {
-            return chooseModDirectory(file);
-        }
-
-        return false;
-    }
-
     public boolean setSelectedSaveFile(String selectedSaveFile) {
         File file = new File(selectedSaveFile);
 
         if (file.exists() && file.canRead() && file.isFile()) {
-            return chooseSaveFile(file);
+            if (this.localSavesCombo.getItems().contains(file.toPath())) {
+                this.localSavesCombo.getSelectionModel().select(this.localSavesCombo.getItems().indexOf(file.toPath()));
+                return true;
+            }
         }
 
         return false;
     }
 
-    @FXML
     private void handleOpenGameDirectoryChoose(ActionEvent event) {
-        if (this.canOpenGameDirectoryChoose) {
+        if (!this.loading.get()) {
             Node eventSource = (Node) event.getSource();
             Window actionStage = eventSource.getScene().getWindow();
 
@@ -181,123 +249,42 @@ public class HomeController implements Initializable {
         this.gameDirectory.set(file);
 
         if (this.gameDirectory.getValue() == null) {
-            this.startExtractButton.setDisable(true);
             this.selectedGameDirectory.setText(null);
             return false;
         } else {
-            enableStartExtractButton();
             this.selectedGameDirectory.setText(this.gameDirectory.getValue().getPath());
             return true;
         }
     }
 
-    @FXML
-    private void handleOpenModDirectoryChoose(ActionEvent event) {
-        if (this.canOpenModDirectoryChoose) {
-            Node eventSource = (Node) event.getSource();
-            Window actionStage = eventSource.getScene().getWindow();
-
-            chooseModDirectory(this.modDirectoryChooser.showDialog(actionStage));
-        }
-    }
-
-    private boolean chooseModDirectory(File file) {
-        this.modDirectory.set(file);
-
-        if (this.modDirectory.getValue() == null) {
-            this.startExtractButton.setDisable(true);
-            this.selectedModDirectory.setText(null);
-            return false;
-        } else {
-            enableStartExtractButton();
-            this.selectedModDirectory.setText(this.modDirectory.getValue().getPath());
-            return true;
-        }
-    }
-
-    @FXML
-    private void handleOpenSaveFileChoose(ActionEvent event) {
-        if (this.canOpenSaveFileChooser) {
-            Node eventSource = (Node) event.getSource();
-            Window actionStage = eventSource.getScene().getWindow();
-
-            chooseSaveFile(this.saveFileChooser.showOpenDialog(actionStage));
-
-            if (this.saveFile.getValue() == null) {
-                this.startExtractButton.setDisable(true);
-                this.selectedSaveFile.setText(null);
-            } else {
-                enableStartExtractButton();
-                this.selectedSaveFile.setText(this.saveFile.getValue().getPath());
-            }
-        }
-    }
-
-    private boolean chooseSaveFile(File file) {
-        this.saveFile.set(file);
-
-        if (this.saveFile.getValue() == null) {
-            this.startExtractButton.setDisable(true);
-            this.selectedSaveFile.setText(null);
-            return false;
-        } else {
-            enableStartExtractButton();
-            this.selectedSaveFile.setText(this.saveFile.getValue().getPath());
-            return true;
-        }
-    }
-
-    @FXML
     public void handleStartExtract(ActionEvent actionEvent) {
-        this.startExtractButton.setDisable(true);
-        this.canOpenGameDirectoryChoose = false;
-        this.canOpenModDirectoryChoose = false;
-        this.canOpenSaveFileChooser = false;
-        Config.setGameFolder(this.gameDirectory.getValue());
-        Config.setModFolder(this.modDirectory.getValue());
-        Config.setSaveFile(this.saveFile.getValue());
+        this.loading.set(true);
 
-        ReadSaveTask task = new ReadSaveTask(this.gameDirectory, this.modDirectory, this.saveFile, Eu4Language.getByLocale(Locale.getDefault()));
+        ReadSaveTask task = new ReadSaveTask(this.gameDirectory, this.localSavesCombo.getSelectionModel().getSelectedItem(), this.messageSource);
         task.setOnFailed(event -> {
             LOGGER.error("An error occurred while extracting the save: {}", task.getException().getMessage(), task.getException());
-            this.infoText.setFill(Color.RED);
-            this.infoText.textProperty().unbind();
-            this.infoText.setText("An error occurred while extracting the save: " + task.getException().getMessage());
-            this.canOpenGameDirectoryChoose = true;
-            this.canOpenModDirectoryChoose = true;
-            this.canOpenSaveFileChooser = true;
+            this.progressText.setFill(Color.RED);
+            this.progressText.textProperty().unbind();
+            this.progressText.setText("An error occurred while extracting the save: " + task.getException().getMessage());
+            this.loading.set(false);
+            this.localSavesCombo.setDisable(false);
         });
 
         task.addEventFilter(WorkerStateEvent.WORKER_STATE_SUCCEEDED, event -> {
-            try {
-                this.progressBar.progressProperty().unbind();
-                this.progressBar.setProgress(1);
-                Parent editorNode = this.editorLoader.load();
-                ((EditorController) this.editorLoader.getController()).load(task.getValue(), this.saveFile.get());
-                this.startExtractButton.getScene().setRoot(editorNode);
-                ((EditorController) this.editorLoader.getController()).maximize();
-            } catch (IOException e) {
-                LOGGER.error("An error occurred while extracting the save: {}", e.getMessage(), e);
-                this.infoText.setFill(Color.RED);
-                this.infoText.setText("An error occurred while extracting the save: " + e.getMessage());
-                this.canOpenGameDirectoryChoose = true;
-                this.canOpenModDirectoryChoose = true;
-                this.canOpenSaveFileChooser = true;
-            }
+            Config.setGameFolder(this.gameDirectory.getValue());
+            this.progressBar.progressProperty().unbind();
+            this.progressBar.setProgress(1);
+            this.startExtractButton.getScene()
+                                   .setRoot(this.editorController.load(task.getValue(), this.localSavesCombo.getSelectionModel().getSelectedItem().toFile()));
+            this.editorController.maximize();
         });
 
-        this.infoText.setVisible(true);
-        this.infoText.setFill(Color.BLACK);
-        this.infoText.textProperty().bind(task.titleProperty());
+        this.progressText.setVisible(true);
+        this.progressText.setFill(Color.BLACK);
+        this.progressText.textProperty().bind(task.titleProperty());
         this.progressBar.setVisible(true);
         this.progressBar.progressProperty().bind(task.progressProperty());
 
         new Thread(task).start();
-    }
-
-    private void enableStartExtractButton() {
-        if (this.saveFile.getValue() != null && this.gameDirectory.getValue() != null) {
-            this.startExtractButton.setDisable(false);
-        }
     }
 }

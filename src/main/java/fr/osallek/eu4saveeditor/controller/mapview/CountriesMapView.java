@@ -3,16 +3,16 @@ package fr.osallek.eu4saveeditor.controller.mapview;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 import fr.osallek.eu4saveeditor.common.Eu4SaveEditorUtils;
+import fr.osallek.eu4saveeditor.controller.converter.CountryStringConverter;
 import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.paint.Color;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class CountriesMapView extends AbstractMapView {
 
@@ -48,9 +48,7 @@ public class CountriesMapView extends AbstractMapView {
             }
         });
 
-        this.countryButton = new ToggleButton(this.mapViewContainer.getSave()
-                                                                   .getGame()
-                                                                   .getLocalisation("TRIGGER_COUNTRY"));
+        this.countryButton = new ToggleButton(Eu4SaveEditorUtils.localize("TRIGGER_COUNTRY", this.mapViewContainer.getSave().getGame()));
         this.countryButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
             if (Boolean.FALSE.equals(oldValue) && Boolean.TRUE.equals(newValue)) {
                 selectCountryButton();
@@ -58,9 +56,7 @@ public class CountriesMapView extends AbstractMapView {
         });
         this.countryButton.disableProperty().bind(this.countryButton.selectedProperty());
 
-        this.provinceButton = new ToggleButton(this.mapViewContainer.getSave()
-                                                                    .getGame()
-                                                                    .getLocalisation("UNKNOWN_LOC"));
+        this.provinceButton = new ToggleButton(Eu4SaveEditorUtils.localize("UNKNOWN_LOC", this.mapViewContainer.getSave().getGame()));
         this.provinceButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
             if (Boolean.FALSE.equals(oldValue) && Boolean.TRUE.equals(newValue)) {
                 selectProvinceButton();
@@ -149,7 +145,7 @@ public class CountriesMapView extends AbstractMapView {
     public String updateTitle(SaveProvince selectedProvince) {
         if (this.countryButton.isSelected()) {
             return selectedProvince.getOwner() == null ? getTitle(selectedProvince)
-                                                       : (selectedProvince.getOwner().getLocalizedName() + " (" + selectedProvince.getOwner().getTag() + ")");
+                                                       : (CountryStringConverter.INSTANCE.toString(selectedProvince.getOwner()) + " (" + selectedProvince.getOwner().getTag() + ")");
         } else if (this.provinceButton.isSelected()) {
             return getTitle(selectedProvince);
         }
@@ -198,7 +194,7 @@ public class CountriesMapView extends AbstractMapView {
         title += " (" + saveProvince.getId() + ")";
 
         if (saveProvince.getOwner() != null) {
-            title += " - " + saveProvince.getOwner().getLocalizedName();
+            title += " - " + CountryStringConverter.INSTANCE.toString(saveProvince.getOwner());
         }
 
         return title;

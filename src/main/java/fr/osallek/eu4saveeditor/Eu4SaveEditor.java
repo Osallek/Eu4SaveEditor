@@ -3,6 +3,10 @@ package fr.osallek.eu4saveeditor;
 import fr.osallek.eu4saveeditor.common.Constants;
 import fr.osallek.eu4saveeditor.common.Eu4SaveEditorUtils;
 import fr.osallek.eu4saveeditor.controller.HomeController;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -13,11 +17,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-
 public class Eu4SaveEditor extends Application {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Eu4SaveEditor.class);
@@ -25,8 +24,6 @@ public class Eu4SaveEditor extends Application {
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss dd/MM/yyyy");
 
     private static String gameFolderArg;
-
-    private static String modsFolderArg;
 
     private static String saveFileArg;
 
@@ -56,12 +53,6 @@ public class Eu4SaveEditor extends Application {
             this.validArgs = false;
         }
 
-        if (StringUtils.isNotBlank(modsFolderArg)) {
-            this.validArgs &= homeController.setModDirectory(modsFolderArg);
-        } else {
-            this.validArgs = false;
-        }
-
         if (StringUtils.isNotBlank(saveFileArg)) {
             this.validArgs &= homeController.setSelectedSaveFile(saveFileArg);
         } else {
@@ -85,7 +76,6 @@ public class Eu4SaveEditor extends Application {
     public static void run(String[] args) {
         LOGGER.info("Running with args {}", Arrays.toString(args));
         gameFolderArg = Eu4SaveEditorUtils.readArg(args, Constants.GAME_FOLDER_ARG);
-        modsFolderArg = Eu4SaveEditorUtils.readArg(args, Constants.MODS_FOLDER_ARG);
         saveFileArg = Eu4SaveEditorUtils.readArg(args, Constants.SAVE_FILE_ARG);
         override = BooleanUtils.toBoolean(Eu4SaveEditorUtils.readArg(args, Constants.OVERRIDE_ARG));
         launch();

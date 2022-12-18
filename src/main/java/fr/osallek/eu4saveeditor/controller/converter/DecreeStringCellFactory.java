@@ -1,6 +1,6 @@
 package fr.osallek.eu4saveeditor.controller.converter;
 
-import fr.osallek.eu4parser.model.game.Decree;
+import fr.osallek.eu4saveeditor.controller.object.Decree;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.util.Callback;
@@ -17,7 +17,7 @@ public class DecreeStringCellFactory implements Callback<ListView<Decree>, ListC
                 if (empty) {
                     setText(null);
                 } else {
-                    setText(value == null ? null : value.getLocalizedName());
+                    setText(value == null ? null : value.toString());
                 }
             }
         };

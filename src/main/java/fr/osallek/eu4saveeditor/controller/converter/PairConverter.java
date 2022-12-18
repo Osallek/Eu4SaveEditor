@@ -3,15 +3,15 @@ package fr.osallek.eu4saveeditor.controller.converter;
 import javafx.util.StringConverter;
 import org.apache.commons.lang3.tuple.Pair;
 
-public class PairConverter extends StringConverter<Pair<String, String>> {
+public class PairConverter extends StringConverter<Pair<Integer, String>> {
 
     @Override
-    public String toString(Pair<String, String> pair) {
+    public String toString(Pair<Integer, String> pair) {
         return pair == null ? "" : pair.getValue();
     }
 
     @Override
-    public Pair<String, String> fromString(String s) {
+    public Pair<Integer, String> fromString(String s) {
         return null;
     }
 }

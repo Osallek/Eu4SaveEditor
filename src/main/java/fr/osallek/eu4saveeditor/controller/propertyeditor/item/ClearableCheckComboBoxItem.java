@@ -2,6 +2,9 @@ package fr.osallek.eu4saveeditor.controller.propertyeditor.item;
 
 import fr.osallek.eu4saveeditor.controller.control.ClearableCheckComboBox;
 import fr.osallek.eu4saveeditor.i18n.SheetCategory;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
@@ -12,10 +15,6 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Supplier;
 
 public class ClearableCheckComboBoxItem<U> implements CustomItem<U> {
 

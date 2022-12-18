@@ -1,9 +1,8 @@
 package fr.osallek.eu4saveeditor.controller.object;
 
 import fr.osallek.eu4parser.model.game.IdeaGroup;
-import fr.osallek.eu4parser.model.save.Id;
 import fr.osallek.eu4saveeditor.common.Copy;
-
+import fr.osallek.eu4saveeditor.common.Eu4SaveEditorUtils;
 import java.util.Map;
 
 public class Idea extends Copy<Idea> {
@@ -69,6 +68,6 @@ public class Idea extends Copy<Idea> {
 
     @Override
     public String toString() {
-        return this.ideaGroup.getLocalizedName();
+        return Eu4SaveEditorUtils.localize(this.ideaGroup.getName(), this.ideaGroup.getGame());
     }
 }

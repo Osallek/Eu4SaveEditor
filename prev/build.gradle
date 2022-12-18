@@ -6,6 +6,7 @@ plugins {
     id 'org.moditect.gradleplugin' version '1.0.0-rc3'
     id 'org.openjfx.javafxplugin' version '0.0.9'
     id 'org.beryx.jlink' version '2.23.3'
+    id 'maven-publish'
 }
 
 repositories {
@@ -48,8 +49,8 @@ processResources {
 
 java {
     modularity.inferModulePath = true
-    sourceCompatibility = JavaVersion.VERSION_15
-    targetCompatibility = JavaVersion.VERSION_15
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 List<String> runArgs = [

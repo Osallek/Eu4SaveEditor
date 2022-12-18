@@ -1,5 +1,8 @@
 package fr.osallek.eu4saveeditor.controller.control;
 
+import java.time.LocalDate;
+import java.util.Objects;
+import java.util.function.Supplier;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -11,10 +14,6 @@ import javafx.scene.layout.Priority;
 import org.apache.commons.lang3.BooleanUtils;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
-
-import java.time.LocalDate;
-import java.util.Objects;
-import java.util.function.Supplier;
 
 public class ClearableDatePicker extends HBox {
 

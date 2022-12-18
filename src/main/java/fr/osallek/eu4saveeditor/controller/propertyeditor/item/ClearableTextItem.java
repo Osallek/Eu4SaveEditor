@@ -2,14 +2,13 @@ package fr.osallek.eu4saveeditor.controller.propertyeditor.item;
 
 import fr.osallek.eu4saveeditor.controller.control.CustomClearableTextField;
 import fr.osallek.eu4saveeditor.i18n.SheetCategory;
+import java.util.Optional;
+import java.util.function.Supplier;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import org.controlsfx.control.textfield.CustomTextField;
-
-import java.util.Optional;
-import java.util.function.Supplier;
 
 public class ClearableTextItem implements CustomItem<Void> {
 

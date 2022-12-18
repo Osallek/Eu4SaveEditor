@@ -1,13 +1,12 @@
 package fr.osallek.eu4saveeditor.controller.mapview;
 
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
-import javafx.geometry.Point2D;
-import javafx.geometry.Rectangle2D;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javafx.geometry.Point2D;
+import javafx.geometry.Rectangle2D;
 
 public class DrawableProvince {
 

@@ -3,7 +3,6 @@ package fr.osallek.eu4saveeditor.controller.object;
 import fr.osallek.eu4parser.model.game.GameModifier;
 import fr.osallek.eu4parser.model.save.country.SaveModifier;
 import fr.osallek.eu4saveeditor.common.Copy;
-
 import java.time.LocalDate;
 import java.util.Objects;
 

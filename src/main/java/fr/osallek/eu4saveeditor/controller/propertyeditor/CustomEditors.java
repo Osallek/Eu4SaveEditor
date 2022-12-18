@@ -19,6 +19,10 @@ import fr.osallek.eu4saveeditor.controller.propertyeditor.item.HBoxItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.PropertySheetItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.SelectableGridViewItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.TextItem;
+import java.lang.reflect.InvocationTargetException;
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Optional;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
@@ -41,11 +45,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import org.controlsfx.dialog.FontSelectorDialog;
 import org.controlsfx.property.editor.PropertyEditor;
-
-import java.lang.reflect.InvocationTargetException;
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Optional;
 
 public class CustomEditors {
 

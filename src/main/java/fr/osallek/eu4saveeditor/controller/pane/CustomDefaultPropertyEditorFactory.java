@@ -28,17 +28,16 @@ package fr.osallek.eu4saveeditor.controller.pane;
 
 import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheet.Item;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.CustomEditors;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.time.LocalDate;
+import java.util.Arrays;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.util.Callback;
 import org.controlsfx.control.PropertySheet;
 import org.controlsfx.property.editor.PropertyEditor;
-
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.time.LocalDate;
-import java.util.Arrays;
 
 /**
  * A default implementation of the {@link Callback} type required by the

@@ -1,11 +1,10 @@
 package fr.osallek.eu4saveeditor.controller.propertyeditor.item;
 
 import fr.osallek.eu4saveeditor.i18n.SheetCategory;
+import java.util.Optional;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.scene.layout.HBox;
-
-import java.util.Optional;
 
 public class HBoxItem<U> implements CustomItem<U> {
 

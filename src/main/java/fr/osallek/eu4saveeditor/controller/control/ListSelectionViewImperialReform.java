@@ -1,7 +1,12 @@
 package fr.osallek.eu4saveeditor.controller.control;
 
+import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.game.ImperialReform;
 import fr.osallek.eu4saveeditor.controller.converter.ImperialReformStringCellFactory;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.function.Supplier;
 import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
 import javafx.geometry.Orientation;
@@ -10,19 +15,14 @@ import javafx.scene.input.KeyCombination;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.function.Supplier;
-
 public class ListSelectionViewImperialReform extends CustomListSelectionView<ImperialReform> {
 
     private final ObservableList<ImperialReform> choices;
 
     private final ObservableList<ImperialReform> selected;
 
-    public ListSelectionViewImperialReform(ObservableList<ImperialReform> choices, ObservableList<ImperialReform> selected) {
-        super(choices, selected, new ImperialReformStringCellFactory(), 750, 600);
+    public ListSelectionViewImperialReform(ObservableList<ImperialReform> choices, ObservableList<ImperialReform> selected, Game game) {
+        super(choices, selected, new ImperialReformStringCellFactory(game), 750, 600);
         this.choices = choices;
         this.selected = selected;
         setSourceItems(this.choices.sorted());

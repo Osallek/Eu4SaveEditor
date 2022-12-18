@@ -1,5 +1,6 @@
 package fr.osallek.eu4saveeditor.controller.propertyeditor.item;
 
+import java.util.Optional;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -12,8 +13,6 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
-
-import java.util.Optional;
 
 public class ComboBoxItem<U> implements CustomItem<U> {
 

@@ -1,5 +1,6 @@
 package fr.osallek.eu4saveeditor.controller.converter;
 
+import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.empire.HreReligionStatus;
 import javafx.scene.control.ListCell;
@@ -26,16 +27,16 @@ public class HreReligionStatusStringCellFactory implements Callback<ListView<Hre
                     String text;
                     switch (value) {
                         case PROTESTANT:
-                            text = save.getGame().getLocalisation("protestant");
+                            text = save.getGame().getLocalisationClean("protestant", Eu4Language.getDefault());
                             break;
 
                         case CATHOLIC:
-                            text = save.getGame().getLocalisation("catholic");
+                            text = save.getGame().getLocalisationClean("catholic", Eu4Language.getDefault());
                             break;
 
                         case PEACE:
                         default:
-                            text = save.getGame().getLocalisationClean("HRE_RELIGIOUS_PEACE");
+                            text = save.getGame().getLocalisationClean("HRE_RELIGIOUS_PEACE", Eu4Language.getDefault());
                     }
 
                     setText(text.substring(0, 1).toUpperCase() + text.substring(1));

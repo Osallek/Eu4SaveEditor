@@ -1,7 +1,6 @@
 package fr.osallek.eu4saveeditor.i18n;
 
 import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
-
 import java.util.Locale;
 
 public enum ItemsI18n {

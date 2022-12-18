@@ -1,13 +1,12 @@
 package fr.osallek.eu4saveeditor.controller.control;
 
+import java.util.function.Supplier;
 import javafx.beans.property.ObjectProperty;
 import javafx.scene.Node;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import org.controlsfx.control.textfield.CustomTextField;
-
-import java.util.function.Supplier;
 
 /**
  * Copy from {@link org.controlsfx.control.textfield.TextFields}.createClearableTextField()
