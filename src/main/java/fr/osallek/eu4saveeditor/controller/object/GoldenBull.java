@@ -16,8 +16,11 @@ public class GoldenBull extends Copy<GoldenBull> {
     private boolean changed;
 
     public GoldenBull(fr.osallek.eu4parser.model.game.GoldenBull goldenBull, Save save) {
-        this.goldenBull = goldenBull.getName();
-        this.name = Eu4SaveEditorUtils.localize(goldenBull.getName(), save.getGame());
+        if (goldenBull != null) {
+            this.goldenBull = goldenBull.getName();
+            this.name = Eu4SaveEditorUtils.localize(goldenBull.getName(), save.getGame());
+        }
+
         this.changed = false;
         this.save = save;
     }

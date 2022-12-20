@@ -45,6 +45,8 @@ import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableTextItem
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.HBoxItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.SelectableGridViewItem;
 import fr.osallek.eu4saveeditor.controller.validator.CustomGraphicValidationDecoration;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -69,6 +71,7 @@ import org.controlsfx.validation.Validator;
 import org.controlsfx.validation.decoration.CompoundValidationDecoration;
 import org.controlsfx.validation.decoration.StyleClassValidationDecoration;
 import org.springframework.context.MessageSource;
+import org.springframework.core.io.ClassPathResource;
 
 public class ProvincePropertySheet extends VBox {
 
@@ -510,7 +513,15 @@ public class ProvincePropertySheet extends VBox {
                                                                                                                                .anyMatch(b -> CollectionUtils.isNotEmpty(b.getManufactoryFor())),
                                                                                                                       buildingsBuilt));
                         grid.setCellFactory(b -> Eu4SaveEditorUtils.localize("building_" + b.getName(), this.province.getSave().getGame()),
-                                            Building::getImage);
+                                            b -> {
+                                                try {
+                                                    return Optional.ofNullable(b.getImage())
+                                                                   .filter(File::exists)
+                                                                   .orElse(new ClassPathResource("images/no_building.png").getFile());
+                                                } catch (IOException e) {
+                                                    return null;
+                                                }
+                                            });
                         this.buildingsFields.add(grid);
                     }
                 });

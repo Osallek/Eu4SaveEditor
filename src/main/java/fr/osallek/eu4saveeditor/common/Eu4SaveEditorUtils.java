@@ -39,7 +39,10 @@ public class Eu4SaveEditorUtils {
     }
 
     public static String localize(String s, Game game) {
-        return Optional.ofNullable(game.getLocalisation(ClausewitzUtils.removeQuotes(s), Eu4Language.getDefault())).map(Localisation::getValue).orElse(s);
+        return Optional.ofNullable(game.getLocalisation(ClausewitzUtils.removeQuotes(s), Eu4Language.getDefault()))
+                       .or(() -> Optional.ofNullable(game.getLocalisation(ClausewitzUtils.removeQuotes(s), Eu4Language.ENGLISH)))
+                       .map(Localisation::getValue)
+                       .orElse(s);
     }
 
     public static ImageView bufferedToView(BufferedImage buffered) {

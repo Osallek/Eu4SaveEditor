@@ -1444,8 +1444,8 @@ public class CountryPropertySheet extends VBox {
                                                                                    tableView2HiddenFlag,
                                                                                    this.messageSource.getMessage("ose.category.hidden-flags", null, Constants.LOCALE),
                                                                                    list -> null,
-                                                                                   () -> this.hiddenFlags);
-                        dialog.setDisableAddProperty(new SimpleBooleanProperty(true));
+                                                                                   () -> this.hiddenFlags,
+                                                                                   new SimpleBooleanProperty(true));
                         Optional<List<StringDate>> hiddenFlagList = dialog.showAndWait();
 
                         hiddenFlagList.ifPresent(this.hiddenFlags::setAll);
