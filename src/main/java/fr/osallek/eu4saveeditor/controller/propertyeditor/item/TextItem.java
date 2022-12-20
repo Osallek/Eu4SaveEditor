@@ -1,6 +1,5 @@
 package fr.osallek.eu4saveeditor.controller.propertyeditor.item;
 
-import fr.osallek.eu4saveeditor.i18n.SheetCategory;
 import java.util.Optional;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -16,12 +15,8 @@ public class TextItem implements CustomItem<String> {
 
     private final Text text;
 
-    public TextItem(SheetCategory category, String name, Text text) {
-        this(category, name, null, text);
-    }
-
-    public TextItem(SheetCategory category, String name, String description, Text text) {
-        this.category = category.getForDefaultLocale();
+    public TextItem(String category, String name, String description, Text text) {
+        this.category = category;
         this.name = name;
         this.description = description;
         this.text = text;

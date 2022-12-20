@@ -28,11 +28,7 @@ import org.springframework.context.MessageSource;
 
 public class MapViewContainer {
 
-    private final MessageSource messageSource;
-
     private final SaveProvince[][] provincesMap;
-
-    private final Map<Integer, DrawableProvince> drawableProvinces;
 
     private final Canvas canvas;
 
@@ -72,13 +68,11 @@ public class MapViewContainer {
 
     private final Button submitButton;
 
-    public MapViewContainer(MessageSource messageSource, SaveProvince[][] provincesMap, Map<Integer, DrawableProvince> drawableProvinces, Canvas canvas,
-                            VBox editPane, Save save, ObservableList<SaveCountry> playableCountries, ObservableList<SaveCountry> countriesAlive,
-                            ObservableList<Culture> cultures, ObservableList<SaveReligion> religions, ObservableList<SaveReligion> playableReligions,
-                            ObservableList<TradeGood> tradeGoods, ObservableList<TradeNode> tradeNodes, ObservableList<SaveProvince> cities) {
-        this.messageSource = messageSource;
+    public MapViewContainer(MessageSource messageSource, SaveProvince[][] provincesMap, Canvas canvas, VBox editPane, Save save,
+                            ObservableList<SaveCountry> playableCountries, ObservableList<SaveCountry> countriesAlive, ObservableList<Culture> cultures,
+                            ObservableList<SaveReligion> religions, ObservableList<SaveReligion> playableReligions, ObservableList<TradeGood> tradeGoods,
+                            ObservableList<TradeNode> tradeNodes, ObservableList<SaveProvince> cities) {
         this.provincesMap = provincesMap;
-        this.drawableProvinces = drawableProvinces;
         this.canvas = canvas;
         this.editPane = editPane;
         this.save = save;
@@ -90,7 +84,7 @@ public class MapViewContainer {
         this.playableReligions = playableReligions;
         this.tradeGoods = tradeGoods;
         this.tradeNodes = tradeNodes;
-        this.saveSheet = new SavePropertySheet(this.save, this.countriesAlive, this.cities, this.messageSource);
+        this.saveSheet = new SavePropertySheet(this.save, this.countriesAlive, this.cities, messageSource);
         this.mapViews = new EnumMap<>(MapViewType.class);
 
         this.titleLabel = new Label();
@@ -127,8 +121,8 @@ public class MapViewContainer {
         }
     }
 
-    public void registerMapView(MapViewType mapViewType) {
-        this.mapViews.put(mapViewType, mapViewType.getMapView(this));
+    public void registerMapView(MapViewType mapViewType, AbstractMapView mapView) {
+        this.mapViews.put(mapViewType, mapView);
     }
 
     public void selectMapView(MapViewType mapViewType) {
@@ -223,10 +217,6 @@ public class MapViewContainer {
         return provincesMap;
     }
 
-    public Map<Integer, DrawableProvince> getDrawableProvinces() {
-        return drawableProvinces;
-    }
-
     public Canvas getCanvas() {
         return canvas;
     }
@@ -265,6 +255,10 @@ public class MapViewContainer {
 
     public ObservableList<TradeNode> getTradeNodes() {
         return tradeNodes;
+    }
+
+    public ObservableList<SaveProvince> getCities() {
+        return cities;
     }
 
     public SegmentedButton getTabsSegmentedButton() {

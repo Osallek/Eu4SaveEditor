@@ -44,7 +44,7 @@ public class GovernmentReformsDialog extends Dialog<List<GovernmentReform>> {
                .forEach((s, reforms) -> {
                    TitledPane titledPane = new TitledPane();
                    titledPane.setText(country.getSave().getGame().getLocalisationClean(s, Eu4Language.getDefault()));
-                   SelectableGridView<GovernmentReform> gridView = new SelectableGridView<>(FXCollections.observableArrayList(reforms));
+                   SelectableGridView<GovernmentReform> gridView = new SelectableGridView<>(FXCollections.observableArrayList(reforms), false);
                    gridView.setCellFactory(r -> Eu4SaveEditorUtils.localize(r.getName(), country.getSave().getGame()), GovernmentReform::getImageFile);
                    gridView.getItems().stream().filter(this.governmentReforms::contains).findFirst().ifPresent(gridView::select);
                    this.governmentReforms.removeAll(reforms);

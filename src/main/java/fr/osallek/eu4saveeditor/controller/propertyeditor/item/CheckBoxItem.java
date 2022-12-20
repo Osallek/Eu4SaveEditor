@@ -1,6 +1,5 @@
 package fr.osallek.eu4saveeditor.controller.propertyeditor.item;
 
-import fr.osallek.eu4saveeditor.i18n.SheetCategory;
 import java.util.Optional;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -19,24 +18,12 @@ public class CheckBoxItem implements CustomItem<Void> {
 
     private BooleanProperty editable;
 
-    public CheckBoxItem(SheetCategory category, String name, boolean value) {
-        this(category.getForDefaultLocale(), name, value);
-    }
-
     public CheckBoxItem(String category, String name, boolean value) {
-        this(category, name, value,  null);
-    }
-
-    public CheckBoxItem(SheetCategory category, String name, boolean value, String description) {
-        this(category.getForDefaultLocale(), name, value, description);
+        this(category, name, value, null);
     }
 
     public CheckBoxItem(String category, String name, boolean value, String description) {
         this(category, name, value, description, new SimpleBooleanProperty(true));
-    }
-
-    public CheckBoxItem(SheetCategory category, String name, boolean value, String description, BooleanProperty editable) {
-        this(category.getForDefaultLocale(), name, value, description, editable);
     }
 
     public CheckBoxItem(String category, String name, boolean value, String description, BooleanProperty editable) {

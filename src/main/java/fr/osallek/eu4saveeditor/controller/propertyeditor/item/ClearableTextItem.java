@@ -1,7 +1,6 @@
 package fr.osallek.eu4saveeditor.controller.propertyeditor.item;
 
 import fr.osallek.eu4saveeditor.controller.control.CustomClearableTextField;
-import fr.osallek.eu4saveeditor.i18n.SheetCategory;
 import java.util.Optional;
 import java.util.function.Supplier;
 import javafx.beans.property.BooleanProperty;
@@ -24,16 +23,8 @@ public class ClearableTextItem implements CustomItem<Void> {
 
     private final BooleanProperty editable;
 
-    public ClearableTextItem(SheetCategory category, String name) {
-        this(category.getForDefaultLocale(), name);
-    }
-
     public ClearableTextItem(String category, String name) {
         this(category, name, null, null);
-    }
-
-    public ClearableTextItem(SheetCategory category, String name, String value, Supplier<String> clearSupplier) {
-        this(category.getForDefaultLocale(), name, value, clearSupplier);
     }
 
     public ClearableTextItem(String category, String name, String value, Supplier<String> clearSupplier) {

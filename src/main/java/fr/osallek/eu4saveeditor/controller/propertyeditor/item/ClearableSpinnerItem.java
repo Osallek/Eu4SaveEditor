@@ -1,7 +1,6 @@
 package fr.osallek.eu4saveeditor.controller.propertyeditor.item;
 
 import fr.osallek.eu4saveeditor.controller.control.ClearableSpinner;
-import fr.osallek.eu4saveeditor.i18n.SheetCategory;
 import java.util.Optional;
 import java.util.function.Supplier;
 import javafx.beans.property.BooleanProperty;
@@ -20,17 +19,9 @@ public class ClearableSpinnerItem<T> implements CustomItem<Integer> {
 
     private final BooleanProperty editable;
 
-    public ClearableSpinnerItem(SheetCategory category, String name, ClearableSpinner<T> spinner) {
-        this(category.getForDefaultLocale(), name, spinner);
-    }
-
 
     public ClearableSpinnerItem(String category, String name, ClearableSpinner<T> spinner) {
         this(category, name, spinner, new SimpleBooleanProperty(true));
-    }
-
-    public ClearableSpinnerItem(SheetCategory category, String name, ClearableSpinner<T> spinner, BooleanProperty editable) {
-        this(category.getForDefaultLocale(), name, spinner, editable);
     }
 
     public ClearableSpinnerItem(String category, String name, ClearableSpinner<T> spinner, BooleanProperty editable) {

@@ -32,7 +32,7 @@ public class SelectableGridCell<T> extends GridCell<T> {
 
     private final int size;
 
-    public SelectableGridCell(Function<T, String> textFunction, Function<T, File> imageFunction, int size) {
+    public SelectableGridCell(Function<T, String> textFunction, Function<T, File> imageFunction, int size, boolean unSelect) {
         this.size = size;
         this.notSelectedEffect = new ColorAdjust();
         this.notSelectedEffect.setSaturation(-1);
@@ -58,7 +58,10 @@ public class SelectableGridCell<T> extends GridCell<T> {
                 if (source.isSelected()) {
                     unSelect();
                 } else {
-                    source.getSelectableGridView().getCells().forEach(SelectableGridCell::unSelect);
+                    if (unSelect) {
+                        source.getSelectableGridView().getCells().forEach(SelectableGridCell::unSelect);
+                    }
+                    
                     source.updateSelected(true);
                     source.getSelectableGridView().select(source.getItem());
 

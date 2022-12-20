@@ -1,7 +1,6 @@
 package fr.osallek.eu4saveeditor.controller.propertyeditor.item;
 
 import fr.osallek.eu4saveeditor.controller.control.ClearableColorPicker;
-import fr.osallek.eu4saveeditor.i18n.SheetCategory;
 import java.util.Optional;
 import java.util.function.Supplier;
 import javafx.beans.property.BooleanProperty;
@@ -35,21 +34,12 @@ public class ClearableColorPickerItem implements CustomItem<Color> {
 
     private Callback<ListView<Color>, ListCell<Color>> cellFactory;
 
-    public ClearableColorPickerItem(SheetCategory category, String name, ClearableColorPicker colorPicker) {
+    public ClearableColorPickerItem(String category, String name, ClearableColorPicker colorPicker) {
         this(category, name, null, colorPicker, new SimpleBooleanProperty(true));
-    }
-
-    public ClearableColorPickerItem(SheetCategory category, String name, String description, ClearableColorPicker colorPicker) {
-        this(category, name, description, colorPicker, new SimpleBooleanProperty(true));
     }
 
     public ClearableColorPickerItem(String category, String name, String description, ClearableColorPicker colorPicker) {
         this(category, name, description, colorPicker, new SimpleBooleanProperty(true));
-    }
-
-    public ClearableColorPickerItem(SheetCategory category, String name, String description, ClearableColorPicker colorPicker,
-                                    BooleanProperty editable) {
-        this(category.getForDefaultLocale(), name, description, colorPicker, editable);
     }
 
     public ClearableColorPickerItem(String category, String name, String description, ClearableColorPicker colorPicker, BooleanProperty editable) {

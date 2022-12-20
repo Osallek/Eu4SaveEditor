@@ -1,7 +1,6 @@
 package fr.osallek.eu4saveeditor.controller.propertyeditor.item;
 
 import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
-import fr.osallek.eu4saveeditor.i18n.SheetCategory;
 import java.util.Optional;
 import javafx.beans.value.ObservableValue;
 
@@ -10,10 +9,6 @@ public class PropertySheetItem implements CustomPropertySheet.Item {
     private final String category;
 
     private final CustomPropertySheet propertySheet;
-
-    public PropertySheetItem(SheetCategory category, CustomPropertySheet propertySheet) {
-        this(category.getForDefaultLocale(), propertySheet);
-    }
 
     public PropertySheetItem(String category, CustomPropertySheet propertySheet) {
         this.category = category;

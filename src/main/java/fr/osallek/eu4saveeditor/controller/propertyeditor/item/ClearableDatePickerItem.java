@@ -1,7 +1,6 @@
 package fr.osallek.eu4saveeditor.controller.propertyeditor.item;
 
 import fr.osallek.eu4saveeditor.controller.control.ClearableDatePicker;
-import fr.osallek.eu4saveeditor.i18n.SheetCategory;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -22,10 +21,6 @@ public class ClearableDatePickerItem implements CustomItem<LocalDate> {
 
     private final BooleanProperty editable;
 
-    public ClearableDatePickerItem(SheetCategory category, String name, LocalDate date, Supplier<LocalDate> clearSupplier) {
-        this(category.getForDefaultLocale(), name, date, clearSupplier);
-    }
-
     public ClearableDatePickerItem(String category, String name, LocalDate date, Supplier<LocalDate> clearSupplier) {
         this(category, name, null, date, clearSupplier, null, null, new SimpleBooleanProperty(true));
     }
@@ -35,7 +30,7 @@ public class ClearableDatePickerItem implements CustomItem<LocalDate> {
     }
 
     public ClearableDatePickerItem(String category, String name, String description, LocalDate date, Supplier<LocalDate> clearSupplier, LocalDate startDate,
-            LocalDate endDate, BooleanProperty editable) {
+                                   LocalDate endDate, BooleanProperty editable) {
         this.category = category;
         this.name = name;
         this.description = description;

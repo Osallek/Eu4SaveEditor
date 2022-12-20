@@ -40,13 +40,9 @@ public class EstatePropertySheet extends VBox {
 
     private final ClearableSliderItem territoryField;
 
-    private final ButtonItem privilegeButton;
-
     private final ObservableList<Privilege> privileges;
 
     private final ValidationSupport validationSupport;
-
-    private CustomPropertySheetSkin propertySheetSkin;
 
     private final List<DoubleProperty> countryEstatesTerritory = FXCollections.observableArrayList();
 
@@ -61,8 +57,8 @@ public class EstatePropertySheet extends VBox {
 
         List<CustomPropertySheet.Item> items = new ArrayList<>();
 
-        this.propertySheetSkin = new CustomPropertySheetSkin(this.propertySheet);
-        this.propertySheet.setSkin(this.propertySheetSkin);
+        CustomPropertySheetSkin propertySheetSkin = new CustomPropertySheetSkin(this.propertySheet);
+        this.propertySheet.setSkin(propertySheetSkin);
 
         this.loyaltyField = new ClearableSliderItem(Eu4SaveEditorUtils.localize(this.estate.getEstateGame().getName(), this.country.getSave().getGame()),
                                                     this.country.getSave().getGame().getLocalisationClean("LOYALTY", Eu4Language.getDefault()),
@@ -81,9 +77,9 @@ public class EstatePropertySheet extends VBox {
         items.add(this.territoryField);
 
         this.privileges = FXCollections.observableArrayList(this.estate.getGrantedPrivileges().stream().map(Privilege::new).collect(Collectors.toList()));
-        this.privilegeButton = new ButtonItem(Eu4SaveEditorUtils.localize(this.estate.getEstateGame().getName(), this.country.getSave().getGame()), null,
-                                              country.getSave().getGame().getLocalisationClean("PRIVILEGE_PICKER_TITLE", Eu4Language.getDefault()), 2);
-        this.privilegeButton.getButton().setOnAction(event -> {
+        ButtonItem privilegeButton = new ButtonItem(Eu4SaveEditorUtils.localize(this.estate.getEstateGame().getName(), this.country.getSave().getGame()), null,
+                                                    country.getSave().getGame().getLocalisationClean("PRIVILEGE_PICKER_TITLE", Eu4Language.getDefault()), 2);
+        privilegeButton.getButton().setOnAction(event -> {
             TableView2Privilege tableView2Privilege = new TableView2Privilege(this.country, this.estate, this.privileges,
                                                                               FXCollections.observableArrayList(
                                                                                       this.estate.getEstateGame().getPrivileges().values()));
@@ -107,7 +103,7 @@ public class EstatePropertySheet extends VBox {
 
             privilegeList.ifPresent(this.privileges::setAll);
         });
-        items.add(this.privilegeButton);
+        items.add(privilegeButton);
 
         this.validationSupport = new ValidationSupport();
         this.validationSupport.setValidationDecorator(

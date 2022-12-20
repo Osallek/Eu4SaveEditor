@@ -13,19 +13,21 @@ public class SelectableGridView<T> extends GridView<T> {
 
     private ObservableSet<T> selection = FXCollections.observableSet(new HashSet<>());
 
-    private Set<SelectableGridCell<T>> cells = new HashSet<>();
+    private final Set<SelectableGridCell<T>> cells = new HashSet<>();
 
     private boolean anyItemChanged;
 
     private int size = 48;
 
+    private boolean multiSelect;
 
-    public SelectableGridView(ObservableList<T> items) {
-        this(items, (Integer) null);
+    public SelectableGridView(ObservableList<T> items, boolean multiSelect) {
+        this(items, multiSelect, (Integer) null);
     }
 
-    public SelectableGridView(ObservableList<T> items, Integer size) {
+    public SelectableGridView(ObservableList<T> items, boolean multiSelect, Integer size) {
         super();
+        this.multiSelect = multiSelect;
 
         if (size != null) {
             this.size = size;
@@ -39,21 +41,24 @@ public class SelectableGridView<T> extends GridView<T> {
         setItems(items);
     }
 
-    public SelectableGridView(ObservableList<T> items, ObservableSet<T> selectedItems) {
-        this(items, selectedItems, null);
+    public SelectableGridView(ObservableList<T> items, boolean multiSelect, ObservableSet<T> selectedItems) {
+        this(items, multiSelect, selectedItems, null);
     }
 
-    public SelectableGridView(ObservableList<T> items, ObservableSet<T> selectedItems, Integer size) {
-        this(items, size);
+    public SelectableGridView(ObservableList<T> items, boolean multiSelect, ObservableSet<T> selectedItems, Integer size) {
+        this(items, multiSelect, size);
         this.selection = selectedItems;
     }
 
     public void setCellFactory(Function<T, String> textFunction, Function<T, File> imageFunction) {
-        super.setCellFactory(param -> new SelectableGridCell<>(textFunction, imageFunction, this.size));
+        super.setCellFactory(param -> new SelectableGridCell<>(textFunction, imageFunction, this.size, !this.multiSelect));
     }
 
     public void select(T t) {
-        this.selection.forEach(this::unSelect);
+        if (!this.multiSelect) {
+            this.selection.forEach(this::unSelect);
+        }
+
         this.selection.add(t);
         this.anyItemChanged = true;
     }

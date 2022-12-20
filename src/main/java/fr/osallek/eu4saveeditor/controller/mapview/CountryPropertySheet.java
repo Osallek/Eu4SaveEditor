@@ -19,6 +19,7 @@ import fr.osallek.eu4parser.model.save.country.LeaderType;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 import fr.osallek.eu4saveeditor.Eu4SaveEditor;
+import fr.osallek.eu4saveeditor.common.Constants;
 import fr.osallek.eu4saveeditor.common.Eu4SaveEditorUtils;
 import fr.osallek.eu4saveeditor.controller.control.ClearableCheckComboBox;
 import fr.osallek.eu4saveeditor.controller.control.ClearableColorPicker;
@@ -48,9 +49,9 @@ import fr.osallek.eu4saveeditor.controller.converter.ProvinceStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.ProvinceStringConverter;
 import fr.osallek.eu4saveeditor.controller.converter.ReligionGroupStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.ReligionStringCellFactory;
-import fr.osallek.eu4saveeditor.controller.converter.SaveReligionStringConverter;
 import fr.osallek.eu4saveeditor.controller.converter.ReligiousReformStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.SaveReligionStringCellFactory;
+import fr.osallek.eu4saveeditor.controller.converter.SaveReligionStringConverter;
 import fr.osallek.eu4saveeditor.controller.object.ActivePolicy;
 import fr.osallek.eu4saveeditor.controller.object.CountrySubject;
 import fr.osallek.eu4saveeditor.controller.object.Idea;
@@ -76,7 +77,6 @@ import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSpinnerI
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableTextItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.PropertySheetItem;
 import fr.osallek.eu4saveeditor.controller.validator.CustomGraphicValidationDecoration;
-import fr.osallek.eu4saveeditor.i18n.SheetCategory;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -108,10 +108,13 @@ import org.controlsfx.validation.decoration.CompoundValidationDecoration;
 import org.controlsfx.validation.decoration.StyleClassValidationDecoration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.MessageSource;
 
 public class CountryPropertySheet extends VBox {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CountryPropertySheet.class);
+
+    private final MessageSource messageSource;
 
     private SaveCountry country;
 
@@ -205,7 +208,7 @@ public class CountryPropertySheet extends VBox {
 
     private final CustomPropertySheet courtPropertySheet;
 
-    private CustomPropertySheetSkin courtPropertySheetSkin;
+    private final CustomPropertySheetSkin courtPropertySheetSkin;
 
     private MonarchPropertySheet monarchPropertySheet;
 
@@ -257,7 +260,7 @@ public class CountryPropertySheet extends VBox {
 
     private final List<EstatePropertySheet> estatePropertySheets;
 
-    private CustomPropertySheetSkin estatesPropertySheetSkin;
+    private final CustomPropertySheetSkin estatesPropertySheetSkin;
 
     private final ClearableSpinnerItem<Integer> admTechField;
 
@@ -305,7 +308,9 @@ public class CountryPropertySheet extends VBox {
 
     private BooleanProperty colorChanged;
 
-    public CountryPropertySheet(Save save, ObservableList<SaveCountry> countriesAlive, ObservableList<Culture> cultures, ObservableList<SaveReligion> religions) {
+    public CountryPropertySheet(MessageSource messageSource, Save save, ObservableList<SaveCountry> countriesAlive, ObservableList<Culture> cultures,
+                                ObservableList<SaveReligion> religions) {
+        this.messageSource = messageSource;
         this.countriesAlive = countriesAlive;
         this.cultures = cultures;
         this.religions = religions;
@@ -325,43 +330,44 @@ public class CountryPropertySheet extends VBox {
         this.propertySheet.setSkin(this.propertySheetSkin);
 
         //GENERAL
-        this.nameField = new ClearableTextItem(SheetCategory.GENERAL, Eu4SaveEditorUtils.localize("LEDGER_NAME", save.getGame()));
+        this.nameField = new ClearableTextItem(this.messageSource.getMessage("ose.category.general", null, Constants.LOCALE),
+                                               Eu4SaveEditorUtils.localize("LEDGER_NAME", save.getGame()));
         this.nameField.getTextField().getStylesheets().add(Eu4SaveEditor.class.getResource("/styles/style.css").toExternalForm());
 
-        this.wasPlayerField = new CheckBoxItem(SheetCategory.GENERAL, Eu4SaveEditorUtils.localize("WAS_PLAYER", save.getGame()), false);
+        this.wasPlayerField = new CheckBoxItem(this.messageSource.getMessage("ose.category.general", null, Constants.LOCALE), Eu4SaveEditorUtils.localize("WAS_PLAYER", save.getGame()), false);
 
-        this.admPointField = new ClearableSpinnerItem<>(SheetCategory.GENERAL,
+        this.admPointField = new ClearableSpinnerItem<>(this.messageSource.getMessage("ose.category.general", null, Constants.LOCALE),
                                                         Eu4SaveEditorUtils.localize("ADM_POWER", save.getGame()),
                                                         new ClearableSpinnerInt(0, 999, 1));
 
-        this.dipPointField = new ClearableSpinnerItem<>(SheetCategory.GENERAL,
+        this.dipPointField = new ClearableSpinnerItem<>(this.messageSource.getMessage("ose.category.general", null, Constants.LOCALE),
                                                         Eu4SaveEditorUtils.localize("DIP_POWER", save.getGame()),
                                                         new ClearableSpinnerInt(0, 999, 1));
 
-        this.milPointField = new ClearableSpinnerItem<>(SheetCategory.GENERAL,
+        this.milPointField = new ClearableSpinnerItem<>(this.messageSource.getMessage("ose.category.general", null, Constants.LOCALE),
                                                         Eu4SaveEditorUtils.localize("MIL_POWER", save.getGame()),
                                                         new ClearableSpinnerInt(0, 999, 1));
 
-        this.stabilityField = new ClearableSpinnerItem<>(SheetCategory.GENERAL,
+        this.stabilityField = new ClearableSpinnerItem<>(this.messageSource.getMessage("ose.category.general", null, Constants.LOCALE),
                                                          Eu4SaveEditorUtils.localize("stability", save.getGame()),
                                                          new ClearableSpinnerInt(-3, 3, 1));
 
-        this.prestigeField = new ClearableSpinnerItem<>(SheetCategory.GENERAL,
+        this.prestigeField = new ClearableSpinnerItem<>(this.messageSource.getMessage("ose.category.general", null, Constants.LOCALE),
                                                         Eu4SaveEditorUtils.localize("prestige", save.getGame()),
                                                         new ClearableSpinnerDouble(-100, 100, 1));
 
-        this.absolutismField = new ClearableSpinnerItem<>(SheetCategory.GENERAL,
+        this.absolutismField = new ClearableSpinnerItem<>(this.messageSource.getMessage("ose.category.general", null, Constants.LOCALE),
                                                           Eu4SaveEditorUtils.localize("absolutism", save.getGame()),
                                                           new ClearableSpinnerInt(0, 100, 1));
 
-        this.capitalField = new ClearableComboBoxItem<>(SheetCategory.GENERAL,
+        this.capitalField = new ClearableComboBoxItem<>(this.messageSource.getMessage("ose.category.general", null, Constants.LOCALE),
                                                         Eu4SaveEditorUtils.localize("TRIGGER_CAPITAL", save.getGame()),
                                                         FXCollections.observableArrayList(),
                                                         new ClearableComboBox<>(new SearchableComboBox<>()));
         this.capitalField.setConverter(new ProvinceStringConverter());
         this.capitalField.setCellFactory(new ProvinceStringCellFactory());
 
-        this.mapColorField = new ClearableColorPickerItem(SheetCategory.GENERAL,
+        this.mapColorField = new ClearableColorPickerItem(this.messageSource.getMessage("ose.category.general", null, Constants.LOCALE),
                                                           Eu4SaveEditorUtils.localize("ND_MAP_COLOR", save.getGame()),
                                                           new ClearableColorPicker(new ColorPicker()));
 
@@ -466,42 +472,43 @@ public class CountryPropertySheet extends VBox {
         this.secondaryReligionsField.setCellFactory(SaveReligionStringCellFactory.INSTANCE);
 
         //Economy
-        this.treasuryField = new ClearableSpinnerItem<>(SheetCategory.ECONOMY,
+        this.treasuryField = new ClearableSpinnerItem<>(this.messageSource.getMessage("ose.category.economy", null, Constants.LOCALE),
                                                         Eu4SaveEditorUtils.localize("TECH_TRESURY_TITLE", save.getGame()),
                                                         new ClearableSpinnerDouble(-1000000, 1000000, 100));
 
-        this.inflationField = new ClearableSpinnerItem<>(SheetCategory.ECONOMY,
+        this.inflationField = new ClearableSpinnerItem<>(this.messageSource.getMessage("ose.category.economy", null, Constants.LOCALE),
                                                          Eu4SaveEditorUtils.localize("inflation", save.getGame()),
                                                          new ClearableSpinnerDouble(0, Integer.MAX_VALUE / 1000.0, 1));
 
-        this.corruptionField = new ClearableSliderItem(SheetCategory.ECONOMY,
+        this.corruptionField = new ClearableSliderItem(this.messageSource.getMessage("ose.category.economy", null, Constants.LOCALE),
                                                        Eu4SaveEditorUtils.localize("corruption", save.getGame()),
                                                        0, 100);
 
-        this.mercantilismField = new ClearableSliderIntItem(SheetCategory.ECONOMY,
+        this.mercantilismField = new ClearableSliderIntItem(this.messageSource.getMessage("ose.category.economy", null, Constants.LOCALE),
                                                             Eu4SaveEditorUtils.localize("MERCANTILISM_LABEL", save.getGame()),
                                                             0, 100);
 
-        this.loansButton = new ButtonItem(SheetCategory.ECONOMY, null, save.getGame().getLocalisationClean("AI_LOANS", Eu4Language.getDefault()), 2);
+        this.loansButton = new ButtonItem(this.messageSource.getMessage("ose.category.economy", null, Constants.LOCALE), null, save.getGame()
+                                                                                                                                   .getLocalisationClean("AI_LOANS", Eu4Language.getDefault()), 2);
         this.loans = FXCollections.observableArrayList();
 
         //Institutions
         this.institutionsEmbracedFields = new ArrayList<>();
 
         //GOVERNMENT
-        this.governmentRankField = new ClearableComboBoxItem<>(SheetCategory.COUNTRY_GOVERNMENT,
+        this.governmentRankField = new ClearableComboBoxItem<>(this.messageSource.getMessage("ose.category.government", null, Constants.LOCALE),
                                                                save.getGame().getLocalisationClean("GOV_RANK", Eu4Language.getDefault()),
                                                                FXCollections.observableArrayList(),
                                                                new ClearableComboBox<>(new RequiredComboBox<>()));
         this.governmentRankField.setConverter(new PairConverter());
         this.governmentRankField.setCellFactory(new PairCellFactory());
 
-        this.governmentReformProgressField = new ClearableSpinnerItem<>(SheetCategory.COUNTRY_GOVERNMENT,
+        this.governmentReformProgressField = new ClearableSpinnerItem<>(this.messageSource.getMessage("ose.category.government", null, Constants.LOCALE),
                                                                         save.getGame()
                                                                             .getLocalisationCleanNoPunctuation("CHANGE_GOVERNMENT_REFORM_PROGRESS", Eu4Language.getDefault()),
                                                                         new ClearableSpinnerDouble(0, Double.MAX_VALUE, 10));
 
-        this.governmentReformsButton = new ButtonItem(SheetCategory.COUNTRY_GOVERNMENT,
+        this.governmentReformsButton = new ButtonItem(this.messageSource.getMessage("ose.category.government", null, Constants.LOCALE),
                                                       null,
                                                       save.getGame().getLocalisationClean("governmental_reforms", Eu4Language.getDefault()),
                                                       2);
@@ -533,32 +540,32 @@ public class CountryPropertySheet extends VBox {
         this.rivals = FXCollections.observableArrayList();
 
         //Military
-        this.manpowerField = new ClearableSpinnerItem<>(SheetCategory.COUNTRY_MILITARY,
+        this.manpowerField = new ClearableSpinnerItem<>(this.messageSource.getMessage("ose.category.military", null, Constants.LOCALE),
                                                         save.getGame().getLocalisationCleanNoPunctuation("HINT_MANPOWER_TITLE", Eu4Language.getDefault()),
                                                         new ClearableSpinnerDouble(0, Double.MAX_VALUE, 1000));
 
-        this.sailorsField = new ClearableSpinnerItem<>(SheetCategory.COUNTRY_MILITARY,
+        this.sailorsField = new ClearableSpinnerItem<>(this.messageSource.getMessage("ose.category.military", null, Constants.LOCALE),
                                                        save.getGame().getLocalisationCleanNoPunctuation("LEDGER_SAILORS", Eu4Language.getDefault()),
                                                        new ClearableSpinnerDouble(0, Double.MAX_VALUE, 1000));
 
-        this.armyTraditionField = new ClearableSliderItem(SheetCategory.COUNTRY_MILITARY,
+        this.armyTraditionField = new ClearableSliderItem(this.messageSource.getMessage("ose.category.military", null, Constants.LOCALE),
                                                           Eu4SaveEditorUtils.localize("army_tradition", save.getGame()),
                                                           0, 100);
 
-        this.navyTraditionField = new ClearableSliderItem(SheetCategory.COUNTRY_MILITARY,
+        this.navyTraditionField = new ClearableSliderItem(this.messageSource.getMessage("ose.category.military", null, Constants.LOCALE),
                                                           Eu4SaveEditorUtils.localize("navy_tradition", save.getGame()),
                                                           0, 100);
 
-        this.armyProfessionalismField = new ClearableSliderItem(SheetCategory.COUNTRY_MILITARY,
+        this.armyProfessionalismField = new ClearableSliderItem(this.messageSource.getMessage("ose.category.military", null, Constants.LOCALE),
                                                                 Eu4SaveEditorUtils.localize("army_professionalism", save.getGame()),
                                                                 0, save.getGame().getMaxArmyProfessionalism());
 
-        this.warEhaustionField = new ClearableSliderItem(SheetCategory.COUNTRY_MILITARY,
+        this.warEhaustionField = new ClearableSliderItem(this.messageSource.getMessage("ose.category.military", null, Constants.LOCALE),
                                                          Eu4SaveEditorUtils.localize("WAR_EXHAUSTION", save.getGame()),
                                                          0, 20);
 
-        this.leadersButton = new ButtonItem(SheetCategory.COUNTRY_MILITARY, null, save.getGame()
-                                                                                      .getLocalisationClean("HEADER_LEADER", Eu4Language.getDefault()), 2);
+        this.leadersButton = new ButtonItem(this.messageSource.getMessage("ose.category.military", null, Constants.LOCALE), null, save.getGame()
+                                                                                                                                      .getLocalisationClean("HEADER_LEADER", Eu4Language.getDefault()), 2);
         this.leaders = FXCollections.observableArrayList();
 
         //ESTATES
@@ -612,12 +619,12 @@ public class CountryPropertySheet extends VBox {
 
         //Flags
         this.flags = FXCollections.observableArrayList();
-        this.flagsButton = new ButtonItem(SheetCategory.COUNTRY_FLAGS, null,
-                                          SheetCategory.COUNTRY_FLAGS.getForDefaultLocale());
+        this.flagsButton = new ButtonItem(this.messageSource.getMessage("ose.category.flags", null, Constants.LOCALE), null,
+                                          this.messageSource.getMessage("ose.category.flags", null, Constants.LOCALE));
 
         this.hiddenFlags = FXCollections.observableArrayList();
-        this.hiddenFlagsButton = new ButtonItem(SheetCategory.COUNTRY_FLAGS, null,
-                                                SheetCategory.COUNTRY_HIDDEN_FLAGS.getForDefaultLocale());
+        this.hiddenFlagsButton = new ButtonItem(this.messageSource.getMessage("ose.category.flags", null, Constants.LOCALE), null,
+                                                this.messageSource.getMessage("ose.category.hidden-flags", null, Constants.LOCALE));
 
         this.validationSupport = new ValidationSupport();
         this.validationSupport.registerValidator(this.nameField.getTextField(), Validator.createEmptyValidator("Text is required"));
@@ -1410,7 +1417,7 @@ public class CountryPropertySheet extends VBox {
                         TableView2StringDate tableView2Flag = new TableView2StringDate(this.country.getSave(), this.flags, false, null, null);
                         TableViewDialog<StringDate> dialog = new TableViewDialog<>(this.country.getSave(),
                                                                                    tableView2Flag,
-                                                                                   SheetCategory.COUNTRY_FLAGS.getForDefaultLocale(),
+                                                                                   this.messageSource.getMessage("ose.category.flags", null, Constants.LOCALE),
                                                                                    list -> null,
                                                                                    () -> this.flags);
                         dialog.setDisableAddProperty(new SimpleBooleanProperty(true));
@@ -1435,7 +1442,7 @@ public class CountryPropertySheet extends VBox {
                         TableView2StringDate tableView2HiddenFlag = new TableView2StringDate(this.country.getSave(), this.hiddenFlags, false, null, null);
                         TableViewDialog<StringDate> dialog = new TableViewDialog<>(this.country.getSave(),
                                                                                    tableView2HiddenFlag,
-                                                                                   SheetCategory.COUNTRY_HIDDEN_FLAGS.getForDefaultLocale(),
+                                                                                   this.messageSource.getMessage("ose.category.hidden-flags", null, Constants.LOCALE),
                                                                                    list -> null,
                                                                                    () -> this.hiddenFlags);
                         dialog.setDisableAddProperty(new SimpleBooleanProperty(true));
@@ -1481,7 +1488,7 @@ public class CountryPropertySheet extends VBox {
     }
 
     public void validate(ActionEvent actionEvent) {
-        if (!ClausewitzUtils.removeQuotes(this.country.getLocalizedName()).equals(this.nameField.getText())) {
+        if (!Objects.equals(ClausewitzUtils.removeQuotes(this.country.getLocalizedName()), this.nameField.getText())) {
             this.country.setLocalizedName(this.nameField.getText());
         }
 
@@ -1505,7 +1512,7 @@ public class CountryPropertySheet extends VBox {
             this.country.setMercantilism(this.mercantilismField.getIntValue());
         }
 
-        if (this.country.getLoans().size() != this.loans.size() || this.loans.stream().anyMatch(Loan::isChanged)) {
+        if (CollectionUtils.size(this.country.getLoans()) != this.loans.size() || this.loans.stream().anyMatch(Loan::isChanged)) {
             this.country.getLoans().forEach(loan -> this.loans.stream()
                                                               .filter(l -> loan.getId().getId().equals(l.getId()))
                                                               .findFirst()
@@ -1527,7 +1534,7 @@ public class CountryPropertySheet extends VBox {
             this.loans.forEach(l -> this.country.addLoan(l.getInterest(), l.getAmount(), l.getExpiryDate()));
         }
 
-        if (!Objects.equals(this.country.getGovernmentName().getRank(this.country.getGovernmentLevel()), this.governmentRankField.getSelectedValue())) {
+        if (!Objects.equals(this.country.getGovernmentLevel(), this.governmentRankField.getSelectedValue().getKey())) {
             this.country.setGovernmentRank(this.governmentRankField.getSelectedValue().getKey());
         }
 

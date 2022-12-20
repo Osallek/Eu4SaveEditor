@@ -1,7 +1,6 @@
 package fr.osallek.eu4saveeditor.controller.propertyeditor.item;
 
 import fr.osallek.eu4saveeditor.controller.control.ClearableSlider;
-import fr.osallek.eu4saveeditor.i18n.SheetCategory;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
 import javafx.beans.property.BooleanProperty;
@@ -21,28 +20,12 @@ public class ClearableSliderItem implements CustomItem<Integer> {
 
     private final BooleanProperty editable;
 
-    public ClearableSliderItem(SheetCategory category, String name, double min, double max) {
-        this(category, name, min, max, null, null);
-    }
-
     public ClearableSliderItem(String category, String name, double min, double max) {
         this(category, name, min, max, null, null);
     }
 
-    public ClearableSliderItem(SheetCategory category, String name, double min, double max, Double value, DoubleSupplier supplier) {
-        this(category.getForDefaultLocale(), name, min, max, value, supplier);
-    }
-
     public ClearableSliderItem(String category, String name, double min, double max, Double value, DoubleSupplier supplier) {
         this(category, name, new ClearableSlider(min, max, value, supplier, new NumberStringConverter("###.###")), new SimpleBooleanProperty(true));
-    }
-
-    public ClearableSliderItem(SheetCategory category, String name, ClearableSlider slider) {
-        this(category, name, slider, new SimpleBooleanProperty(true));
-    }
-
-    public ClearableSliderItem(SheetCategory category, String name, ClearableSlider slider, BooleanProperty editable) {
-        this(category.getForDefaultLocale(), name, slider, editable);
     }
 
     public ClearableSliderItem(String category, String name, ClearableSlider slider, BooleanProperty editable) {

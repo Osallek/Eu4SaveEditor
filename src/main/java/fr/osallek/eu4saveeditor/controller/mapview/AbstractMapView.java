@@ -33,17 +33,9 @@ public abstract class AbstractMapView {
         this.selected.setValue(selected);
     }
 
-    public void draw() {
-        for (DrawableProvince drawableProvince : this.mapViewContainer.getDrawableProvinces().values()) {
-            if (drawableProvince != null) {
-                drawProvince(drawableProvince.getProvince() == null ? null : drawableProvince.getProvince().getId());
-            }
-        }
-    }
+    public abstract void draw();
 
     public abstract void onProvinceSelected(SaveProvince province);
-
-    public abstract void drawProvince(Integer provinceId);
 
     public abstract List<CustomPropertySheet> removeSheets();
 

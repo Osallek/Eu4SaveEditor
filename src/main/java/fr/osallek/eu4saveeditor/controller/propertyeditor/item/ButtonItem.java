@@ -1,6 +1,5 @@
 package fr.osallek.eu4saveeditor.controller.propertyeditor.item;
 
-import fr.osallek.eu4saveeditor.i18n.SheetCategory;
 import java.util.Optional;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -23,14 +22,6 @@ public class ButtonItem implements CustomItem<String> {
 
     private final Integer colSpan;
 
-    public ButtonItem(SheetCategory category, String name, String label) {
-        this(category.getForDefaultLocale(), name, label);
-    }
-
-    public ButtonItem(SheetCategory category, String name, String label, Integer colSpan) {
-        this(category.getForDefaultLocale(), name, null, label, colSpan);
-    }
-
     public ButtonItem(String category, String name, String label) {
         this(category, name, null, label, null);
     }
@@ -39,8 +30,8 @@ public class ButtonItem implements CustomItem<String> {
         this(category, name, null, label, colSpan);
     }
 
-    public ButtonItem(SheetCategory category, String name, String description, String label) {
-        this(category.getForDefaultLocale(), name, description, label, null);
+    public ButtonItem(String category, String name, String description, String label) {
+        this(category, name, description, label, null);
     }
 
     public ButtonItem(String category, String name, String description, String label, Integer colSpan) {

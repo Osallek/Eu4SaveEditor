@@ -65,18 +65,13 @@ public class MonarchPropertySheet extends VBox {
 
     private final ClearableDatePickerItem birthDateField;
 
-    private ClearableSliderItem claimField;
-
-    private final ButtonItem personalitiesButton;
+    private final ClearableSliderItem claimField;
 
     private final ObservableList<Personality> personalities = FXCollections.observableArrayList();
 
     private final ValidationSupport validationSupport;
 
-    private CustomPropertySheetSkin propertySheetSkin;
-
-    public MonarchPropertySheet(SaveCountry country, Monarch monarch, String name, ObservableList<Culture> cultures,
-                                ObservableList<SaveReligion> religions) {
+    public MonarchPropertySheet(SaveCountry country, Monarch monarch, String name, ObservableList<Culture> cultures, ObservableList<SaveReligion> religions) {
         this.country = country;
         this.monarch = monarch;
         this.propertySheet = new CustomPropertySheet();
@@ -87,8 +82,8 @@ public class MonarchPropertySheet extends VBox {
 
         List<CustomPropertySheet.Item> items = new ArrayList<>();
 
-        this.propertySheetSkin = new CustomPropertySheetSkin(this.propertySheet);
-        this.propertySheet.setSkin(this.propertySheetSkin);
+        CustomPropertySheetSkin propertySheetSkin = new CustomPropertySheetSkin(this.propertySheet);
+        this.propertySheet.setSkin(propertySheetSkin);
 
         this.nameField = new ClearableTextItem(name, this.country.getSave().getGame().getLocalisationClean("LEDGER_NAME", Eu4Language.getDefault()));
         this.nameField.getTextField().getStylesheets().add(Eu4SaveEditor.class.getResource("/styles/style.css").toExternalForm());
@@ -179,10 +174,10 @@ public class MonarchPropertySheet extends VBox {
                                                                                                             .stream()
                                                                                                             .map(Personality::new)
                                                                                                             .collect(Collectors.toList()));
-        this.personalitiesButton = new ButtonItem(name, null, this.country.getSave()
-                                                                          .getGame()
-                                                                          .getLocalisationClean("LEDGER_PERSONALITIES", Eu4Language.getDefault()), 2);
-        this.personalitiesButton.getButton().setOnAction(event -> {
+        ButtonItem personalitiesButton = new ButtonItem(name, null, this.country.getSave()
+                                                                                .getGame()
+                                                                                .getLocalisationClean("LEDGER_PERSONALITIES", Eu4Language.getDefault()), 2);
+        personalitiesButton.getButton().setOnAction(event -> {
             TableView2Personalities view2Personalities = new TableView2Personalities(this.country, this.monarch, this.personalities,
                                                                                      this.country.getSave()
                                                                                                  .getGame()
@@ -209,7 +204,7 @@ public class MonarchPropertySheet extends VBox {
 
             rulerPersonalities.ifPresent(this.personalities::setAll);
         });
-        items.add(this.personalitiesButton);
+        items.add(personalitiesButton);
 
         this.validationSupport = new ValidationSupport();
         this.validationSupport.setValidationDecorator(new CompoundValidationDecoration(new CustomGraphicValidationDecoration(),
