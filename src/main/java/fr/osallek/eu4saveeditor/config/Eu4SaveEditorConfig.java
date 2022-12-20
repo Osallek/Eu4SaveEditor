@@ -14,7 +14,7 @@ public class Eu4SaveEditorConfig {
     public MessageSource messageSource() {
         final ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
 
-        messageSource.addBasenames("messages/ose");
+        messageSource.addBasenames("messages/ose", "messages/province");
         messageSource.setUseCodeAsDefaultMessage(true);
         messageSource.setDefaultLocale(Locale.US);
         messageSource.setDefaultEncoding(StandardCharsets.UTF_8.name());

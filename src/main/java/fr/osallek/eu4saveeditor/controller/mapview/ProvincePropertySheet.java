@@ -122,6 +122,8 @@ public class ProvincePropertySheet extends VBox {
 
     private final ClearableSpinnerItem<Integer> cotField;
 
+    private final ClearableSpinnerItem<Integer> infrastructureField;
+
     private final List<ClearableSliderItem> institutionFields;
 
     private final ClearableSliderItem autonomyField;
@@ -271,6 +273,10 @@ public class ProvincePropertySheet extends VBox {
                                                    save.getGame().getLocalisationClean("EST_VAL_COT", Eu4Language.getDefault()),
                                                    new ClearableSpinnerInt(0, 3, 1));
 
+        this.infrastructureField = new ClearableSpinnerItem<>(this.messageSource.getMessage("ose.category.economy", null, Constants.LOCALE),
+                                                              this.messageSource.getMessage("province.infrastructure", null, Constants.LOCALE),
+                                                              new ClearableSpinnerInt(0, 100, 1));
+
         this.autonomyField = new ClearableSliderItem(this.messageSource.getMessage("ose.category.economy", null, Constants.LOCALE),
                                                      save.getGame().getLocalisationClean("local_autonomy", Eu4Language.getDefault()),
                                                      0, 100);
@@ -333,6 +339,7 @@ public class ProvincePropertySheet extends VBox {
         this.tradeGoodField.setEditable(false);
         this.latentTradeGoodField.setEditable(false);
         this.cotField.setEditable(false);
+        this.infrastructureField.setEditable(false);
         this.institutionFields.forEach(clearableSliderItem -> clearableSliderItem.setEditable(false));
         this.autonomyField.setEditable(false);
         this.devastationField.setEditable(false);
@@ -449,6 +456,11 @@ public class ProvincePropertySheet extends VBox {
             this.cotField.setSupplier(this.province::getCenterOfTradeLevel);
             this.cotField.setEditable(true);
             items.add(this.cotField);
+
+            this.infrastructureField.setValue(this.province.getExpandInfrastructure());
+            this.infrastructureField.setSupplier(this.province::getExpandInfrastructure);
+            this.infrastructureField.setEditable(true);
+            items.add(this.infrastructureField);
 
             if (this.province.isCity()) {
                 this.autonomyField.setValue(this.province.getTrueLocalAutonomy());
@@ -672,6 +684,12 @@ public class ProvincePropertySheet extends VBox {
         if (this.cotField.isEditable().getValue()) {
             if (!Objects.deepEquals(this.province.getCenterOfTradeLevel(), this.cotField.getTrueValue())) {
                 this.province.setCenterOfTrade(this.cotField.getTrueValue());
+            }
+        }
+
+        if (this.infrastructureField.isEditable().getValue()) {
+            if (!Objects.deepEquals(this.province.getExpandInfrastructure(), this.infrastructureField.getTrueValue())) {
+                this.province.setExpandInfrastructure(this.infrastructureField.getTrueValue());
             }
         }
 
