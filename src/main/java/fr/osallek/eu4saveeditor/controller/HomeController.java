@@ -262,10 +262,11 @@ public class HomeController {
 
         ReadSaveTask task = new ReadSaveTask(this.gameDirectory, this.localSavesCombo.getSelectionModel().getSelectedItem(), this.messageSource);
         task.setOnFailed(event -> {
-            LOGGER.error("An error occurred while extracting the save: {}", task.getException().getMessage(), task.getException());
+            LOGGER.error("{} {}", this.messageSource.getMessage("ose.error.extracting", null, Constants.LOCALE),
+                         task.getException().getMessage(), task.getException());
             this.progressText.setFill(Color.RED);
             this.progressText.textProperty().unbind();
-            this.progressText.setText("An error occurred while extracting the save: " + task.getException().getMessage());
+            this.progressText.setText(this.messageSource.getMessage("ose.error.extracting", null, Constants.LOCALE) + task.getException().getMessage());
             this.loading.set(false);
             this.localSavesCombo.setDisable(false);
         });

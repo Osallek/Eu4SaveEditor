@@ -3,16 +3,20 @@ package fr.osallek.eu4saveeditor.controller.mapview;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.common.ImageReader;
 import fr.osallek.eu4parser.model.game.Event;
+import fr.osallek.eu4parser.model.game.Government;
+import fr.osallek.eu4parser.model.game.GovernmentReform;
 import fr.osallek.eu4parser.model.game.ImperialReform;
 import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.SaveReligion;
 import fr.osallek.eu4parser.model.save.changeprices.ChangePriceGood;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
+import fr.osallek.eu4parser.model.save.country.SaveGovernment;
 import fr.osallek.eu4parser.model.save.empire.HreReligionStatus;
 import fr.osallek.eu4parser.model.save.gameplayoptions.CustomNationDifficulty;
 import fr.osallek.eu4parser.model.save.gameplayoptions.Difficulty;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
+import fr.osallek.eu4saveeditor.common.Constants;
 import fr.osallek.eu4saveeditor.common.Eu4SaveEditorUtils;
 import fr.osallek.eu4saveeditor.controller.control.ClearableComboBox;
 import fr.osallek.eu4saveeditor.controller.control.CustomListSelectionView;
@@ -46,7 +50,6 @@ import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderIt
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.HBoxItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.PropertySheetItem;
 import fr.osallek.eu4saveeditor.controller.validator.CustomGraphicValidationDecoration;
-import fr.osallek.eu4saveeditor.i18n.ItemsI18n;
 import fr.osallek.eu4saveeditor.i18n.SheetCategory;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -71,16 +74,23 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.controlsfx.control.SearchableComboBox;
 import org.controlsfx.validation.ValidationSupport;
 import org.controlsfx.validation.decoration.CompoundValidationDecoration;
 import org.controlsfx.validation.decoration.StyleClassValidationDecoration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.MessageSource;
 
 public class SavePropertySheet extends VBox {
 
+    //Todo Hegemon
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SavePropertySheet.class);
+
+    private final MessageSource messageSource;
 
     private final Save save;
 
@@ -174,8 +184,9 @@ public class SavePropertySheet extends VBox {
 
     private final ObservableList<Event> notFiredEvents;
 
-    public SavePropertySheet(Save save, ObservableList<SaveCountry> countriesAlive, ObservableList<SaveProvince> cities) {
+    public SavePropertySheet(Save save, ObservableList<SaveCountry> countriesAlive, ObservableList<SaveProvince> cities, MessageSource messageSource) {
         this.save = save;
+        this.messageSource = messageSource;
         this.propertySheet = new CustomPropertySheet();
         this.propertySheet.setPropertyEditorFactory(new CustomPropertyEditorFactory());
         this.propertySheet.setMode(CustomPropertySheet.Mode.CATEGORY);
@@ -418,12 +429,20 @@ public class SavePropertySheet extends VBox {
         if (!this.save.getHre().dismantled()) {
             this.hreEmperor = new ClearableComboBoxItem<>(SheetCategory.SAVE_HRE,
                                                           save.getGame().getLocalisationClean("HINT_EMPEROR_TITLE", Eu4Language.getDefault()),
-                                                          new FilteredList<>(countriesAlive,
-                                                                             country -> country.getCapital().getContinent()
-                                                                                               .equals(this.save.getHre().getContinent())),
+                                                          countriesAlive.filtered(
+                                                                  c -> c.getCapital().getContinent().equals(this.save.getHre().getContinent())
+                                                                       && Optional.ofNullable(c.getGovernment())
+                                                                                  .map(SaveGovernment::getType)
+                                                                                  .map(Government::getBasicGovernmentReform)
+                                                                                  .map(GovernmentReform::isMonarchy)
+                                                                                  .map(Pair::getKey)
+                                                                                  .map(BooleanUtils::isTrue).orElse(true)
+                                                                       && c.getOverlord() == null
+                                                                       && c.getReligion()
+                                                                           .getReligionGroup()
+                                                                           .equals(this.save.getHre().getEmperor().getReligion().getReligionGroup())),
                                                           this.save.getHre().getEmperor(),
-                                                          new ClearableComboBox<>(new SearchableComboBox<>(),
-                                                                                  () -> this.save.getHre().getEmperor()));
+                                                          new ClearableComboBox<>(new SearchableComboBox<>(), () -> this.save.getHre().getEmperor()));
             this.hreEmperor.setConverter(new CountryStringConverter());
             this.hreEmperor.setCellFactory(new CountryStringCellFactory());
 
@@ -654,7 +673,9 @@ public class SavePropertySheet extends VBox {
             this.decreeField = new ClearableComboBoxItem<>(SheetCategory.SAVE_CELESTIAL_EMPIRE,
                                                            this.save.getGame().getLocalisationClean("CELESTIAL_DECREES", Eu4Language.getDefault()),
                                                            FXCollections.observableList(decrees),
-                                                           Optional.ofNullable(this.save.getCelestialEmpire().getDecree().getDecree()).map(d -> new Decree(d, this.save)).orElse(null),
+                                                           Optional.ofNullable(this.save.getCelestialEmpire().getDecree().getDecree())
+                                                                   .map(d -> new Decree(d, this.save))
+                                                                   .orElse(null),
                                                            new ClearableComboBox<>(new ComboBox<>()));
             this.decreeField.setConverter(new DecreeStringConverter());
             this.decreeField.setCellFactory(new DecreeStringCellFactory());
@@ -694,14 +715,13 @@ public class SavePropertySheet extends VBox {
                  });
 
         if (!this.religionPropertySheet.getItems().isEmpty()) {
-            items.add(new PropertySheetItem(this.save.getGame()
-                                                     .getLocalisationClean("LEDGER_RELIGIONS", Eu4Language.getDefault()), this.religionPropertySheet));
+            items.add(new PropertySheetItem(this.save.getGame().getLocalisationClean("LEDGER_RELIGIONS", Eu4Language.getDefault()),
+                                            this.religionPropertySheet));
         }
 
         //EVENTS
         ButtonItem firedEventsButtonItem = new ButtonItem(this.save.getGame().getLocalisationClean("MENU_MESSAGES_EVENTS", Eu4Language.getDefault()),
-                                                          null,
-                                                          ItemsI18n.FIRED_EVENTS.getForDefaultLocale());
+                                                          null, this.messageSource.getMessage("ose.fired-events", null, Constants.LOCALE));
 
         this.firedEvents = FXCollections.observableArrayList(this.save.getFiredEvents().getEvents());
         this.notFiredEvents = FXCollections.observableArrayList(this.save.getGame().getFireOnlyOnceEvents());

@@ -48,7 +48,7 @@ import fr.osallek.eu4saveeditor.controller.converter.ProvinceStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.ProvinceStringConverter;
 import fr.osallek.eu4saveeditor.controller.converter.ReligionGroupStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.ReligionStringCellFactory;
-import fr.osallek.eu4saveeditor.controller.converter.ReligionStringConverter;
+import fr.osallek.eu4saveeditor.controller.converter.SaveReligionStringConverter;
 import fr.osallek.eu4saveeditor.controller.converter.ReligiousReformStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.SaveReligionStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.object.ActivePolicy;
@@ -370,22 +370,22 @@ public class CountryPropertySheet extends VBox {
                                                         Eu4SaveEditorUtils.localize("LEDGER_CULTURE", save.getGame()),
                                                         cultures,
                                                         new ClearableComboBox<>(new SearchableComboBox<>()));
-        this.cultureField.setConverter(new CultureStringConverter(save.getGame()));
-        this.cultureField.setCellFactory(new CultureStringCellFactory(save.getGame()));
+        this.cultureField.setConverter(CultureStringConverter.INSTANCE);
+        this.cultureField.setCellFactory(CultureStringCellFactory.INSTANCE);
 
         this.acceptedCulturesField = new ClearableCheckComboBoxItem<>(Eu4SaveEditorUtils.localize("LEDGER_CULTURE", save.getGame()),
                                                                       Eu4SaveEditorUtils.localize("MAPMODE_ACCEPTEDCULTURES", save.getGame()),
                                                                       cultures,
                                                                       new ClearableCheckComboBox<>());
-        this.acceptedCulturesField.setConverter(new CultureStringConverter(save.getGame()));
+        this.acceptedCulturesField.setConverter(CultureStringConverter.INSTANCE);
 
         //Religion
         this.religionField = new ClearableComboBoxItem<>(Eu4SaveEditorUtils.localize("LEDGER_RELIGION", save.getGame()),
                                                          Eu4SaveEditorUtils.localize("LEDGER_RELIGION", save.getGame()),
                                                          this.religions,
                                                          new ClearableComboBox<>(new SearchableComboBox<>()));
-        this.religionField.setConverter(new ReligionStringConverter(save.getGame()));
-        this.religionField.setCellFactory(new SaveReligionStringCellFactory(save.getGame()));
+        this.religionField.setConverter(SaveReligionStringConverter.INSTANCE);
+        this.religionField.setCellFactory(SaveReligionStringCellFactory.INSTANCE);
 
         this.authorityField = new ClearableSliderItem(Eu4SaveEditorUtils.localize("LEDGER_RELIGION", save.getGame()),
                                                       Eu4SaveEditorUtils.localize("authority", save.getGame()),
@@ -462,8 +462,8 @@ public class CountryPropertySheet extends VBox {
                                                                    Eu4SaveEditorUtils.localize("SECONDARY_RELIGION", save.getGame()),
                                                                    FXCollections.observableArrayList(this.religions),
                                                                    new ClearableComboBox<>(new SearchableComboBox<>()));
-        this.secondaryReligionsField.setConverter(new ReligionStringConverter(save.getGame()));
-        this.secondaryReligionsField.setCellFactory(new SaveReligionStringCellFactory(save.getGame()));
+        this.secondaryReligionsField.setConverter(SaveReligionStringConverter.INSTANCE);
+        this.secondaryReligionsField.setCellFactory(SaveReligionStringCellFactory.INSTANCE);
 
         //Economy
         this.treasuryField = new ClearableSpinnerItem<>(SheetCategory.ECONOMY,
@@ -896,7 +896,7 @@ public class CountryPropertySheet extends VBox {
                         CustomListSelectionView<Religion> listSelectionView = new CustomListSelectionView<>(
                                 FXCollections.observableArrayList(this.notHarmonizedReligions),
                                 FXCollections.observableArrayList(this.harmonizedReligions),
-                                new ReligionStringCellFactory(this.country.getSave().getGame()),
+                                ReligionStringCellFactory.INSTANCE,
                                 750, 600);
 
                         ListSelectionViewDialog<Religion> dialog =

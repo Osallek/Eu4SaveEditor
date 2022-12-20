@@ -6,6 +6,8 @@ import javafx.util.StringConverter;
 
 public class ProvinceIdStringConverter extends StringConverter<SaveProvince> {
 
+    public static final ProvinceIdStringConverter INSTANCE = new ProvinceIdStringConverter();
+
     @Override
     public String toString(SaveProvince province) {
         return province == null ? "" : ClausewitzUtils.removeQuotes(province.getName()) + " (" + province.getId() + ")";

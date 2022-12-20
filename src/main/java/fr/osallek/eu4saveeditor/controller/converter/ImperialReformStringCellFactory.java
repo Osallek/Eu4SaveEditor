@@ -22,7 +22,7 @@ public class ImperialReformStringCellFactory implements Callback<ListView<Imperi
             @Override
             protected void updateItem(ImperialReform value, boolean empty) {
                 super.updateItem(value, empty);
-                setText(value == null ? null : Eu4SaveEditorUtils.localize(value.getName(), game));
+                setText(value == null ? null : Eu4SaveEditorUtils.localize(value.getName() + "_title", game));
             }
         };
     }

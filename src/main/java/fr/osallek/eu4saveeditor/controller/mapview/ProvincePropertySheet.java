@@ -23,7 +23,7 @@ import fr.osallek.eu4saveeditor.controller.converter.CountryStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.CountryStringConverter;
 import fr.osallek.eu4saveeditor.controller.converter.CultureStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.CultureStringConverter;
-import fr.osallek.eu4saveeditor.controller.converter.ReligionStringConverter;
+import fr.osallek.eu4saveeditor.controller.converter.SaveReligionStringConverter;
 import fr.osallek.eu4saveeditor.controller.converter.SaveReligionStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.TradeGoodStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.TradeGoodStringConverter;
@@ -69,6 +69,8 @@ import org.controlsfx.validation.decoration.CompoundValidationDecoration;
 import org.controlsfx.validation.decoration.StyleClassValidationDecoration;
 
 public class ProvincePropertySheet extends VBox {
+
+    //Todo great project
 
     private SaveProvince province;
 
@@ -164,15 +166,15 @@ public class ProvincePropertySheet extends VBox {
                                                            save.getGame().getLocalisationClean("LEDGER_CULTURE", Eu4Language.getDefault()),
                                                            cultures,
                                                            new ClearableComboBox<>(new SearchableComboBox<>()));
-        this.cultureComboBox.setConverter(new CultureStringConverter(save.getGame()));
-        this.cultureComboBox.setCellFactory(new CultureStringCellFactory(save.getGame()));
+        this.cultureComboBox.setConverter(CultureStringConverter.INSTANCE);
+        this.cultureComboBox.setCellFactory(CultureStringCellFactory.INSTANCE);
 
         this.religionComboBox = new ClearableComboBoxItem<>(SheetCategory.GENERAL,
                                                             save.getGame().getLocalisationClean("LEDGER_RELIGION", Eu4Language.getDefault()),
                                                             religions,
                                                             new ClearableComboBox<>(new SearchableComboBox<>()));
-        this.religionComboBox.setConverter(new ReligionStringConverter(save.getGame()));
-        this.religionComboBox.setCellFactory(new SaveReligionStringCellFactory(save.getGame()));
+        this.religionComboBox.setConverter(SaveReligionStringConverter.INSTANCE);
+        this.religionComboBox.setCellFactory(SaveReligionStringCellFactory.INSTANCE);
 
         this.controllerComboBox = new ClearableComboBoxItem<>(SheetCategory.PROVINCE_POLITICAL,
                                                               save.getGame().getLocalisationClean("SUPPLY_CONTROLLER", Eu4Language.getDefault()),
@@ -242,14 +244,14 @@ public class ProvincePropertySheet extends VBox {
                                                           save.getGame().getLocalisationClean("LEDGER_GOODS", Eu4Language.getDefault()),
                                                           tradeGoods,
                                                           new ClearableComboBox<>(new SearchableComboBox<>()));
-        this.tradeGoodField.setConverter(new TradeGoodStringConverter(save.getGame()));
+        this.tradeGoodField.setConverter(TradeGoodStringConverter.INSTANCE);
         this.tradeGoodField.setCellFactory(new TradeGoodStringCellFactory(save.getGame()));
 
         this.tradeNodeField = new ClearableComboBoxItem<>(SheetCategory.ECONOMY,
                                                           save.getGame().getLocalisationClean("TRADENODE", Eu4Language.getDefault()),
                                                           tradeNodes,
                                                           new ClearableComboBox<>(new SearchableComboBox<>()));
-        this.tradeNodeField.setConverter(new TradeNodeStringConverter(save.getGame()));
+        this.tradeNodeField.setConverter(TradeNodeStringConverter.INSTANCE);
         this.tradeNodeField.setCellFactory(new TradeNodeStringCellFactory(save.getGame()));
 
         this.latentTradeGoodField = new ClearableComboBoxItem<>(SheetCategory.ECONOMY,
@@ -257,7 +259,7 @@ public class ProvincePropertySheet extends VBox {
                                                                     .getLocalisationClean("LATENT_TRADE_GOODS_TOOLTIP_HEADER", Eu4Language.getDefault()),
                                                                 tradeGoods,
                                                                 new ClearableComboBox<>(new SearchableComboBox<>()));
-        this.latentTradeGoodField.setConverter(new TradeGoodStringConverter(save.getGame()));
+        this.latentTradeGoodField.setConverter(TradeGoodStringConverter.INSTANCE);
         this.latentTradeGoodField.setCellFactory(new TradeGoodStringCellFactory(save.getGame()));
 
         this.cotField = new ClearableSpinnerItem<>(SheetCategory.ECONOMY,

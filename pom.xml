@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.7.6</version>
+		<version>3.0.0</version>
 		<relativePath/>
 	</parent>
 
@@ -19,7 +19,7 @@
 		<java.version>17</java.version>
 
 		<eu4-parser.version>1.1.7</eu4-parser.version>
-		<javafx.version>18.0.2</javafx.version>
+		<javafx.version>19</javafx.version>
 		<controlsfx.version>11.1.2</controlsfx.version>
 		<maven-artifact.version>3.8.6</maven-artifact.version>
 		<bootstrapfx-core.version>0.4.0</bootstrapfx-core.version>

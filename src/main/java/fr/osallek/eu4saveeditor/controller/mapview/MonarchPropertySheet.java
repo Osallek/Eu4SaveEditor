@@ -13,7 +13,7 @@ import fr.osallek.eu4saveeditor.controller.control.ClearableSpinnerInt;
 import fr.osallek.eu4saveeditor.controller.control.TableView2Personalities;
 import fr.osallek.eu4saveeditor.controller.converter.CultureStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.CultureStringConverter;
-import fr.osallek.eu4saveeditor.controller.converter.ReligionStringConverter;
+import fr.osallek.eu4saveeditor.controller.converter.SaveReligionStringConverter;
 import fr.osallek.eu4saveeditor.controller.converter.SaveReligionStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.object.Personality;
 import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
@@ -100,8 +100,8 @@ public class MonarchPropertySheet extends VBox {
                                                         this.country.getSave().getGame().getLocalisationClean("LEDGER_CULTURE", Eu4Language.getDefault()),
                                                         cultures,
                                                         new ClearableComboBox<>(new SearchableComboBox<>()));
-        this.cultureField.setConverter(new CultureStringConverter(this.country.getSave().getGame()));
-        this.cultureField.setCellFactory(new CultureStringCellFactory(this.country.getSave().getGame()));
+        this.cultureField.setConverter(CultureStringConverter.INSTANCE);
+        this.cultureField.setCellFactory(CultureStringCellFactory.INSTANCE);
         this.cultureField.setValue(this.monarch.getCulture());
         this.cultureField.setSupplier(this.monarch::getCulture);
         items.add(this.cultureField);
@@ -110,8 +110,8 @@ public class MonarchPropertySheet extends VBox {
                                                          this.country.getSave().getGame().getLocalisationClean("LEDGER_RELIGION", Eu4Language.getDefault()),
                                                          religions,
                                                          new ClearableComboBox<>(new SearchableComboBox<>()));
-        this.religionField.setConverter(new ReligionStringConverter(this.country.getSave().getGame()));
-        this.religionField.setCellFactory(new SaveReligionStringCellFactory(this.country.getSave().getGame()));
+        this.religionField.setConverter(SaveReligionStringConverter.INSTANCE);
+        this.religionField.setCellFactory(SaveReligionStringCellFactory.INSTANCE);
         this.religionField.setValue(this.monarch.getReligion());
         this.religionField.setSupplier(this.monarch::getReligion);
         items.add(this.religionField);

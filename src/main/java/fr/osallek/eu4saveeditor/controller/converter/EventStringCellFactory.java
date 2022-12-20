@@ -22,7 +22,7 @@ public class EventStringCellFactory implements Callback<ListView<Event>, ListCel
             @Override
             protected void updateItem(Event value, boolean empty) {
                 super.updateItem(value, empty);
-                setText(value == null ? null : Eu4SaveEditorUtils.localize(value.getId(), game));
+                setText(value == null ? null : Eu4SaveEditorUtils.localize(value.getTitle(), game));
             }
         };
     }

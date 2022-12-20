@@ -9,11 +9,7 @@ import javafx.util.Callback;
 
 public class SaveReligionStringCellFactory implements Callback<ListView<SaveReligion>, ListCell<SaveReligion>> {
 
-    private final Game game;
-
-    public SaveReligionStringCellFactory(Game game) {
-        this.game = game;
-    }
+    public static final SaveReligionStringCellFactory INSTANCE = new SaveReligionStringCellFactory();
 
     @Override
     public ListCell<SaveReligion> call(ListView<SaveReligion> param) {
@@ -22,7 +18,7 @@ public class SaveReligionStringCellFactory implements Callback<ListView<SaveReli
             @Override
             protected void updateItem(SaveReligion value, boolean empty) {
                 super.updateItem(value, empty);
-                setText(value == null ? null : Eu4SaveEditorUtils.localize(value.getName(), game));
+                setText(value == null ? null : SaveReligionStringConverter.INSTANCE.toString(value));
             }
         };
     }

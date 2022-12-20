@@ -9,11 +9,7 @@ import javafx.util.Callback;
 
 public class CultureStringCellFactory implements Callback<ListView<Culture>, ListCell<Culture>> {
 
-    private final Game game;
-
-    public CultureStringCellFactory(Game game) {
-        this.game = game;
-    }
+    public static final CultureStringCellFactory INSTANCE = new CultureStringCellFactory();
 
     @Override
     public ListCell<Culture> call(ListView<Culture> param) {
@@ -22,7 +18,7 @@ public class CultureStringCellFactory implements Callback<ListView<Culture>, Lis
             @Override
             protected void updateItem(Culture value, boolean empty) {
                 super.updateItem(value, empty);
-                setText(value == null ? null : Eu4SaveEditorUtils.localize(value.getName(), game));
+                setText(value == null ? null : CultureStringConverter.INSTANCE.toString(value));
             }
         };
     }

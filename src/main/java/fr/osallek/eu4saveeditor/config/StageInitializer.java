@@ -1,5 +1,6 @@
 package fr.osallek.eu4saveeditor.config;
 
+import fr.osallek.eu4saveeditor.common.Constants;
 import fr.osallek.eu4saveeditor.controller.HomeController;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
@@ -32,7 +33,7 @@ public class StageInitializer implements ApplicationListener<StageReadyEvent> {
             stage.setMaximized(true);
             stage.setScene(scene);
             stage.setTitle("Eu4 Save Editor");
-            stage.getIcons().add(new Image(getClass().getResourceAsStream("/images/favicon.ico")));
+            stage.getIcons().add(new Image(getClass().getResourceAsStream(Constants.IMAGE_ICON)));
             stage.show();
         } catch (Exception e) {
             LOGGER.error("{}", e.getMessage(), e);

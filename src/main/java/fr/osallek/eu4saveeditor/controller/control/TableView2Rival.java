@@ -36,7 +36,7 @@ public class TableView2Rival extends TableView<Rival> {
         target.setCellValueFactory(p -> p.getValue() == null ? null : new ReadOnlyObjectWrapper<>(p.getValue().getTarget()));
         target.setCellFactory(UniqueComboBoxTableCell.forTableColumn(new CountryStringConverter(),
                                                                      this.countriesMap,
-                                                                     Comparator.comparing(SaveCountry::getLocalizedName, Eu4Utils.COLLATOR),
+                                                                     Comparator.comparing(CountryStringConverter.INSTANCE::toString, Eu4Utils.COLLATOR),
                                                                      getItems(),
                                                                      this::getNewList
                                                                     ));

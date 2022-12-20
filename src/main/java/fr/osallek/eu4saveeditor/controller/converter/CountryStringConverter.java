@@ -14,8 +14,10 @@ public class CountryStringConverter extends StringConverter<SaveCountry> {
     @Override
     public String toString(SaveCountry country) {
         return (country == null || EditorController.dummyCountry.equals(country)) ? "" :
-               ObjectUtils.firstNonNull(ClausewitzUtils.removeQuotes(country.getLocalizedName()),
-                                        Eu4SaveEditorUtils.localize(country.getTag(), country.getSave().getGame()));
+               ClausewitzUtils.removeQuotes(ObjectUtils.firstNonNull(country.getCustomName(),
+                                                                     country.getName(),
+                                                                     country.getLocalizedName(),
+                                                                     Eu4SaveEditorUtils.localize(country.getTag(), country.getSave().getGame())));
     }
 
     @Override

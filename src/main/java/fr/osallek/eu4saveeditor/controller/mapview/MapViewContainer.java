@@ -24,8 +24,11 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.VBox;
 import org.controlsfx.control.SegmentedButton;
+import org.springframework.context.MessageSource;
 
 public class MapViewContainer {
+
+    private final MessageSource messageSource;
 
     private final SaveProvince[][] provincesMap;
 
@@ -69,10 +72,11 @@ public class MapViewContainer {
 
     private final Button submitButton;
 
-    public MapViewContainer(SaveProvince[][] provincesMap, Map<Integer, DrawableProvince> drawableProvinces, Canvas canvas, VBox editPane, Save save,
-                            ObservableList<SaveCountry> playableCountries, ObservableList<SaveCountry> countriesAlive, ObservableList<Culture> cultures,
-                            ObservableList<SaveReligion> religions, ObservableList<SaveReligion> playableReligions, ObservableList<TradeGood> tradeGoods,
-                            ObservableList<TradeNode> tradeNodes, ObservableList<SaveProvince> cities) {
+    public MapViewContainer(MessageSource messageSource, SaveProvince[][] provincesMap, Map<Integer, DrawableProvince> drawableProvinces, Canvas canvas,
+                            VBox editPane, Save save, ObservableList<SaveCountry> playableCountries, ObservableList<SaveCountry> countriesAlive,
+                            ObservableList<Culture> cultures, ObservableList<SaveReligion> religions, ObservableList<SaveReligion> playableReligions,
+                            ObservableList<TradeGood> tradeGoods, ObservableList<TradeNode> tradeNodes, ObservableList<SaveProvince> cities) {
+        this.messageSource = messageSource;
         this.provincesMap = provincesMap;
         this.drawableProvinces = drawableProvinces;
         this.canvas = canvas;
@@ -86,7 +90,7 @@ public class MapViewContainer {
         this.playableReligions = playableReligions;
         this.tradeGoods = tradeGoods;
         this.tradeNodes = tradeNodes;
-        this.saveSheet = new SavePropertySheet(this.save, this.countriesAlive, this.cities);
+        this.saveSheet = new SavePropertySheet(this.save, this.countriesAlive, this.cities, this.messageSource);
         this.mapViews = new EnumMap<>(MapViewType.class);
 
         this.titleLabel = new Label();
