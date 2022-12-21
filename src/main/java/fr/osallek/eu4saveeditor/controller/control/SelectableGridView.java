@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
@@ -19,7 +20,9 @@ public class SelectableGridView<T> extends GridView<T> {
 
     private int size = 48;
 
-    private boolean multiSelect;
+    private final boolean multiSelect;
+
+    private final ObservableList<T> allItems;
 
     public SelectableGridView(ObservableList<T> items, boolean multiSelect) {
         this(items, multiSelect, (Integer) null);
@@ -39,6 +42,7 @@ public class SelectableGridView<T> extends GridView<T> {
         setVerticalCellSpacing(5);
         itemsProperty().addListener((observable, oldValue, newValue) -> setMaxHeight(62 * Math.ceil((double) observable.getValue().size() / 6)));
         setItems(items);
+        this.allItems = items;
     }
 
     public SelectableGridView(ObservableList<T> items, boolean multiSelect, ObservableSet<T> selectedItems) {
@@ -50,8 +54,8 @@ public class SelectableGridView<T> extends GridView<T> {
         this.selection = selectedItems;
     }
 
-    public void setCellFactory(Function<T, String> textFunction, Function<T, File> imageFunction) {
-        super.setCellFactory(param -> new SelectableGridCell<>(textFunction, imageFunction, this.size, !this.multiSelect));
+    public void setCellFactory(Function<T, String> textFunction, Function<T, File> imageFunction, File defaultFile) {
+        super.setCellFactory(param -> new SelectableGridCell<>(textFunction, imageFunction, this.size, !this.multiSelect, defaultFile));
     }
 
     public void select(T t) {
@@ -82,5 +86,13 @@ public class SelectableGridView<T> extends GridView<T> {
 
     Set<SelectableGridCell<T>> getCells() {
         return cells;
+    }
+
+    public void setFilter(Predicate<T> filter) {
+        if (filter != null) {
+            setItems(this.allItems.filtered(filter));
+        } else {
+            setItems(this.allItems);
+        }
     }
 }

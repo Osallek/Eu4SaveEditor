@@ -5,7 +5,6 @@ import fr.osallek.eu4saveeditor.controller.pane.AbstractPropertyEditor;
 import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
 import fr.osallek.eu4saveeditor.controller.pane.NumericField;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ButtonItem;
-import fr.osallek.eu4saveeditor.controller.propertyeditor.item.CheckComboBoxItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableCheckComboBoxItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableColorPickerItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableComboBoxItem;
@@ -107,7 +106,7 @@ public class CustomEditors {
                 try {
                     return sourceClass.getConstructor(String.class).newInstance(getEditor().getText());
                 } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-                        | NoSuchMethodException | SecurityException e) {
+                         | NoSuchMethodException | SecurityException e) {
                     e.printStackTrace();
                     return null;
                 }
@@ -364,35 +363,6 @@ public class CustomEditors {
             @Override
             public void setValue(T value) {
                 getEditor().getSelectionModel().select(value);
-            }
-        };
-    }
-
-    public static <T> PropertyEditor<ObservableList<T>> createCheckComboBoxEditor(CheckComboBoxItem<T> comboBoxItem) {
-
-        return new AbstractPropertyEditor<>(comboBoxItem, comboBoxItem.getCheckComboBox()) {
-
-            private ListProperty<T> list;
-
-            {
-                getEditor().getItems().setAll(comboBoxItem.getChoices());
-
-                if (comboBoxItem.getConverter() != null) {
-                    getEditor().setConverter(comboBoxItem.getConverter());
-                }
-            }
-
-            @Override
-            protected ListProperty<T> getObservableValue() {
-                if (list == null) {
-                    list = new SimpleListProperty<>(getEditor().getCheckModel().getCheckedItems());
-                }
-                return list;
-            }
-
-            @Override
-            public void setValue(ObservableList<T> checked) {
-                checked.forEach(getEditor().getCheckModel()::check);
             }
         };
     }

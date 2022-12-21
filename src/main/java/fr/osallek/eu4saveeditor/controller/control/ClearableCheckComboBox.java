@@ -34,7 +34,7 @@ public class ClearableCheckComboBox<U> extends HBox {
 
         if (clearSupplier != null) {
             this.button.setOnMouseReleased(e -> {
-                this.clearChecks();
+                clearChecks();
                 clearSupplier.get().forEach(this::check);
             });
         }

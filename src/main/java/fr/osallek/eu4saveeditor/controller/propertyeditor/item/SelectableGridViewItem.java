@@ -100,8 +100,8 @@ public class SelectableGridViewItem<U> implements CustomItem<U> {
         this.selectableGridView.unSelect(u);
     }
 
-    public void setCellFactory(Function<U, String> textFunction, Function<U, File> imageFunction) {
-        this.getSelectableGridView().setCellFactory(textFunction, imageFunction);
+    public void setCellFactory(Function<U, String> textFunction, Function<U, File> imageFunction, File defaultFile) {
+        this.getSelectableGridView().setCellFactory(textFunction, imageFunction, defaultFile);
     }
 
     public Function<U, String> getCellFactory() {

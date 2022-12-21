@@ -711,7 +711,7 @@ public class CountryPropertySheet extends VBox {
                 this.cultureField.setSupplier(this.country::getPrimaryCulture);
                 items.add(this.cultureField);
 
-                this.acceptedCulturesField.setValue(FXCollections.observableArrayList(this.country.getAcceptedCultures()));
+                this.acceptedCulturesField.setValue(FXCollections.observableList(this.country.getAcceptedCultures()));
                 this.acceptedCulturesField.setSupplier(this.country::getAcceptedCultures);
                 items.add(this.acceptedCulturesField);
 

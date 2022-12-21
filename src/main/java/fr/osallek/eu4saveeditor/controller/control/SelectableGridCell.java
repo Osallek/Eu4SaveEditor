@@ -32,8 +32,11 @@ public class SelectableGridCell<T> extends GridCell<T> {
 
     private final int size;
 
-    public SelectableGridCell(Function<T, String> textFunction, Function<T, File> imageFunction, int size, boolean unSelect) {
+    private final File defaultFile;
+
+    public SelectableGridCell(Function<T, String> textFunction, Function<T, File> imageFunction, int size, boolean unSelect, File defaultFile) {
         this.size = size;
+        this.defaultFile = defaultFile;
         this.notSelectedEffect = new ColorAdjust();
         this.notSelectedEffect.setSaturation(-1);
 
@@ -98,6 +101,10 @@ public class SelectableGridCell<T> extends GridCell<T> {
             if (this.imageFunction != null) {
                 try {
                     BufferedImage image = ImageReader.convertFileToImage(this.imageFunction.apply(item));
+
+                    if (image == null) {
+                        image = ImageReader.convertFileToImage(this.defaultFile);
+                    }
 
                     if (image != null) {
                         this.imageView.setImage(Eu4SaveEditorUtils.bufferedToView(image).getImage());

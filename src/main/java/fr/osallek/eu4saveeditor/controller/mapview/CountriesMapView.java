@@ -10,6 +10,7 @@ import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ToggleButton;
@@ -92,8 +93,13 @@ public class CountriesMapView extends AbstractMapView {
 
     @Override
     public void onProvinceSelected(SaveProvince province) {
-        this.provinceSheet.update(province);
-        this.countrySheet.update(province.getOwner());
+        if (!Objects.equals(this.provinceSheet.getProvince(), province)) {
+            this.provinceSheet.update(province);
+        }
+
+        if (!Objects.equals(this.countrySheet.getCountry(), province.getOwner())) {
+            this.countrySheet.update(province.getOwner());
+        }
 
         if (Boolean.FALSE.equals(this.selected.getValue())) {
             this.mapViewContainer.addTabsSegmentedButtons(this.countryButton, this.provinceButton);
