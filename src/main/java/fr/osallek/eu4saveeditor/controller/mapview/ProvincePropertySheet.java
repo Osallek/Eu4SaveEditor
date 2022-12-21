@@ -753,6 +753,7 @@ public class ProvincePropertySheet extends VBox {
             List<Building> buildings = this.buildingsFields.stream()
                                                            .map(SelectableGridViewItem::getSelectedValues)
                                                            .flatMap(Collection::stream)
+                                                           .distinct()
                                                            .collect(Collectors.toList());
             if (!CollectionUtils.isEqualCollection(this.province.getBuildings().stream().map(ProvinceBuilding::getBuilding).toList(), buildings)) {
                 this.province.setBuildings(buildings);

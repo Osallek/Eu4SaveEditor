@@ -248,7 +248,7 @@ public class ReligionPropertySheet extends VBox {
         }
 
         if (this.goldenBullField != null) {
-            this.goldenBullField.setValue(this.religion.getPapacy().getGoldenBull());
+            this.goldenBullField.setValue(new GoldenBull(this.religion.getPapacy().getGoldenBull(), this.save));
         }
 
         if (this.reformationCenters != null) {
