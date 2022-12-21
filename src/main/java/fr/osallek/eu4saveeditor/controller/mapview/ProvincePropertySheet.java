@@ -8,6 +8,7 @@ import fr.osallek.eu4parser.model.game.TradeGood;
 import fr.osallek.eu4parser.model.game.TradeNode;
 import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.save.Save;
+import fr.osallek.eu4parser.model.save.SaveGreatProject;
 import fr.osallek.eu4parser.model.save.SaveReligion;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.province.ProvinceBuilding;
@@ -51,7 +52,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -67,6 +70,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.controlsfx.control.SearchableComboBox;
 import org.controlsfx.validation.ValidationSupport;
 import org.controlsfx.validation.Validator;
@@ -144,6 +148,8 @@ public class ProvincePropertySheet extends VBox {
     private final ButtonItem modifiersButton;
 
     private final ObservableList<Modifier> modifiers;
+
+    private Map<SaveGreatProject, ClearableSpinnerItem<Integer>> greatProjectsField;
 
     private final ChangeListener<? super SaveCountry> ownerChangeListener;
 
@@ -327,6 +333,9 @@ public class ProvincePropertySheet extends VBox {
         this.modifiers = FXCollections.observableArrayList();
         this.modifiersButton = new ButtonItem(save.getGame().getLocalisationClean("DOMESTIC_MODIFIERS", Eu4Language.getDefault()), null,
                                               save.getGame().getLocalisationClean("DOMESTIC_MODIFIERS", Eu4Language.getDefault()));
+
+        //Great projects
+        this.greatProjectsField = new LinkedHashMap<>();
 
         this.ownerChangeListener = (observable, oldValue, newValue) -> {
             this.controllerComboBox.select(newValue);
@@ -572,6 +581,18 @@ public class ProvincePropertySheet extends VBox {
         });
         items.add(this.modifiersButton);
 
+        //Great projects
+        this.greatProjectsField = this.province.getGreatProjects()
+                                               .stream()
+                                               .map(p -> Map.entry(p,
+                                                                   new ClearableSpinnerItem<>(this.messageSource.getMessage("ose.category.great-projects", null, Constants.LOCALE),
+                                                                                              Eu4SaveEditorUtils.localize(p.getName(), this.province.getSave()
+                                                                                                                                                    .getGame()),
+                                                                                              new ClearableSpinnerInt(0, p.getGreatProject().getMaxLevel(),
+                                                                                                                      p.getDevelopmentTier(), 1, p::getDevelopmentTier))))
+                                               .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        items.addAll(this.greatProjectsField.values());
+
         this.propertySheet.getItems().setAll(items);
 
         if (expandedPaneName != null) {
@@ -765,6 +786,14 @@ public class ProvincePropertySheet extends VBox {
                                                                                      this.modifiers.remove(modifier);
                                                                                  },
                                                                                  () -> this.province.removeModifier(saveModifier.getModifier())));
+        }
+
+        if (MapUtils.isNotEmpty(this.greatProjectsField) && CollectionUtils.isNotEmpty(this.province.getGreatProjects())) {
+            this.greatProjectsField.forEach((p, item) -> {
+                if (!Objects.equals(p.getDevelopmentTier(), item.getTrueValue())) {
+                    p.setDevelopmentTier(item.getTrueValue());
+                }
+            });
         }
     }
 
