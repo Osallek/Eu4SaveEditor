@@ -4,6 +4,7 @@ import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.game.SubjectType;
 import fr.osallek.eu4saveeditor.common.Eu4SaveEditorUtils;
 import javafx.util.StringConverter;
+import org.apache.commons.lang3.StringUtils;
 
 public class SubjectTypeStringConverter extends StringConverter<SubjectType> {
 
@@ -15,7 +16,7 @@ public class SubjectTypeStringConverter extends StringConverter<SubjectType> {
 
     @Override
     public String toString(SubjectType subjectType) {
-        return subjectType == null ? "" : Eu4SaveEditorUtils.localize(subjectType.getName() + "_title", this.game);
+        return subjectType == null ? "" : StringUtils.capitalize(Eu4SaveEditorUtils.localize(subjectType.getName() + "_title", this.game));
     }
 
     @Override
