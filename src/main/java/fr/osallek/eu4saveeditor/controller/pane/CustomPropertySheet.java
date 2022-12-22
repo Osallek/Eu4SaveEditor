@@ -15,9 +15,7 @@
  */
 package fr.osallek.eu4saveeditor.controller.pane;
 
-import fr.osallek.eu4saveeditor.Eu4SaveEditor;
-import java.util.Comparator;
-import java.util.Optional;
+import fr.osallek.eu4saveeditor.Eu4SaveEditorApplication;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -31,6 +29,9 @@ import org.controlsfx.property.BeanPropertyUtils;
 import org.controlsfx.property.editor.DefaultPropertyEditorFactory;
 import org.controlsfx.property.editor.Editors;
 import org.controlsfx.property.editor.PropertyEditor;
+
+import java.util.Comparator;
+import java.util.Optional;
 
 /**
  * The PropertySheet control is a powerful control designed to make it really easy for developers to present to end users a list of properties that the end user
@@ -207,7 +208,7 @@ public class CustomPropertySheet extends CustomControlsFXControl {
      */
     @Override
     public String getUserAgentStylesheet() {
-        return Eu4SaveEditor.class.getResource("/styles/style.css").toExternalForm();
+        return Eu4SaveEditorApplication.class.getResource("/styles/style.css").toExternalForm();
     }
 
 

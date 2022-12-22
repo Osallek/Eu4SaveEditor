@@ -11,10 +11,6 @@ import fr.osallek.eu4saveeditor.controller.object.BootstrapColumn;
 import fr.osallek.eu4saveeditor.controller.object.BootstrapPane;
 import fr.osallek.eu4saveeditor.controller.object.BootstrapRow;
 import fr.osallek.eu4saveeditor.controller.object.LocalSaveListCell;
-import java.io.File;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
@@ -46,6 +42,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+
 @Component
 public class HomeController {
 
@@ -67,8 +69,6 @@ public class HomeController {
 
     private TextField selectedGameDirectory;
 
-    public Button chooseGameFolderButton;
-
     private ComboBox<Path> localSavesCombo;
 
     private Button startExtractButton;
@@ -83,7 +83,7 @@ public class HomeController {
         this.editorController = editorController;
     }
 
-    public void initialize() {
+    public void initialize(Path savePath) {
         this.root = new BootstrapPane();
         this.root.setPadding(new Insets(50));
         this.root.setVgap(25);
@@ -120,10 +120,10 @@ public class HomeController {
 
         this.gameDirectoryChooser.setTitle(this.messageSource.getMessage("ose.game-directory", null, Constants.LOCALE));
 
-        this.chooseGameFolderButton = new Button();
-        this.chooseGameFolderButton.onActionProperty().set(this::handleOpenGameDirectoryChoose);
-        this.chooseGameFolderButton.setText(this.messageSource.getMessage("ose.choose-folder", null, Constants.LOCALE));
-        this.chooseGameFolderButton.disableProperty().bind(this.loading);
+        Button chooseGameFolderButton = new Button();
+        chooseGameFolderButton.onActionProperty().set(this::handleOpenGameDirectoryChoose);
+        chooseGameFolderButton.setText(this.messageSource.getMessage("ose.choose-folder", null, Constants.LOCALE));
+        chooseGameFolderButton.disableProperty().bind(this.loading);
 
         this.selectedGameDirectory = new TextField();
         this.selectedGameDirectory.setEditable(false);
@@ -135,7 +135,7 @@ public class HomeController {
         gameDirectoryHbox.setSpacing(3);
         gameDirectoryHbox.setAlignment(Pos.CENTER_LEFT);
         gameDirectoryHbox.getChildren().add(this.selectedGameDirectory);
-        gameDirectoryHbox.getChildren().add(this.chooseGameFolderButton);
+        gameDirectoryHbox.getChildren().add(chooseGameFolderButton);
 
         gameDirectoryPanel.setBody(gameDirectoryHbox);
 
@@ -173,7 +173,7 @@ public class HomeController {
         this.progressText.setVisible(false);
         this.progressText.setTextAlignment(TextAlignment.CENTER);
 
-        this.progressBar = new ProgressBar();
+        this.progressBar = new ProgressBar(0);
         this.progressBar.setVisible(false);
         this.progressBar.getStyleClass().add("progress-bar-primary");
         this.progressBar.setMaxWidth(Double.MAX_VALUE);
@@ -202,38 +202,25 @@ public class HomeController {
 
         Config.getGameFolder().ifPresent(this.gameDirectoryChooser::setInitialDirectory);
         Config.getGameFolder().ifPresent(this.gameDirectory::set);
-        Config.getSaveFolder().ifPresent(file -> this.setSelectedSaveFile(file.getAbsolutePath()));
+
+        if (savePath != null) {
+            setSelectedSaveFile(savePath);
+            handleStartExtract(null);
+        }
     }
 
-    public GridPane getScene() {
+    public GridPane getScene(Path savePath) {
         if (this.root == null) {
-            initialize();
+            initialize(savePath);
         }
 
         return this.root;
     }
 
-    public boolean setGameDirectory(String gameDirectory) {
-        File file = new File(gameDirectory);
-
-        if (file.exists() && file.canRead() && file.isDirectory()) {
-            return chooseGameDirectory(file);
+    public void setSelectedSaveFile(Path saveFile) {
+        if (Files.exists(saveFile) && Files.isReadable(saveFile) && Files.isRegularFile(saveFile) && this.localSavesCombo.getItems().contains(saveFile)) {
+            this.localSavesCombo.getSelectionModel().select(this.localSavesCombo.getItems().indexOf(saveFile));
         }
-
-        return false;
-    }
-
-    public boolean setSelectedSaveFile(String selectedSaveFile) {
-        File file = new File(selectedSaveFile);
-
-        if (file.exists() && file.canRead() && file.isFile()) {
-            if (this.localSavesCombo.getItems().contains(file.toPath())) {
-                this.localSavesCombo.getSelectionModel().select(this.localSavesCombo.getItems().indexOf(file.toPath()));
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private void handleOpenGameDirectoryChoose(ActionEvent event) {
@@ -261,31 +248,37 @@ public class HomeController {
         this.loading.set(true);
 
         ReadSaveTask task = new ReadSaveTask(this.gameDirectory, this.localSavesCombo.getSelectionModel().getSelectedItem(), this.messageSource);
-        task.setOnFailed(event -> {
-            LOGGER.error("{} {}", this.messageSource.getMessage("ose.error.extracting", null, Constants.LOCALE),
-                         task.getException().getMessage(), task.getException());
-            this.progressText.setFill(Color.RED);
-            this.progressText.textProperty().unbind();
-            this.progressText.setText(this.messageSource.getMessage("ose.error.extracting", null, Constants.LOCALE) + task.getException().getMessage());
-            this.loading.set(false);
-            this.localSavesCombo.setDisable(false);
-        });
-
-        task.addEventFilter(WorkerStateEvent.WORKER_STATE_SUCCEEDED, event -> {
-            Config.setGameFolder(this.gameDirectory.getValue());
-            this.progressBar.progressProperty().unbind();
-            this.progressBar.setProgress(1);
-            this.startExtractButton.getScene()
-                                   .setRoot(this.editorController.load(task.getValue(), this.localSavesCombo.getSelectionModel().getSelectedItem().toFile()));
-            this.editorController.maximize();
-        });
-
         this.progressText.setVisible(true);
         this.progressText.setFill(Color.BLACK);
         this.progressText.textProperty().bind(task.titleProperty());
         this.progressBar.setVisible(true);
         this.progressBar.progressProperty().bind(task.progressProperty());
 
+        task.setOnFailed(event -> taskError(task.getException()));
+
+        task.addEventFilter(WorkerStateEvent.WORKER_STATE_SUCCEEDED, event -> {
+            Config.setGameFolder(this.gameDirectory.getValue());
+            this.progressBar.progressProperty().unbind();
+            this.progressBar.setProgress(1);
+
+            try {
+                this.startExtractButton.getScene()
+                                       .setRoot(this.editorController.load(task.getValue(),
+                                                                           this.localSavesCombo.getSelectionModel().getSelectedItem().toFile()));
+                this.editorController.maximize();
+            } catch (Exception e) {
+                taskError(e);
+            }
+        });
+
         new Thread(task).start();
+    }
+
+    private void taskError(Throwable e) {
+        LOGGER.error("{} {}", this.messageSource.getMessage("ose.error.extracting", null, Constants.LOCALE), e.getMessage(), e);
+        this.progressText.setFill(Color.RED);
+        this.progressText.textProperty().unbind();
+        this.progressText.setText(this.messageSource.getMessage("ose.error.extracting", null, Constants.LOCALE) + e.getMessage());
+        this.loading.set(false);
     }
 }

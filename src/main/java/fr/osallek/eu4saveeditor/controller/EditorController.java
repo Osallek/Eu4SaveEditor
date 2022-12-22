@@ -9,7 +9,6 @@ import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.SaveReligion;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
-import fr.osallek.eu4saveeditor.Eu4SaveEditor;
 import fr.osallek.eu4saveeditor.common.Config;
 import fr.osallek.eu4saveeditor.common.Constants;
 import fr.osallek.eu4saveeditor.common.WriteSaveTask;
@@ -27,16 +26,6 @@ import fr.osallek.eu4saveeditor.controller.mapview.CountriesMapView;
 import fr.osallek.eu4saveeditor.controller.mapview.MapViewContainer;
 import fr.osallek.eu4saveeditor.controller.mapview.MapViewType;
 import fr.osallek.eu4saveeditor.controller.pane.ZoomableScrollPane;
-import java.awt.Polygon;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.util.Comparator;
-import java.util.Locale;
-import java.util.Map;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javafx.animation.PauseTransition;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -66,7 +55,6 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import javax.imageio.ImageIO;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.controlsfx.control.MaskerPane;
@@ -76,6 +64,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
+
+import javax.imageio.ImageIO;
+import java.awt.Polygon;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.Comparator;
+import java.util.Locale;
+import java.util.Map;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class EditorController {
@@ -248,7 +248,7 @@ public class EditorController {
 
     public void onClickExportButton(MouseEvent mouseEvent) {
         if (MouseButton.PRIMARY.equals(mouseEvent.getButton())) {
-            File file = Eu4SaveEditor.override ? this.saveFile : this.saveFileChooser.showSaveDialog(((Node) mouseEvent.getSource()).getScene().getWindow());
+            File file = this.saveFileChooser.showSaveDialog(((Node) mouseEvent.getSource()).getScene().getWindow());
 
             if (file != null) {
                 WriteSaveTask task = new WriteSaveTask(this.save, file, Eu4Language.getByLocale(Locale.getDefault()));
@@ -276,7 +276,7 @@ public class EditorController {
         }
     }
 
-    public Pane load(Save save, File saveFile) {
+    public Pane load(Save save, File saveFile) throws IOException {
         this.save = save;
         this.saveFile = saveFile;
         int extIndex = FilenameUtils.indexOfExtension(this.save.getName());
@@ -368,6 +368,7 @@ public class EditorController {
             LOGGER.error("{} {}", this.messageSource.getMessage("ose.error.terrain", null, Constants.LOCALE), e.getMessage(), e);
             this.title.setText(this.messageSource.getMessage("ose.error.terrain", null, Constants.LOCALE));
             this.title.setFill(Paint.valueOf(Color.RED.toString()));
+            throw e;
         }
 
         return this.root;

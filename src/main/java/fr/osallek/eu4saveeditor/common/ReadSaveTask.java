@@ -3,11 +3,12 @@ package fr.osallek.eu4saveeditor.common;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.Eu4Parser;
 import fr.osallek.eu4parser.model.save.Save;
+import javafx.concurrent.Task;
+import org.springframework.context.MessageSource;
+
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import javafx.concurrent.Task;
-import org.springframework.context.MessageSource;
 
 public class ReadSaveTask extends Task<Save> {
 
@@ -21,6 +22,7 @@ public class ReadSaveTask extends Task<Save> {
         this.gameDirectory = gameDirectory;
         this.saveFile = saveFile;
         this.messageSource = messageSource;
+        getProgress(ReadSaveStep.values()[0].itemName); //Init
     }
 
     @Override
@@ -32,11 +34,9 @@ public class ReadSaveTask extends Task<Save> {
     }
 
     private void getProgress(String itemName) {
-        ReadSaveStep step;
-
-        if ((step = ReadSaveStep.BY_ITEM_NAME.get(itemName)) != null) {
-            this.updateProgress(step.step, ReadSaveStep.NB_STEPS);
-            this.updateTitle(this.messageSource.getMessage("ose.progress." + step.name(), null, Constants.LOCALE));
-        }
+        ReadSaveStep.getStep(itemName).ifPresent(step -> {
+            updateProgress(step.step, ReadSaveStep.NB_STEPS);
+            updateTitle(this.messageSource.getMessage("ose.progress." + step.name(), null, Constants.LOCALE));
+        });
     }
 }

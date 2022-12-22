@@ -8,12 +8,8 @@ import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.SaveReligion;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
-import fr.osallek.eu4saveeditor.Eu4SaveEditor;
+import fr.osallek.eu4saveeditor.Eu4SaveEditorApplication;
 import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -25,6 +21,11 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.VBox;
 import org.controlsfx.control.SegmentedButton;
 import org.springframework.context.MessageSource;
+
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 
 public class MapViewContainer {
 
@@ -104,7 +105,7 @@ public class MapViewContainer {
         this.tabsSegmentedButton = new SegmentedButton();
         this.tabsSegmentedButton.getStyleClass().add(SegmentedButton.STYLE_CLASS_DARK);
         this.tabsSegmentedButton.setMaxWidth(Double.MAX_VALUE);
-        this.tabsSegmentedButton.getStylesheets().add(Eu4SaveEditor.class.getResource("/styles/style.css").toExternalForm());
+        this.tabsSegmentedButton.getStylesheets().add(Eu4SaveEditorApplication.class.getResource("/styles/style.css").toExternalForm());
         addTabsSegmentedButtons(this.saveButton);
 
         this.editPane.getChildren().clear();

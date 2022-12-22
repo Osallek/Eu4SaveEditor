@@ -25,7 +25,7 @@ public class StageInitializer implements ApplicationListener<StageReadyEvent> {
     @Override
     public void onApplicationEvent(StageReadyEvent event) {
         try {
-            Scene scene = new Scene(this.mainController.getScene());
+            Scene scene = new Scene(this.mainController.getScene(event.getSavePath()));
             scene.getStylesheets().add(BootstrapFX.bootstrapFXStylesheet());
             scene.getStylesheets().add(getClass().getResource("/styles/style.css").toExternalForm());
 

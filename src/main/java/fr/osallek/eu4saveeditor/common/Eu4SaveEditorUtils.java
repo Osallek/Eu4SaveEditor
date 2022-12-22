@@ -6,6 +6,11 @@ import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.game.localisation.Localisation;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
+import javafx.scene.image.ImageView;
+import javafx.scene.image.PixelWriter;
+import javafx.scene.image.WritableImage;
+import javafx.scene.paint.Color;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.nio.file.Files;
@@ -14,11 +19,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
-import javafx.scene.image.ImageView;
-import javafx.scene.image.PixelWriter;
-import javafx.scene.image.WritableImage;
-import javafx.scene.paint.Color;
 
 public class Eu4SaveEditorUtils {
 
@@ -47,9 +49,11 @@ public class Eu4SaveEditorUtils {
 
     public static ImageView bufferedToView(BufferedImage buffered) {
         WritableImage wr = null;
+
         if (buffered != null) {
             wr = new WritableImage(buffered.getWidth(), buffered.getHeight());
             PixelWriter pw = wr.getPixelWriter();
+
             for (int x = 0; x < buffered.getWidth(); x++) {
                 for (int y = 0; y < buffered.getHeight(); y++) {
                     pw.setArgb(x, y, buffered.getRGB(x, y));
@@ -66,6 +70,7 @@ public class Eu4SaveEditorUtils {
                 try (Stream<Path> stream = Files.walk(saveFolder.toPath())) {
                     return stream.filter(path -> path.getFileName().toString().endsWith(".eu4"))
                                  .filter(Eu4Parser::isValid)
+                                 .filter(Predicate.not(Eu4Parser::isIronman))
                                  .sorted(Comparator.comparing(t -> t.toFile().lastModified(), Comparator.reverseOrder()))
                                  .toList();
                 }
@@ -74,15 +79,5 @@ public class Eu4SaveEditorUtils {
         }
 
         return new ArrayList<>();
-    }
-
-    public static double[] copyFromIntArray(int[] source) {
-        double[] dest = new double[source.length];
-
-        for (int i = 0; i < source.length; i++) {
-            dest[i] = source[i];
-        }
-
-        return dest;
     }
 }

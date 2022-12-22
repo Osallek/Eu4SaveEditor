@@ -1,8 +1,8 @@
 package fr.osallek.eu4saveeditor.common;
 
-import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -17,7 +17,7 @@ public enum ReadSaveStep {
 
     public final int step;
 
-    public static final Map<String, ReadSaveStep> BY_ITEM_NAME;
+    private static final Map<String, ReadSaveStep> BY_ITEM_NAME;
 
     public static final int NB_STEPS;
 
@@ -37,5 +37,9 @@ public enum ReadSaveStep {
 
     public int getStep() {
         return step;
+    }
+
+    public static Optional<ReadSaveStep> getStep(String itemName) {
+        return Optional.ofNullable(BY_ITEM_NAME.get(itemName));
     }
 }

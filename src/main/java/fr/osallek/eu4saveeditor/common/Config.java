@@ -52,7 +52,9 @@ public class Config {
             load();
         }
 
-        PROPERTIES.setProperty(GAME_FOLDER_PROP, newValue.getAbsolutePath());
+        if (newValue != null && newValue.exists()) {
+            PROPERTIES.setProperty(GAME_FOLDER_PROP, newValue.getAbsolutePath());
+        }
 
         store();
     }
