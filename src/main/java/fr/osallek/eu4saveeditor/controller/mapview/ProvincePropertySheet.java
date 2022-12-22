@@ -82,8 +82,6 @@ import java.util.stream.Collectors;
 
 public class ProvincePropertySheet extends VBox {
 
-    //Todo great project
-
     private final MessageSource messageSource;
 
     private SaveProvince province;

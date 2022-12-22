@@ -7,9 +7,11 @@ import javafx.util.Callback;
 
 public class CountryStringCellFactory implements Callback<ListView<SaveCountry>, ListCell<SaveCountry>> {
 
+    public static final CountryStringCellFactory INSTANCE = new CountryStringCellFactory();
+
     @Override
     public ListCell<SaveCountry> call(ListView<SaveCountry> param) {
-        return new ListCell<SaveCountry>() {
+        return new ListCell<>() {
 
             @Override
             protected void updateItem(SaveCountry value, boolean empty) {
