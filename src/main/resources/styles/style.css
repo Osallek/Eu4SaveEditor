@@ -1,3 +1,17 @@
+.property-sheet .scroll-pane .property-pane {
+    -fx-background-color: -fx-background;
+}
+
+.property-sheet .scroll-pane {
+    -fx-background-color: -fx-background;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.property-sheet .scroll-pane .accordion {
+    -fx-padding: -1;
+}
+
 .validation-error {
     -fx-focus-color: #d35244;
     -fx-faint-focus-color: #d3524422;
@@ -12,4 +26,8 @@
     -fx-background-insets: -0.2, 1, -1.4, 3;
     -fx-background-radius: 3, 2, 4, 0;
     -fx-prompt-text-fill: transparent;
+}
+
+.segmented-button .toggle-button:disabled {
+    -fx-opacity: 1.0 ;
 }

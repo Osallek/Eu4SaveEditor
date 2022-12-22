@@ -1,9 +1,9 @@
 package fr.osallek.eu4saveeditor.controller.mapview;
 
-import fr.osallek.eu4parser.model.game.GoldenBull;
+import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.SaveReligion;
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 import fr.osallek.eu4saveeditor.controller.EditorController;
 import fr.osallek.eu4saveeditor.controller.control.ClearableComboBox;
@@ -13,6 +13,8 @@ import fr.osallek.eu4saveeditor.controller.converter.CountryStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.CountryStringConverter;
 import fr.osallek.eu4saveeditor.controller.converter.GoldenBullStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.GoldenBullStringConverter;
+import fr.osallek.eu4saveeditor.controller.converter.SaveReligionStringConverter;
+import fr.osallek.eu4saveeditor.controller.object.GoldenBull;
 import fr.osallek.eu4saveeditor.controller.object.ReformationCenter;
 import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
 import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheetSkin;
@@ -24,6 +26,12 @@ import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableComboBox
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSpinnerItem;
 import fr.osallek.eu4saveeditor.controller.validator.CustomGraphicValidationDecoration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -34,13 +42,6 @@ import org.controlsfx.control.SearchableComboBox;
 import org.controlsfx.validation.ValidationSupport;
 import org.controlsfx.validation.decoration.CompoundValidationDecoration;
 import org.controlsfx.validation.decoration.StyleClassValidationDecoration;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class ReligionPropertySheet extends VBox {
 
@@ -54,11 +55,11 @@ public class ReligionPropertySheet extends VBox {
 
     private CheckBoxItem enableField;
 
-    private ClearableComboBoxItem<Country> defenderOfFaithField;
+    private ClearableComboBoxItem<SaveCountry> defenderOfFaithField;
 
-    private ClearableComboBoxItem<Country> papalControllerField;
+    private ClearableComboBoxItem<SaveCountry> papalControllerField;
 
-    private ClearableComboBoxItem<Country> crusadeTargetField;
+    private ClearableComboBoxItem<SaveCountry> crusadeTargetField;
 
     private ClearableSliderItem reformDesireField;
 
@@ -66,13 +67,10 @@ public class ReligionPropertySheet extends VBox {
 
     private ClearableComboBoxItem<GoldenBull> goldenBullField;
 
-    private ButtonItem reformationCentersButton;
-
     private ObservableList<ReformationCenter> reformationCenters;
 
-    private CustomPropertySheetSkin propertySheetSkin;
-
-    public ReligionPropertySheet(Save save, SaveReligion religion, ObservableList<Country> countriesAlive, ObservableList<SaveProvince> provinces) {
+    public ReligionPropertySheet(Save save, SaveReligion religion, ObservableList<SaveCountry> countriesAlive, ObservableList<SaveProvince> provinces) {
+        String category = SaveReligionStringConverter.INSTANCE.toString(religion);
         this.save = save;
         this.religion = religion;
         this.propertySheet = new CustomPropertySheet();
@@ -83,63 +81,56 @@ public class ReligionPropertySheet extends VBox {
 
         List<CustomPropertySheet.Item> items = new ArrayList<>();
 
-        this.propertySheetSkin = new CustomPropertySheetSkin(this.propertySheet);
-        this.propertySheet.setSkin(this.propertySheetSkin);
+        CustomPropertySheetSkin propertySheetSkin = new CustomPropertySheetSkin(this.propertySheet);
+        this.propertySheet.setSkin(propertySheetSkin);
 
         this.validationSupport = new ValidationSupport();
         this.validationSupport.setValidationDecorator(
                 new CompoundValidationDecoration(new CustomGraphicValidationDecoration(), new StyleClassValidationDecoration("validation-error", null)));
 
         if (this.religion.hasDate() && this.religion.getEnable() == null) {
-            this.enableField = new CheckBoxItem(this.religion.getLocalizedName(), this.save.getGame().getLocalisation("ENABLE"),
+            this.enableField = new CheckBoxItem(category,
+                                                this.save.getGame().getLocalisationClean("ENABLE", Eu4Language.getDefault()),
                                                 this.religion.getEnable() != null);
             items.add(this.enableField);
         }
 
-        ObservableList<Country> countries = FXCollections.observableArrayList(countriesAlive.stream()
-                                                                                            .filter(country -> religion.equals(country.getReligion()))
-                                                                                            .collect(Collectors.toList()));
-        ObservableList<Country> otherReligionGroupCountries =
+        ObservableList<SaveCountry> countries = FXCollections.observableArrayList(countriesAlive.stream()
+                                                                                                .filter(country -> religion.equals(country.getReligion()))
+                                                                                                .collect(Collectors.toList()));
+        countries.add(0, EditorController.dummyCountry);
+
+        ObservableList<SaveCountry> otherReligionGroupCountries =
                 FXCollections.observableArrayList(countriesAlive.stream()
                                                                 .filter(country -> country.getReligion() == null
                                                                                    || !country.getReligion()
                                                                                               .getReligionGroup()
                                                                                               .equals(religion.getReligionGroup()))
                                                                 .collect(Collectors.toList()));
+        otherReligionGroupCountries.add(0, EditorController.dummyCountry);
 
-        FilteredList<Country> possibleDefenders = countries.filtered(
-                country -> country.getOverlord() == null && !EditorController.dummyCountry.equals(country));
+        FilteredList<SaveCountry> possibleDefenders = countries.filtered(c -> c.getOverlord() == null && !EditorController.dummyCountry.equals(c));
         if (this.religion.hasDefenderOfFaith() && !possibleDefenders.isEmpty()) {
-            if (!countries.contains(EditorController.dummyCountry)) {
-                countries.add(0, EditorController.dummyCountry);
-            }
-
-            this.defenderOfFaithField = new ClearableComboBoxItem<>(this.religion.getLocalizedName(),
-                                                                    this.save.getGame()
-                                                                             .getLocalisation("defender_of_faith"),
+            this.defenderOfFaithField = new ClearableComboBoxItem<>(category,
+                                                                    this.save.getGame().getLocalisationClean("defender_of_faith", Eu4Language.getDefault()),
                                                                     possibleDefenders,
-                                                                    this.religion.getDefender() == null ?
-                                                                    EditorController.dummyCountry :
+                                                                    this.religion.getDefender() == null ? EditorController.dummyCountry :
                                                                     this.religion.getDefender(),
-                                                                    new ClearableComboBox<>(new SearchableComboBox<>(),
-                                                                                            this.religion::getDefender));
+                                                                    new ClearableComboBox<>(new SearchableComboBox<>(), this.religion::getDefender));
             this.defenderOfFaithField.setConverter(new CountryStringConverter());
             this.defenderOfFaithField.setCellFactory(new CountryStringCellFactory());
             items.add(this.defenderOfFaithField);
         }
 
         if (this.religion.hasPapacy() && Boolean.TRUE.equals(this.religion.getPapacy().getPapacyActive())) {
-            FilteredList<Country> possibleControllers = countries.filtered(country -> country.getCapital() != null
-                                                                                      && country.getCapital().getContinent() != null
-                                                                                      && !EditorController.dummyCountry.equals(country));
+            FilteredList<SaveCountry> possibleControllers = countries.filtered(country -> country.getCapital() != null
+                                                                                          && country.getCapital().getContinent() != null
+                                                                                          && !EditorController.dummyCountry.equals(country));
 
             if (!possibleControllers.isEmpty()) {
-                if (!countries.contains(EditorController.dummyCountry)) {
-                    countries.add(0, EditorController.dummyCountry);
-                }
-
-                this.papalControllerField = new ClearableComboBoxItem<>(this.religion.getLocalizedName(),
-                                                                        this.save.getGame().getLocalisation("HINT_PAPALCONTROLLER_TITLE"),
+                this.papalControllerField = new ClearableComboBoxItem<>(category,
+                                                                        this.save.getGame()
+                                                                                 .getLocalisationClean("HINT_PAPALCONTROLLER_TITLE", Eu4Language.getDefault()),
                                                                         possibleControllers,
                                                                         this.religion.getPapacy().getController(),
                                                                         new ClearableComboBox<>(new SearchableComboBox<>(),
@@ -151,70 +142,68 @@ public class ReligionPropertySheet extends VBox {
 
             if (otherReligionGroupCountries.contains(EditorController.dummyCountry) ?
                 otherReligionGroupCountries.size() > 1 : !otherReligionGroupCountries.isEmpty()) {
-                if (!otherReligionGroupCountries.contains(EditorController.dummyCountry)) {
-                    otherReligionGroupCountries.add(0, EditorController.dummyCountry);
-                }
 
-                this.crusadeTargetField = new ClearableComboBoxItem<>(this.religion.getLocalizedName(),
-                                                                      this.save.getGame()
-                                                                               .getLocalisation(
-                                                                                       "IS_CRUSADE_TARGET"),
+                this.crusadeTargetField = new ClearableComboBoxItem<>(category,
+                                                                      this.save.getGame().getLocalisationClean("IS_CRUSADE_TARGET", Eu4Language.getDefault()),
                                                                       otherReligionGroupCountries,
                                                                       this.religion.getPapacy().getCrusadeTarget(),
-                                                                      new ClearableComboBox<>(
-                                                                              new SearchableComboBox<>(),
-                                                                              () -> this.religion.getPapacy()
-                                                                                                 .getCrusadeTarget()));
+                                                                      new ClearableComboBox<>(new SearchableComboBox<>(),
+                                                                                              () -> this.religion.getPapacy().getCrusadeTarget()));
                 this.crusadeTargetField.setConverter(new CountryStringConverter());
                 this.crusadeTargetField.setCellFactory(new CountryStringCellFactory());
                 items.add(this.crusadeTargetField);
             }
 
-            this.reformDesireField = new ClearableSliderItem(this.religion.getLocalizedName(),
-                                                             save.getGame().getLocalisation("HINT_REFORMDESIRE_TITLE"),
+            this.reformDesireField = new ClearableSliderItem(category,
+                                                             save.getGame().getLocalisationClean("HINT_REFORMDESIRE_TITLE", Eu4Language.getDefault()),
                                                              0, 200,
                                                              this.religion.getPapacy().getReformDesire(),
                                                              () -> this.religion.getPapacy().getReformDesire());
             items.add(this.reformDesireField);
 
-            this.curiaTreasuryField = new ClearableSpinnerItem<>(this.religion.getLocalizedName(),
+            this.curiaTreasuryField = new ClearableSpinnerItem<>(category,
                                                                  save.getGame()
-                                                                     .getLocalisationCleanNoPunctuation("CURIA_TREASURY"),
+                                                                     .getLocalisationCleanNoPunctuation("CURIA_TREASURY", Eu4Language.getDefault()),
                                                                  new ClearableSpinnerDouble(0, 100000,
                                                                                             this.religion.getPapacy().getCuriaTreasury(),
                                                                                             100,
                                                                                             () -> this.religion.getPapacy().getCuriaTreasury()));
             items.add(this.curiaTreasuryField);
 
-            ObservableList<GoldenBull> goldenBulls = FXCollections.observableArrayList(this.save.getGame().getGoldenBulls());
-            goldenBulls.add(0, new GoldenBull((String) null));
+            ObservableList<GoldenBull> goldenBulls = FXCollections.observableArrayList(this.save.getGame()
+                                                                                                .getGoldenBulls()
+                                                                                                .stream()
+                                                                                                .map(g -> new GoldenBull(g, this.save))
+                                                                                                .toList());
+            goldenBulls.add(0, new GoldenBull(this.save));
 
-            this.goldenBullField = new ClearableComboBoxItem<>(this.religion.getLocalizedName(),
+            this.goldenBullField = new ClearableComboBoxItem<>(category,
                                                                this.save.getGame()
-                                                                        .getLocalisation("GOLDEN_BULL_PICKED_TITLE"),
+                                                                        .getLocalisationClean("GOLDEN_BULL_PICKED_TITLE", Eu4Language.getDefault()),
                                                                goldenBulls,
-                                                               this.religion.getPapacy().getGoldenBull(),
+                                                               new GoldenBull(this.religion.getPapacy().getGoldenBull(), this.save),
                                                                new ClearableComboBox<>(new SearchableComboBox<>(),
-                                                                                       () -> this.religion.getPapacy().getGoldenBull()));
+                                                                                       () -> new GoldenBull(this.religion.getPapacy().getGoldenBull(),
+                                                                                                            this.save)));
             this.goldenBullField.setConverter(new GoldenBullStringConverter());
             this.goldenBullField.setCellFactory(new GoldenBullStringCellFactory());
             items.add(this.goldenBullField);
-
-            this.religion.getPapacy().getGoldenBull();
         }
 
         if (CollectionUtils.isNotEmpty(provinces) && this.religion.getGameReligion() != null
             && CollectionUtils.isNotEmpty(this.religion.getGameReligion().getAllowedCenterConversion())) {
             this.reformationCenters = FXCollections.observableArrayList();
             this.reformationCenters.setAll(this.religion.getReformationCenters().stream().map(ReformationCenter::new).collect(Collectors.toList()));
-            this.reformationCentersButton = new ButtonItem(this.religion.getLocalizedName(), null,
-                                                           save.getGame().getLocalisationClean("protestant_center_of_reformation"),
-                                                           items.isEmpty() ? 1 : 2);
-            this.reformationCentersButton.getButton().setOnAction(event -> {
+            ButtonItem reformationCentersButton = new ButtonItem(category, null,
+                                                                 save.getGame()
+                                                                     .getLocalisationClean("protestant_center_of_reformation", Eu4Language.getDefault()),
+                                                                 items.isEmpty() ? 1 : 2);
+            reformationCentersButton.getButton().setOnAction(event -> {
                 TableView2ReformationCenter tableView2 = new TableView2ReformationCenter(this.save, this.reformationCenters, provinces);
                 TableViewDialog<ReformationCenter> dialog = new TableViewDialog<>(this.save,
                                                                                   tableView2,
-                                                                                  this.save.getGame().getLocalisationClean("protestant_center_of_reformation"),
+                                                                                  this.save.getGame()
+                                                                                           .getLocalisationClean("protestant_center_of_reformation", Eu4Language.getDefault()),
                                                                                   list -> new ReformationCenter(this.religion,
                                                                                                                 provinces.stream()
                                                                                                                          .filter(Predicate.not(
@@ -227,7 +216,7 @@ public class ReligionPropertySheet extends VBox {
 
                 modifierList.ifPresent(this.reformationCenters::setAll);
             });
-            items.add(this.reformationCentersButton);
+            items.add(reformationCentersButton);
         }
 
         this.propertySheet.getItems().setAll(items);
@@ -239,8 +228,7 @@ public class ReligionPropertySheet extends VBox {
         }
 
         if (this.defenderOfFaithField != null) {
-            this.defenderOfFaithField.setValue(this.religion.getDefender() == null ?
-                                               EditorController.dummyCountry : this.religion.getDefender());
+            this.defenderOfFaithField.setValue(this.religion.getDefender() == null ? EditorController.dummyCountry : this.religion.getDefender());
         }
 
         if (this.papalControllerField != null) {
@@ -260,7 +248,7 @@ public class ReligionPropertySheet extends VBox {
         }
 
         if (this.goldenBullField != null) {
-            this.goldenBullField.setValue(this.religion.getPapacy().getGoldenBull());
+            this.goldenBullField.setValue(new GoldenBull(this.religion.getPapacy().getGoldenBull(), this.save));
         }
 
         if (this.reformationCenters != null) {
@@ -282,15 +270,13 @@ public class ReligionPropertySheet extends VBox {
         }
 
         if (this.papalControllerField != null) {
-            if (!Objects.equals(this.religion.getPapacy().getController(),
-                                this.papalControllerField.getSelectedValue())) {
+            if (!Objects.equals(this.religion.getPapacy().getController(), this.papalControllerField.getSelectedValue())) {
                 this.religion.getPapacy().setController(this.papalControllerField.getSelectedValue());
             }
         }
 
         if (this.crusadeTargetField != null) {
-            if (!Objects.equals(this.religion.getPapacy().getCrusadeTarget(),
-                                this.crusadeTargetField.getSelectedValue())) {
+            if (!Objects.equals(this.religion.getPapacy().getCrusadeTarget(), this.crusadeTargetField.getSelectedValue())) {
                 this.religion.getPapacy().setCrusadeTarget(this.crusadeTargetField.getSelectedValue());
             }
         }
@@ -308,8 +294,9 @@ public class ReligionPropertySheet extends VBox {
         }
 
         if (this.goldenBullField != null) {
-            if (!Objects.equals(this.religion.getPapacy().getGoldenBull(), this.goldenBullField.getSelectedValue())) {
-                this.religion.getPapacy().setGoldenBull(this.goldenBullField.getSelectedValue());
+            if ((this.religion.getPapacy().getGoldenBull() == null && this.goldenBullField.getSelectedValue().getGoldenBull() != null)
+                || !Objects.equals(this.religion.getPapacy().getGoldenBull().getName(), this.goldenBullField.getSelectedValue().getGoldenBull())) {
+                this.religion.getPapacy().setGoldenBull(this.save.getGame().getGoldenBull(this.goldenBullField.getSelectedValue().getGoldenBull()));
             }
         }
 

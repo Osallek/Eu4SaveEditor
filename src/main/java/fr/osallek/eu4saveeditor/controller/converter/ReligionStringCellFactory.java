@@ -7,6 +7,8 @@ import javafx.util.Callback;
 
 public class ReligionStringCellFactory implements Callback<ListView<Religion>, ListCell<Religion>> {
 
+    public static final ReligionStringCellFactory INSTANCE = new ReligionStringCellFactory();
+
     @Override
     public ListCell<Religion> call(ListView<Religion> param) {
         return new ListCell<>() {
@@ -14,7 +16,7 @@ public class ReligionStringCellFactory implements Callback<ListView<Religion>, L
             @Override
             protected void updateItem(Religion value, boolean empty) {
                 super.updateItem(value, empty);
-                setText(value == null ? null : value.getLocalizedName());
+                setText(value == null ? null : ReligionStringConverter.INSTANCE.toString(value));
             }
         };
     }

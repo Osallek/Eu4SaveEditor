@@ -1,9 +1,10 @@
 package fr.osallek.eu4saveeditor.controller.pane;
 
 import fr.osallek.eu4parser.model.save.Save;
-import fr.osallek.eu4saveeditor.Eu4SaveEditor;
+import fr.osallek.eu4saveeditor.Eu4SaveEditorApplication;
 import fr.osallek.eu4saveeditor.common.Constants;
 import fr.osallek.eu4saveeditor.common.Copy;
+import fr.osallek.eu4saveeditor.common.Eu4SaveEditorUtils;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Button;
@@ -40,7 +41,7 @@ public class TableViewDialog<S extends Copy<S>> extends Dialog<List<S>> {
     public TableViewDialog(Save save, TableView<S> tableView2, String title, Function<ObservableList<S>, S> supplier, Supplier<List<S>> clearSupplier, BooleanProperty disableAdd) {
         this.tableView2 = tableView2;
         this.addButton = new Button("", new Glyph("FontAwesome", FontAwesome.Glyph.PLUS));
-        Button resetButton = new Button(save.getGame().getLocalisation("PW_RESET"));
+        Button resetButton = new Button(Eu4SaveEditorUtils.localize("PW_RESET", save.getGame()));
         final DialogPane dialogPane = getDialogPane();
 
         VBox vBox = new VBox(3);
@@ -65,7 +66,7 @@ public class TableViewDialog<S extends Copy<S>> extends Dialog<List<S>> {
         dialogPane.setMaxWidth(Double.MAX_VALUE);
         dialogPane.setContent(vBox);
         dialogPane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-        ((Stage) dialogPane.getScene().getWindow()).getIcons().addAll(new Image(Eu4SaveEditor.class.getResourceAsStream(Constants.IMAGE_ICON)));
+        ((Stage) dialogPane.getScene().getWindow()).getIcons().addAll(new Image(Eu4SaveEditorApplication.class.getResourceAsStream(Constants.IMAGE_ICON)));
         setResultConverter(button -> {
             if (button.getButtonData().isDefaultButton() && !button.getButtonData().isCancelButton()) {
                 return this.tableView2.getItems();

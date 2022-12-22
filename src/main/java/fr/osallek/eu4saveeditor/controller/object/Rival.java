@@ -1,29 +1,28 @@
 package fr.osallek.eu4saveeditor.controller.object;
 
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4saveeditor.common.Copy;
-
 import java.time.LocalDate;
 import java.util.Objects;
 
 public class Rival extends Copy<Rival> {
 
-    private final Country source;
+    private final SaveCountry source;
 
-    private Country target;
+    private SaveCountry target;
 
     private LocalDate date;
 
     private boolean changed;
 
-    public Rival(Country source, Country target, LocalDate date) {
+    public Rival(SaveCountry source, SaveCountry target, LocalDate date) {
         this.source = source;
         this.target = target;
         this.date = date;
         this.changed = true;
     }
 
-    public Rival(Country country, fr.osallek.eu4parser.model.save.country.Rival rival) {
+    public Rival(SaveCountry country, fr.osallek.eu4parser.model.save.country.Rival rival) {
         this.source = country;
         this.target = rival.getRival();
         this.date = rival.getDate();
@@ -41,15 +40,15 @@ public class Rival extends Copy<Rival> {
         return new Rival(this);
     }
 
-    public Country getSource() {
+    public SaveCountry getSource() {
         return source;
     }
 
-    public Country getTarget() {
+    public SaveCountry getTarget() {
         return target;
     }
 
-    public void setTarget(Country target) {
+    public void setTarget(SaveCountry target) {
         if (!this.target.equals(target)) {
             this.target = target;
             this.changed = true;

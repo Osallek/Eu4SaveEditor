@@ -1,13 +1,12 @@
 package fr.osallek.eu4saveeditor.controller.control;
 
+import java.util.function.Function;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import org.apache.commons.lang3.BooleanUtils;
-
-import java.util.function.Function;
 
 public class SpinnerTableCell<S, T> extends TableCell<S, T> {
 

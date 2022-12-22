@@ -2,8 +2,7 @@ package fr.osallek.eu4saveeditor.controller.object;
 
 import fr.osallek.eu4parser.model.game.RulerPersonality;
 import fr.osallek.eu4saveeditor.common.Copy;
-
-import java.time.LocalDate;
+import fr.osallek.eu4saveeditor.common.Eu4SaveEditorUtils;
 import java.util.Objects;
 
 public class Personality extends Copy<Personality> {
@@ -44,7 +43,7 @@ public class Personality extends Copy<Personality> {
 
     @Override
     public String toString() {
-        return this.rulerPersonality.getLocalizedName();
+        return Eu4SaveEditorUtils.localize(this.rulerPersonality.getName(), this.rulerPersonality.getGame());
     }
 
     @Override

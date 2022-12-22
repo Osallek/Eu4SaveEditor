@@ -1,10 +1,13 @@
 package fr.osallek.eu4saveeditor.controller.control;
 
 import fr.osallek.eu4parser.model.game.SubjectType;
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4saveeditor.controller.converter.CountryStringConverter;
 import fr.osallek.eu4saveeditor.controller.converter.SubjectTypeStringConverter;
 import fr.osallek.eu4saveeditor.controller.object.CountrySubject;
+import java.time.LocalDate;
+import java.util.stream.Collectors;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -12,16 +15,11 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.ComboBoxTableCell;
 
-import java.time.LocalDate;
-import java.util.stream.Collectors;
-
 public class TableView2CountrySubject extends TableView<CountrySubject> {
 
-    public TableView2CountrySubject(Country country,
-                                    ObservableList<CountrySubject> countrySubjectsField,
-                                    ObservableList<Country> countriesAlive,
+    public TableView2CountrySubject(SaveCountry country, ObservableList<CountrySubject> countrySubjectsField, ObservableList<SaveCountry> countriesAlive,
                                     ObservableList<SubjectType> subjectTypes) {
-        TableColumn<CountrySubject, Country> subject = new TableColumn<>(country.getSave().getGame().getLocalisation("LEDGER_SUBJECT"));
+        TableColumn<CountrySubject, SaveCountry> subject = new TableColumn<>(country.getSave().getGame().getLocalisationClean("LEDGER_SUBJECT", Eu4Language.getDefault()));
         subject.setCellValueFactory(p -> p.getValue() == null ? null : new ReadOnlyObjectWrapper<>(p.getValue().getSubject()));
         subject.setCellFactory(ComboBoxTableCell.forTableColumn(new CountryStringConverter(),
                                                                 countriesAlive.filtered(c -> !c.equals(country) && !country.getSubjects().contains(c))));
@@ -31,16 +29,16 @@ public class TableView2CountrySubject extends TableView<CountrySubject> {
 
         TableColumn<CountrySubject, SubjectType> type = new TableColumn<>(country.getSave()
                                                                                  .getGame()
-                                                                                 .getLocalisationCleanNoPunctuation("LIBERTY_DESIRE_FROM_SUBJECT_TYPE"));
+                                                                                 .getLocalisationCleanNoPunctuation("LIBERTY_DESIRE_FROM_SUBJECT_TYPE", Eu4Language.getDefault()));
         type.setCellValueFactory(p -> p.getValue() == null ? null : new ReadOnlyObjectWrapper<>(p.getValue().getSubjectType()));
-        type.setCellFactory(ComboBoxTableCell.forTableColumn(new SubjectTypeStringConverter(), subjectTypes));
+        type.setCellFactory(ComboBoxTableCell.forTableColumn(new SubjectTypeStringConverter(country.getSave().getGame()), subjectTypes));
         type.setOnEditCommit(event -> event.getRowValue().setSubjectType(event.getNewValue()));
         type.setPrefWidth(200);
         type.setStyle("-fx-alignment: CENTER-LEFT");
 
         TableColumn<CountrySubject, LocalDate> startDate = new TableColumn<>(country.getSave()
                                                                                     .getGame()
-                                                                                    .getLocalisationCleanNoPunctuation("FE_STARTING_DATE"));
+                                                                                    .getLocalisationCleanNoPunctuation("FE_STARTING_DATE", Eu4Language.getDefault()));
         startDate.setCellValueFactory(p -> p.getValue() == null ? null : new ReadOnlyObjectWrapper<>(p.getValue().getStartDate()));
         startDate.setCellFactory(column -> new DatePickerCell<>(country.getSave().getGame().getStartDate(), country.getSave().getDate()));
         startDate.setOnEditCommit(event -> event.getRowValue().setStartDate(event.getNewValue()));

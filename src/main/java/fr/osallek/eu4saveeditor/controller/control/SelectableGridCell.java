@@ -1,7 +1,11 @@
 package fr.osallek.eu4saveeditor.controller.control;
 
-import fr.osallek.eu4saveeditor.imagereader.ImageReader;
-import javafx.embed.swing.SwingFXUtils;
+import fr.osallek.eu4parser.common.ImageReader;
+import fr.osallek.eu4saveeditor.common.Eu4SaveEditorUtils;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.function.Function;
 import javafx.geometry.Pos;
 import javafx.scene.control.Tooltip;
 import javafx.scene.effect.ColorAdjust;
@@ -11,11 +15,6 @@ import javafx.stage.PopupWindow;
 import org.controlsfx.control.GridCell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.util.function.Function;
 
 public class SelectableGridCell<T> extends GridCell<T> {
 
@@ -31,10 +30,13 @@ public class SelectableGridCell<T> extends GridCell<T> {
 
     private Function<T, File> imageFunction;
 
-    private int size;
+    private final int size;
 
-    public SelectableGridCell(Function<T, String> textFunction, Function<T, File> imageFunction, int size) {
+    private final File defaultFile;
+
+    public SelectableGridCell(Function<T, String> textFunction, Function<T, File> imageFunction, int size, boolean unSelect, File defaultFile) {
         this.size = size;
+        this.defaultFile = defaultFile;
         this.notSelectedEffect = new ColorAdjust();
         this.notSelectedEffect.setSaturation(-1);
 
@@ -59,7 +61,10 @@ public class SelectableGridCell<T> extends GridCell<T> {
                 if (source.isSelected()) {
                     unSelect();
                 } else {
-                    source.getSelectableGridView().getCells().forEach(SelectableGridCell::unSelect);
+                    if (unSelect) {
+                        source.getSelectableGridView().getCells().forEach(SelectableGridCell::unSelect);
+                    }
+                    
                     source.updateSelected(true);
                     source.getSelectableGridView().select(source.getItem());
 
@@ -97,8 +102,12 @@ public class SelectableGridCell<T> extends GridCell<T> {
                 try {
                     BufferedImage image = ImageReader.convertFileToImage(this.imageFunction.apply(item));
 
+                    if (image == null) {
+                        image = ImageReader.convertFileToImage(this.defaultFile);
+                    }
+
                     if (image != null) {
-                        this.imageView.setImage(SwingFXUtils.toFXImage(image, null));
+                        this.imageView.setImage(Eu4SaveEditorUtils.bufferedToView(image).getImage());
 
                         setGraphic(this.imageView);
                         setMaxWidth(this.size);

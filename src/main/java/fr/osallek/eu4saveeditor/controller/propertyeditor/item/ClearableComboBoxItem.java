@@ -1,7 +1,8 @@
 package fr.osallek.eu4saveeditor.controller.propertyeditor.item;
 
 import fr.osallek.eu4saveeditor.controller.control.ClearableComboBox;
-import fr.osallek.eu4saveeditor.i18n.SheetCategory;
+import java.util.Optional;
+import java.util.function.Supplier;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -13,9 +14,6 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
-
-import java.util.Optional;
-import java.util.function.Supplier;
 
 public class ClearableComboBoxItem<U> implements CustomItem<U> {
 
@@ -39,14 +37,6 @@ public class ClearableComboBoxItem<U> implements CustomItem<U> {
 
     private Callback<ListView<U>, ListCell<U>> cellFactory;
 
-    public ClearableComboBoxItem(SheetCategory category, String name, ObservableList<U> values, ClearableComboBox<U> comboBox) {
-        this(category, name, values, null, null, comboBox);
-    }
-
-    public ClearableComboBoxItem(SheetCategory category, String name, ObservableList<U> values, U value, ClearableComboBox<U> comboBox) {
-        this(category, name, values, value, null, comboBox);
-    }
-
     public ClearableComboBoxItem(String category, String name, ObservableList<U> values, ClearableComboBox<U> comboBox) {
         this(category, name, values, null, null, comboBox);
     }
@@ -55,17 +45,8 @@ public class ClearableComboBoxItem<U> implements CustomItem<U> {
         this(category, name, values, value, null, comboBox);
     }
 
-    public ClearableComboBoxItem(SheetCategory category, String name, ObservableList<U> values, U value, String description, ClearableComboBox<U> comboBox) {
-        this(category, name, values, value, description, comboBox, new SimpleBooleanProperty(true));
-    }
-
     public ClearableComboBoxItem(String category, String name, ObservableList<U> values, U value, String description, ClearableComboBox<U> comboBox) {
         this(category, name, values, value, description, comboBox, new SimpleBooleanProperty(true));
-    }
-
-    public ClearableComboBoxItem(SheetCategory category, String name, ObservableList<U> values, U value, String description, ClearableComboBox<U> comboBox,
-                                 BooleanProperty editable) {
-        this(category.getForDefaultLocale(), name, values, value, description, comboBox, editable);
     }
 
     public ClearableComboBoxItem(String category, String name, ObservableList<U> values, U value, String description, ClearableComboBox<U> comboBox,

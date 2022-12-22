@@ -1,12 +1,11 @@
 package fr.osallek.eu4saveeditor.controller.control;
 
+import java.math.BigDecimal;
 import javafx.beans.NamedArg;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.util.converter.NumberStringConverter;
-
-import java.math.BigDecimal;
 
 public class NumberSpinnerValueFactory extends SpinnerValueFactory<Number> {
 

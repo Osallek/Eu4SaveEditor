@@ -1,11 +1,17 @@
 package fr.osallek.eu4saveeditor.controller.control;
 
 import fr.osallek.eu4parser.common.Eu4Utils;
-import fr.osallek.eu4parser.common.ModifiersUtils;
+import fr.osallek.eu4parser.model.game.ModifiersUtils;
 import fr.osallek.eu4parser.model.game.Policy;
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
+import fr.osallek.eu4saveeditor.common.Eu4SaveEditorUtils;
 import fr.osallek.eu4saveeditor.controller.converter.PolicyStringConverter;
 import fr.osallek.eu4saveeditor.controller.object.ActivePolicy;
+import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -16,14 +22,9 @@ import javafx.collections.ObservableMap;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 
-import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
-
 public class TableView2Policy extends TableView<ActivePolicy> {
 
-    private final Country country;
+    private final SaveCountry country;
 
     private final String modifier;
 
@@ -33,16 +34,20 @@ public class TableView2Policy extends TableView<ActivePolicy> {
 
     private final ObservableMap<ActivePolicy, ObservableList<Policy>> policiesMap = FXCollections.observableHashMap();
 
-    public TableView2Policy(Country country, ObservableList<ActivePolicy> activePolicies, ObservableList<Policy> availablePolicies, String modifier) {
+    public TableView2Policy(SaveCountry country, ObservableList<ActivePolicy> activePolicies, ObservableList<Policy> availablePolicies, String modifier) {
         this.country = country;
         this.availablePolicies = availablePolicies;
         this.modifier = modifier;
 
-        TableColumn<ActivePolicy, Policy> target = new TableColumn<>(country.getSave().getGame().getLocalisation("POLICY_ENACTED_TITLE"));
+        TableColumn<ActivePolicy, Policy> target = new TableColumn<>(country.getSave()
+                                                                            .getGame()
+                                                                            .getLocalisationClean("POLICY_ENACTED_TITLE", Eu4Language.getDefault()));
         target.setCellValueFactory(p -> p.getValue() == null ? null : new ReadOnlyObjectWrapper<>(p.getValue().getPolicy()));
-        target.setCellFactory(UniqueComboBoxTableCell.forTableColumn(new PolicyStringConverter(),
+        target.setCellFactory(UniqueComboBoxTableCell.forTableColumn(new PolicyStringConverter(country.getSave().getGame()),
                                                                      this.policiesMap,
-                                                                     Comparator.comparing(Policy::getLocalizedName, Eu4Utils.COLLATOR),
+                                                                     Comparator.comparing(p -> Eu4SaveEditorUtils.localize(p.getName(), country.getSave()
+                                                                                                                                               .getGame()),
+                                                                                          Eu4Utils.COLLATOR),
                                                                      getItems(),
                                                                      this::getNewList
                                                                     ));
@@ -50,7 +55,9 @@ public class TableView2Policy extends TableView<ActivePolicy> {
         target.setPrefWidth(250);
         target.setStyle("-fx-alignment: CENTER-LEFT");
 
-        TableColumn<ActivePolicy, LocalDate> date = new TableColumn<>(country.getSave().getGame().getLocalisationCleanNoPunctuation("FE_STARTING_DATE"));
+        TableColumn<ActivePolicy, LocalDate> date = new TableColumn<>(country.getSave()
+                                                                             .getGame()
+                                                                             .getLocalisationCleanNoPunctuation("FE_STARTING_DATE", Eu4Language.getDefault()));
         date.setCellValueFactory(p -> p.getValue() == null ? null : new ReadOnlyObjectWrapper<>(p.getValue().getDate()));
         date.setCellFactory(DatePickerCell.forTableColumn(null, country.getSave().getDate()));
         date.setOnEditCommit(event -> event.getRowValue().setDate(event.getNewValue()));
@@ -87,8 +94,8 @@ public class TableView2Policy extends TableView<ActivePolicy> {
     private boolean disableAddButton(List<? extends ActivePolicy> policies) {
         return policies.size() >= this.country.getSave().getGame().getMaxActivePolicies()
                || policies.size() >= (this.country.getSave().getGame().getBasePossiblePolicies() +
-                                     this.country.getModifier(ModifiersUtils.getModifier("POSSIBLE_POLICY")) +
-                                     this.country.getModifier(ModifiersUtils.getModifier(this.modifier)))
+                                      this.country.getModifier(ModifiersUtils.getModifier("POSSIBLE_POLICY")) +
+                                      this.country.getModifier(ModifiersUtils.getModifier(this.modifier)))
                || policies.size() >= this.availablePolicies.size();
     }
 

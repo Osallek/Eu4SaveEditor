@@ -1,8 +1,7 @@
 package fr.osallek.eu4saveeditor.controller.converter;
 
-import javafx.util.StringConverter;
-
 import java.io.File;
+import javafx.util.StringConverter;
 
 public class FileStringConverter extends StringConverter<File> {
 

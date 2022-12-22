@@ -2,6 +2,7 @@ package fr.osallek.eu4saveeditor.controller.converter;
 
 import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.save.country.LeaderType;
+import fr.osallek.eu4saveeditor.common.Eu4SaveEditorUtils;
 import javafx.util.StringConverter;
 
 public class LeaderTypeStringConverter extends StringConverter<LeaderType> {
@@ -14,7 +15,7 @@ public class LeaderTypeStringConverter extends StringConverter<LeaderType> {
 
     @Override
     public String toString(LeaderType leaderType) {
-        return leaderType == null ? "" : this.game.getLocalisation(leaderType.name());
+        return leaderType == null ? "" : Eu4SaveEditorUtils.localize(leaderType.name(), this.game);
     }
 
     @Override

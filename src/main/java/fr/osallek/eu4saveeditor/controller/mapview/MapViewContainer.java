@@ -3,11 +3,12 @@ package fr.osallek.eu4saveeditor.controller.mapview;
 import fr.osallek.eu4parser.model.game.Culture;
 import fr.osallek.eu4parser.model.game.TradeGood;
 import fr.osallek.eu4parser.model.game.TradeNode;
+import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.SaveReligion;
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
-import fr.osallek.eu4saveeditor.Eu4SaveEditor;
+import fr.osallek.eu4saveeditor.Eu4SaveEditorApplication;
 import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.collections.ObservableList;
@@ -19,6 +20,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.VBox;
 import org.controlsfx.control.SegmentedButton;
+import org.springframework.context.MessageSource;
 
 import java.util.Collections;
 import java.util.EnumMap;
@@ -28,8 +30,6 @@ import java.util.Map;
 public class MapViewContainer {
 
     private final SaveProvince[][] provincesMap;
-
-    private final Map<Integer, DrawableProvince> drawableProvinces;
 
     private final Canvas canvas;
 
@@ -43,9 +43,9 @@ public class MapViewContainer {
 
     private SaveProvince selectedProvince;
 
-    private final ObservableList<Country> playableCountries;
+    private final ObservableList<SaveCountry> playableCountries;
 
-    private final ObservableList<Country> countriesAlive;
+    private final ObservableList<SaveCountry> countriesAlive;
 
     private final ObservableList<Culture> cultures;
 
@@ -69,12 +69,11 @@ public class MapViewContainer {
 
     private final Button submitButton;
 
-    public MapViewContainer(SaveProvince[][] provincesMap, Map<Integer, DrawableProvince> drawableProvinces, Canvas canvas, VBox editPane, Save save,
-                            ObservableList<Country> playableCountries, ObservableList<Country> countriesAlive, ObservableList<Culture> cultures,
+    public MapViewContainer(MessageSource messageSource, SaveProvince[][] provincesMap, Canvas canvas, VBox editPane, Save save,
+                            ObservableList<SaveCountry> playableCountries, ObservableList<SaveCountry> countriesAlive, ObservableList<Culture> cultures,
                             ObservableList<SaveReligion> religions, ObservableList<SaveReligion> playableReligions, ObservableList<TradeGood> tradeGoods,
                             ObservableList<TradeNode> tradeNodes, ObservableList<SaveProvince> cities) {
         this.provincesMap = provincesMap;
-        this.drawableProvinces = drawableProvinces;
         this.canvas = canvas;
         this.editPane = editPane;
         this.save = save;
@@ -86,16 +85,16 @@ public class MapViewContainer {
         this.playableReligions = playableReligions;
         this.tradeGoods = tradeGoods;
         this.tradeNodes = tradeNodes;
-        this.saveSheet = new SavePropertySheet(this.save, this.countriesAlive, this.cities);
+        this.saveSheet = new SavePropertySheet(this.save, this.countriesAlive, this.cities, messageSource);
         this.mapViews = new EnumMap<>(MapViewType.class);
 
         this.titleLabel = new Label();
         this.titleLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 16px");
 
-        this.submitButton = new Button(save.getGame().getLocalisation("SM_APPLY"));
+        this.submitButton = new Button(save.getGame().getLocalisationClean("SM_APPLY", Eu4Language.getDefault()));
         this.submitButton.setStyle("-fx-font-weight: bold");
 
-        this.saveButton = new ToggleButton(save.getGame().getLocalisation("SM_GAME"));
+        this.saveButton = new ToggleButton(save.getGame().getLocalisationClean("SM_GAME", Eu4Language.getDefault()));
         this.saveButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
             if (Boolean.FALSE.equals(oldValue) && Boolean.TRUE.equals(newValue)) {
                 selectSaveButton();
@@ -106,7 +105,7 @@ public class MapViewContainer {
         this.tabsSegmentedButton = new SegmentedButton();
         this.tabsSegmentedButton.getStyleClass().add(SegmentedButton.STYLE_CLASS_DARK);
         this.tabsSegmentedButton.setMaxWidth(Double.MAX_VALUE);
-        this.tabsSegmentedButton.getStylesheets().add(Eu4SaveEditor.class.getResource("styles/style.css").toExternalForm());
+        this.tabsSegmentedButton.getStylesheets().add(Eu4SaveEditorApplication.class.getResource("/styles/style.css").toExternalForm());
         addTabsSegmentedButtons(this.saveButton);
 
         this.editPane.getChildren().clear();
@@ -123,8 +122,8 @@ public class MapViewContainer {
         }
     }
 
-    public void registerMapView(MapViewType mapViewType) {
-        this.mapViews.put(mapViewType, mapViewType.getMapView(this));
+    public void registerMapView(MapViewType mapViewType, AbstractMapView mapView) {
+        this.mapViews.put(mapViewType, mapView);
     }
 
     public void selectMapView(MapViewType mapViewType) {
@@ -219,10 +218,6 @@ public class MapViewContainer {
         return provincesMap;
     }
 
-    public Map<Integer, DrawableProvince> getDrawableProvinces() {
-        return drawableProvinces;
-    }
-
     public Canvas getCanvas() {
         return canvas;
     }
@@ -235,11 +230,11 @@ public class MapViewContainer {
         return editPane;
     }
 
-    public ObservableList<Country> getPlayableCountries() {
+    public ObservableList<SaveCountry> getPlayableCountries() {
         return playableCountries;
     }
 
-    public ObservableList<Country> getCountriesAlive() {
+    public ObservableList<SaveCountry> getCountriesAlive() {
         return countriesAlive;
     }
 
@@ -261,6 +256,10 @@ public class MapViewContainer {
 
     public ObservableList<TradeNode> getTradeNodes() {
         return tradeNodes;
+    }
+
+    public ObservableList<SaveProvince> getCities() {
+        return cities;
     }
 
     public SegmentedButton getTabsSegmentedButton() {

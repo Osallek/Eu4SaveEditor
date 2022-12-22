@@ -1,9 +1,13 @@
 package fr.osallek.eu4saveeditor.controller.control;
 
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
+import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4saveeditor.controller.converter.PercentStringConverter;
 import fr.osallek.eu4saveeditor.controller.object.PriceChange;
+import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.List;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
@@ -12,21 +16,17 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.LocalDateStringConverter;
 
-import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.List;
-
 public class TableView2PriceChange extends TableView<PriceChange> {
 
     public TableView2PriceChange(List<PriceChange> priceChanges, Save save) {
-        TableColumn<PriceChange, String> name = new TableColumn<>(save.getGame().getLocalisation("LEDGER_NAME"));
+        TableColumn<PriceChange, String> name = new TableColumn<>(save.getGame().getLocalisationClean("LEDGER_NAME", Eu4Language.getDefault()));
         name.setCellValueFactory(p -> p.getValue() == null ? null : new ReadOnlyObjectWrapper<>(p.getValue().getName()));
         name.setCellFactory(TextFieldTableCell.forTableColumn());
         name.setEditable(false);
         name.setPrefWidth(500);
         name.setStyle("-fx-alignment: CENTER-LEFT");
 
-        TableColumn<PriceChange, Integer> value = new TableColumn<>(save.getGame().getLocalisation("LEDGER_VALUE"));
+        TableColumn<PriceChange, Integer> value = new TableColumn<>(save.getGame().getLocalisationClean("LEDGER_VALUE", Eu4Language.getDefault()));
         value.setCellValueFactory(p -> p.getValue() == null ? null :
                                        new SimpleIntegerProperty(p.getValue().getValue()).asObject());
         value.setCellFactory(TextFieldTableCell.forTableColumn(new PercentStringConverter()));
@@ -34,7 +34,7 @@ public class TableView2PriceChange extends TableView<PriceChange> {
         value.setPrefWidth(100);
         value.setStyle("-fx-alignment: CENTER-LEFT");
 
-        TableColumn<PriceChange, LocalDate> expiryDate = new TableColumn<>(save.getGame().getLocalisationCleanNoPunctuation("EXPIRES_ON"));
+        TableColumn<PriceChange, LocalDate> expiryDate = new TableColumn<>(save.getGame().getLocalisationCleanNoPunctuation("EXPIRES_ON", Eu4Language.getDefault()));
         expiryDate.setCellValueFactory(p -> p.getValue() == null ? null : new ReadOnlyObjectWrapper<>(p.getValue().getExpiryDate()));
         expiryDate.setCellFactory(TextFieldTableCell.forTableColumn(new LocalDateStringConverter(ClausewitzUtils.DATE_FORMAT, ClausewitzUtils.DATE_FORMAT)));
         expiryDate.setOnEditCommit(event -> event.getRowValue().setExpiryDate(event.getNewValue()));

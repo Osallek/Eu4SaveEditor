@@ -1,16 +1,14 @@
 package fr.osallek.eu4saveeditor.controller.propertyeditor.item;
 
 import fr.osallek.eu4saveeditor.controller.control.SelectableGridView;
-import fr.osallek.eu4saveeditor.i18n.SheetCategory;
+import java.io.File;
+import java.util.Optional;
+import java.util.function.Function;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
-
-import java.io.File;
-import java.util.Optional;
-import java.util.function.Function;
 
 public class SelectableGridViewItem<U> implements CustomItem<U> {
 
@@ -26,12 +24,12 @@ public class SelectableGridViewItem<U> implements CustomItem<U> {
 
     private Function<U, String> textFunction;
 
-    public SelectableGridViewItem(SheetCategory category, SelectableGridView<U> selectableGridView) {
+    public SelectableGridViewItem(String category, SelectableGridView<U> selectableGridView) {
         this(category, selectableGridView, new SimpleBooleanProperty(true));
     }
 
-    public SelectableGridViewItem(SheetCategory category, SelectableGridView<U> selectableGridView, BooleanProperty editable) {
-        this.category = category.getForDefaultLocale();
+    public SelectableGridViewItem(String category, SelectableGridView<U> selectableGridView, BooleanProperty editable) {
+        this.category = category;
         this.values = selectableGridView.getItems();
         this.selectedValues = selectableGridView.getSelectedItems();
         this.selectableGridView = selectableGridView;
@@ -102,8 +100,8 @@ public class SelectableGridViewItem<U> implements CustomItem<U> {
         this.selectableGridView.unSelect(u);
     }
 
-    public void setCellFactory(Function<U, String> textFunction, Function<U, File> imageFunction) {
-        this.getSelectableGridView().setCellFactory(textFunction, imageFunction);
+    public void setCellFactory(Function<U, String> textFunction, Function<U, File> imageFunction, File defaultFile) {
+        this.getSelectableGridView().setCellFactory(textFunction, imageFunction, defaultFile);
     }
 
     public Function<U, String> getCellFactory() {

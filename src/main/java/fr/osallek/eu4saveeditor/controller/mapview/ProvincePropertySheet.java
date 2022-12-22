@@ -1,15 +1,21 @@
 package fr.osallek.eu4saveeditor.controller.mapview;
 
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
+import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.game.Building;
 import fr.osallek.eu4parser.model.game.Culture;
 import fr.osallek.eu4parser.model.game.TradeGood;
 import fr.osallek.eu4parser.model.game.TradeNode;
+import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.save.Save;
+import fr.osallek.eu4parser.model.save.SaveGreatProject;
 import fr.osallek.eu4parser.model.save.SaveReligion;
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
+import fr.osallek.eu4parser.model.save.province.ProvinceBuilding;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
-import fr.osallek.eu4saveeditor.Eu4SaveEditor;
+import fr.osallek.eu4saveeditor.Eu4SaveEditorApplication;
+import fr.osallek.eu4saveeditor.common.Constants;
+import fr.osallek.eu4saveeditor.common.Eu4SaveEditorUtils;
 import fr.osallek.eu4saveeditor.controller.control.ClearableCheckComboBox;
 import fr.osallek.eu4saveeditor.controller.control.ClearableComboBox;
 import fr.osallek.eu4saveeditor.controller.control.ClearableSpinnerDouble;
@@ -20,8 +26,8 @@ import fr.osallek.eu4saveeditor.controller.converter.CountryStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.CountryStringConverter;
 import fr.osallek.eu4saveeditor.controller.converter.CultureStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.CultureStringConverter;
-import fr.osallek.eu4saveeditor.controller.converter.ReligionStringConverter;
 import fr.osallek.eu4saveeditor.controller.converter.SaveReligionStringCellFactory;
+import fr.osallek.eu4saveeditor.controller.converter.SaveReligionStringConverter;
 import fr.osallek.eu4saveeditor.controller.converter.TradeGoodStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.TradeGoodStringConverter;
 import fr.osallek.eu4saveeditor.controller.converter.TradeNodeStringCellFactory;
@@ -41,32 +47,42 @@ import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableTextItem
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.HBoxItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.SelectableGridViewItem;
 import fr.osallek.eu4saveeditor.controller.validator.CustomGraphicValidationDecoration;
-import fr.osallek.eu4saveeditor.i18n.SheetCategory;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableSet;
 import javafx.event.ActionEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.controlsfx.control.SearchableComboBox;
 import org.controlsfx.validation.ValidationSupport;
 import org.controlsfx.validation.Validator;
 import org.controlsfx.validation.decoration.CompoundValidationDecoration;
 import org.controlsfx.validation.decoration.StyleClassValidationDecoration;
+import org.springframework.context.MessageSource;
+import org.springframework.core.io.ClassPathResource;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ProvincePropertySheet extends VBox {
+
+    private final MessageSource messageSource;
 
     private SaveProvince province;
 
@@ -82,17 +98,17 @@ public class ProvincePropertySheet extends VBox {
 
     private final ClearableTextItem capitalField;
 
-    private final ClearableComboBoxItem<Country> ownerComboBox;
+    private final ClearableComboBoxItem<SaveCountry> ownerComboBox;
 
-    private final ClearableComboBoxItem<Country> controllerComboBox;
+    private final ClearableComboBoxItem<SaveCountry> controllerComboBox;
 
-    private final ClearableCheckComboBoxItem<Country> coresField;
+    private final ClearableCheckComboBoxItem<SaveCountry> coresField;
 
-    private final ClearableCheckComboBoxItem<Country> claimsField;
+    private final ClearableCheckComboBoxItem<SaveCountry> claimsField;
 
     private final CheckBoxItem hreField;
 
-    private final ClearableComboBoxItem<Country> colonizeForField;
+    private final ClearableComboBoxItem<SaveCountry> colonizeForField;
 
     private final ClearableSliderItem colonySizeField;
 
@@ -114,6 +130,8 @@ public class ProvincePropertySheet extends VBox {
 
     private final ClearableSpinnerItem<Integer> cotField;
 
+    private final ClearableSpinnerItem<Integer> infrastructureField;
+
     private final List<ClearableSliderItem> institutionFields;
 
     private final ClearableSliderItem autonomyField;
@@ -122,20 +140,26 @@ public class ProvincePropertySheet extends VBox {
 
     private final ClearableComboBoxItem<TradeNode> tradeNodeField;
 
-    private List<SelectableGridViewItem<Building>> buildingsFields;
+    private final List<SelectableGridViewItem<Building>> buildingsFields;
+
+    private final File defaultBuildingImage;
 
     private final ButtonItem modifiersButton;
 
     private final ObservableList<Modifier> modifiers;
 
-    private final ChangeListener<? super Country> ownerChangeListener;
+    private Map<SaveGreatProject, ClearableSpinnerItem<Integer>> greatProjectsField;
+
+    private final ChangeListener<? super SaveCountry> ownerChangeListener;
 
     private BooleanProperty countryChanged;
 
-    private CustomPropertySheetSkin propertySheetSkin;
+    private final CustomPropertySheetSkin propertySheetSkin;
 
-    public ProvincePropertySheet(Save save, ObservableList<Country> playableCountries, ObservableList<Culture> cultures, ObservableList<SaveReligion> religions,
-                                 ObservableList<TradeGood> tradeGoods, ObservableList<TradeNode> tradeNodes) {
+    public ProvincePropertySheet(MessageSource messageSource, Save save, ObservableList<SaveCountry> playableCountries, ObservableList<Culture> cultures,
+                                 ObservableList<SaveReligion> religions, ObservableList<TradeGood> tradeGoods, ObservableList<TradeNode> tradeNodes) {
+        File defaultBuildingImage1;
+        this.messageSource = messageSource;
         this.propertySheet = new CustomPropertySheet();
         this.propertySheet.setPropertyEditorFactory(new CustomPropertyEditorFactory());
         this.propertySheet.setMode(CustomPropertySheet.Mode.CATEGORY);
@@ -146,145 +170,171 @@ public class ProvincePropertySheet extends VBox {
         this.propertySheet.setSkin(this.propertySheetSkin);
 
         //GENERAL
-        this.nameField = new ClearableTextItem(SheetCategory.GENERAL,
-                                               save.getGame().getLocalisation("LEDGER_NAME"));
-        this.nameField.getTextField()
-                      .getStylesheets()
-                      .add(Eu4SaveEditor.class.getResource("styles/propertySheetsStyle.css").toExternalForm());
+        this.nameField = new ClearableTextItem(this.messageSource.getMessage("ose.category.general", null, Constants.LOCALE),
+                                               save.getGame().getLocalisationClean("LEDGER_NAME", Eu4Language.getDefault()));
+        this.nameField.getTextField().getStylesheets().add(Eu4SaveEditorApplication.class.getResource("/styles/style.css").toExternalForm());
 
         this.validationSupport = new ValidationSupport();
         this.validationSupport.registerValidator(this.nameField.getTextField(), Validator.createEmptyValidator("Text is required"));
         this.validationSupport.setValidationDecorator(new CompoundValidationDecoration(new CustomGraphicValidationDecoration(),
                                                                                        new StyleClassValidationDecoration("validation-error", null)));
 
-        this.capitalField = new ClearableTextItem(SheetCategory.GENERAL,
-                                                  save.getGame().getLocalisation("TRIGGER_CAPITAL"));
+        this.capitalField = new ClearableTextItem(this.messageSource.getMessage("ose.category.general", null, Constants.LOCALE),
+                                                  save.getGame().getLocalisationClean("TRIGGER_CAPITAL", Eu4Language.getDefault()));
 
-        this.cultureComboBox = new ClearableComboBoxItem<>(SheetCategory.GENERAL,
-                                                           save.getGame().getLocalisation("LEDGER_CULTURE"),
+        this.cultureComboBox = new ClearableComboBoxItem<>(this.messageSource.getMessage("ose.category.general", null, Constants.LOCALE),
+                                                           save.getGame().getLocalisationClean("LEDGER_CULTURE", Eu4Language.getDefault()),
                                                            cultures,
                                                            new ClearableComboBox<>(new SearchableComboBox<>()));
-        this.cultureComboBox.setConverter(new CultureStringConverter());
-        this.cultureComboBox.setCellFactory(new CultureStringCellFactory());
+        this.cultureComboBox.setConverter(CultureStringConverter.INSTANCE);
+        this.cultureComboBox.setCellFactory(CultureStringCellFactory.INSTANCE);
 
-        this.religionComboBox = new ClearableComboBoxItem<>(SheetCategory.GENERAL,
-                                                            save.getGame().getLocalisation("LEDGER_RELIGION"),
+        this.religionComboBox = new ClearableComboBoxItem<>(this.messageSource.getMessage("ose.category.general", null, Constants.LOCALE),
+                                                            save.getGame().getLocalisationClean("LEDGER_RELIGION", Eu4Language.getDefault()),
                                                             religions,
                                                             new ClearableComboBox<>(new SearchableComboBox<>()));
-        this.religionComboBox.setConverter(new ReligionStringConverter());
-        this.religionComboBox.setCellFactory(new SaveReligionStringCellFactory());
+        this.religionComboBox.setConverter(SaveReligionStringConverter.INSTANCE);
+        this.religionComboBox.setCellFactory(SaveReligionStringCellFactory.INSTANCE);
 
-        this.controllerComboBox = new ClearableComboBoxItem<>(SheetCategory.PROVINCE_POLITICAL,
-                                                              save.getGame().getLocalisationClean("SUPPLY_CONTROLLER"),
+        this.controllerComboBox = new ClearableComboBoxItem<>(this.messageSource.getMessage("ose.category.political", null, Constants.LOCALE),
+                                                              save.getGame().getLocalisationClean("SUPPLY_CONTROLLER", Eu4Language.getDefault()),
                                                               playableCountries,
                                                               new ClearableComboBox<>(new SearchableComboBox<>()));
-        this.controllerComboBox.setConverter(new CountryStringConverter());
+        this.controllerComboBox.setConverter(CountryStringConverter.INSTANCE);
         this.controllerComboBox.setCellFactory(new CountryStringCellFactory());
 
-        this.ownerComboBox = new ClearableComboBoxItem<>(SheetCategory.PROVINCE_POLITICAL,
-                                                         save.getGame().getLocalisation("LEDGER_OWNER"),
+        this.ownerComboBox = new ClearableComboBoxItem<>(this.messageSource.getMessage("ose.category.political", null, Constants.LOCALE),
+                                                         save.getGame().getLocalisationClean("LEDGER_OWNER", Eu4Language.getDefault()),
                                                          playableCountries,
                                                          new ClearableComboBox<>(new SearchableComboBox<>()));
-        this.ownerComboBox.setConverter(new CountryStringConverter());
+        this.ownerComboBox.setConverter(CountryStringConverter.INSTANCE);
         this.ownerComboBox.setCellFactory(new CountryStringCellFactory());
 
-        this.coresField = new ClearableCheckComboBoxItem<>(SheetCategory.PROVINCE_POLITICAL,
-                                                           save.getGame().getLocalisation("LEDGER_CORE"),
+        this.coresField = new ClearableCheckComboBoxItem<>(this.messageSource.getMessage("ose.category.political", null, Constants.LOCALE),
+                                                           save.getGame().getLocalisationClean("LEDGER_CORE", Eu4Language.getDefault()),
                                                            playableCountries,
                                                            new ClearableCheckComboBox<>());
-        this.coresField.setConverter(new CountryStringConverter());
+        this.coresField.setConverter(CountryStringConverter.INSTANCE);
 
-        this.claimsField = new ClearableCheckComboBoxItem<>(SheetCategory.PROVINCE_POLITICAL,
-                                                            save.getGame().getLocalisation("HAVE_CLAIM_IN"),
+        this.claimsField = new ClearableCheckComboBoxItem<>(this.messageSource.getMessage("ose.category.political", null, Constants.LOCALE),
+                                                            save.getGame().getLocalisationClean("HAVE_CLAIM_IN", Eu4Language.getDefault()),
                                                             playableCountries,
                                                             new ClearableCheckComboBox<>());
-        this.claimsField.setConverter(new CountryStringConverter());
+        this.claimsField.setConverter(CountryStringConverter.INSTANCE);
 
-        this.hreField = new CheckBoxItem(SheetCategory.PROVINCE_POLITICAL,
-                                         save.getGame().getLocalisation("IS_PART_OF_HRE"),
+        this.hreField = new CheckBoxItem(this.messageSource.getMessage("ose.category.political", null, Constants.LOCALE),
+                                         save.getGame().getLocalisationClean("IS_PART_OF_HRE", Eu4Language.getDefault()),
                                          false);
 
-        this.colonizeForField = new ClearableComboBoxItem<>(SheetCategory.PROVINCE_COLONY,
-                                                            save.getGame().getLocalisation("COLONIZE_PROVINCE"),
+        this.colonizeForField = new ClearableComboBoxItem<>(this.messageSource.getMessage("ose.category.colony", null, Constants.LOCALE),
+                                                            save.getGame().getLocalisationClean("COLONIZE_PROVINCE", Eu4Language.getDefault()),
                                                             playableCountries,
                                                             new ClearableComboBox<>(new SearchableComboBox<>()));
-        this.colonizeForField.setConverter(new CountryStringConverter());
+        this.colonizeForField.setConverter(CountryStringConverter.INSTANCE);
 
-        this.nativeHostilenessField = new ClearableSpinnerItem<>(SheetCategory.PROVINCE_COLONY,
-                                                                 save.getGame().getLocalisationClean("PP_AGGRESSIVE"),
+        this.nativeHostilenessField = new ClearableSpinnerItem<>(this.messageSource.getMessage("ose.category.colony", null, Constants.LOCALE),
+                                                                 save.getGame().getLocalisationClean("PP_AGGRESSIVE", Eu4Language.getDefault()),
                                                                  new ClearableSpinnerInt(0, 10, 1));
 
-        this.nativeFerocityField = new ClearableSpinnerItem<>(SheetCategory.PROVINCE_COLONY,
-                                                              save.getGame().getLocalisationClean("PP_FEROCITY"),
+        this.nativeFerocityField = new ClearableSpinnerItem<>(this.messageSource.getMessage("ose.category.colony", null, Constants.LOCALE),
+                                                              save.getGame().getLocalisationClean("PP_FEROCITY", Eu4Language.getDefault()),
                                                               new ClearableSpinnerInt(0, 10, 1));
 
-        this.nativeSizeField = new ClearableSpinnerItem<>(SheetCategory.PROVINCE_COLONY,
-                                                              save.getGame().getLocalisationClean("PP_NATIVES"),
-                                                              new ClearableSpinnerInt(0, 10000, 1));
+        this.nativeSizeField = new ClearableSpinnerItem<>(this.messageSource.getMessage("ose.category.colony", null, Constants.LOCALE),
+                                                          save.getGame().getLocalisationClean("PP_NATIVES", Eu4Language.getDefault()),
+                                                          new ClearableSpinnerInt(0, 10000, 1));
 
-        this.colonySizeField = new ClearableSliderItem(SheetCategory.PROVINCE_COLONY,
-                                                       save.getGame().getLocalisation("LEDGER_POPULATION"),
+        this.colonySizeField = new ClearableSliderItem(this.messageSource.getMessage("ose.category.colony", null, Constants.LOCALE),
+                                                       save.getGame().getLocalisationClean("LEDGER_POPULATION", Eu4Language.getDefault()),
                                                        0, 1000);
 
-        this.baseTaxField = new ClearableSpinnerItem<>(SheetCategory.ECONOMY,
-                                                       save.getGame().getLocalisation("LEDGER_TAX"),
+        this.baseTaxField = new ClearableSpinnerItem<>(this.messageSource.getMessage("ose.category.economy", null, Constants.LOCALE),
+                                                       save.getGame().getLocalisationClean("LEDGER_TAX", Eu4Language.getDefault()),
                                                        new ClearableSpinnerDouble(1, 999, 1));
 
-        this.baseProdField = new ClearableSpinnerItem<>(SheetCategory.ECONOMY,
-                                                        save.getGame().getLocalisation("LEDGER_PRODUCTION"),
+        this.baseProdField = new ClearableSpinnerItem<>(this.messageSource.getMessage("ose.category.economy", null, Constants.LOCALE),
+                                                        save.getGame().getLocalisationClean("LEDGER_PRODUCTION", Eu4Language.getDefault()),
                                                         new ClearableSpinnerDouble(1, 999, 1));
 
-        this.baseMPField = new ClearableSpinnerItem<>(SheetCategory.ECONOMY,
-                                                      save.getGame().getLocalisation("LEDGER_MANPOWER"),
+        this.baseMPField = new ClearableSpinnerItem<>(this.messageSource.getMessage("ose.category.economy", null, Constants.LOCALE),
+                                                      save.getGame().getLocalisationClean("LEDGER_MANPOWER", Eu4Language.getDefault()),
                                                       new ClearableSpinnerDouble(1, 999, 1));
 
-        this.tradeGoodField = new ClearableComboBoxItem<>(SheetCategory.ECONOMY,
-                                                          save.getGame().getLocalisation("LEDGER_GOODS"),
+        this.tradeGoodField = new ClearableComboBoxItem<>(this.messageSource.getMessage("ose.category.economy", null, Constants.LOCALE),
+                                                          save.getGame().getLocalisationClean("LEDGER_GOODS", Eu4Language.getDefault()),
                                                           tradeGoods,
                                                           new ClearableComboBox<>(new SearchableComboBox<>()));
-        this.tradeGoodField.setConverter(new TradeGoodStringConverter());
-        this.tradeGoodField.setCellFactory(new TradeGoodStringCellFactory());
+        this.tradeGoodField.setConverter(TradeGoodStringConverter.INSTANCE);
+        this.tradeGoodField.setCellFactory(new TradeGoodStringCellFactory(save.getGame()));
 
-        this.tradeNodeField = new ClearableComboBoxItem<>(SheetCategory.ECONOMY,
-                                                          save.getGame().getLocalisation("TRADENODE"),
+        this.tradeNodeField = new ClearableComboBoxItem<>(this.messageSource.getMessage("ose.category.economy", null, Constants.LOCALE),
+                                                          save.getGame().getLocalisationClean("TRADENODE", Eu4Language.getDefault()),
                                                           tradeNodes,
                                                           new ClearableComboBox<>(new SearchableComboBox<>()));
-        this.tradeNodeField.setConverter(new TradeNodeStringConverter());
-        this.tradeNodeField.setCellFactory(new TradeNodeStringCellFactory());
+        this.tradeNodeField.setConverter(TradeNodeStringConverter.INSTANCE);
+        this.tradeNodeField.setCellFactory(new TradeNodeStringCellFactory(save.getGame()));
 
-        this.latentTradeGoodField = new ClearableComboBoxItem<>(SheetCategory.ECONOMY,
+        this.latentTradeGoodField = new ClearableComboBoxItem<>(this.messageSource.getMessage("ose.category.economy", null, Constants.LOCALE),
                                                                 save.getGame()
-                                                                    .getLocalisationClean("LATENT_TRADE_GOODS_TOOLTIP_HEADER"),
+                                                                    .getLocalisationClean("LATENT_TRADE_GOODS_TOOLTIP_HEADER", Eu4Language.getDefault()),
                                                                 tradeGoods,
                                                                 new ClearableComboBox<>(new SearchableComboBox<>()));
-        this.latentTradeGoodField.setConverter(new TradeGoodStringConverter());
-        this.latentTradeGoodField.setCellFactory(new TradeGoodStringCellFactory());
+        this.latentTradeGoodField.setConverter(TradeGoodStringConverter.INSTANCE);
+        this.latentTradeGoodField.setCellFactory(new TradeGoodStringCellFactory(save.getGame()));
 
-        this.cotField = new ClearableSpinnerItem<>(SheetCategory.ECONOMY,
-                                                   save.getGame().getLocalisationClean("EST_VAL_COT"),
+        this.cotField = new ClearableSpinnerItem<>(this.messageSource.getMessage("ose.category.economy", null, Constants.LOCALE),
+                                                   save.getGame().getLocalisationClean("EST_VAL_COT", Eu4Language.getDefault()),
                                                    new ClearableSpinnerInt(0, 3, 1));
 
-        this.autonomyField = new ClearableSliderItem(SheetCategory.ECONOMY,
-                                                     save.getGame().getLocalisation("local_autonomy"),
+        this.infrastructureField = new ClearableSpinnerItem<>(this.messageSource.getMessage("ose.category.economy", null, Constants.LOCALE),
+                                                              this.messageSource.getMessage("province.infrastructure", null, Constants.LOCALE),
+                                                              new ClearableSpinnerInt(0, 100, 1));
+
+        this.autonomyField = new ClearableSliderItem(this.messageSource.getMessage("ose.category.economy", null, Constants.LOCALE),
+                                                     save.getGame().getLocalisationClean("local_autonomy", Eu4Language.getDefault()),
                                                      0, 100);
 
-        this.devastationField = new ClearableSliderItem(SheetCategory.ECONOMY,
-                                                        save.getGame().getLocalisation("LEDGER_DEVASTATION"),
+        this.devastationField = new ClearableSliderItem(this.messageSource.getMessage("ose.category.economy", null, Constants.LOCALE),
+                                                        save.getGame().getLocalisationClean("LEDGER_DEVASTATION", Eu4Language.getDefault()),
                                                         0, 100);
 
         this.institutionFields = new ArrayList<>();
         for (int i = 0; i < save.getInstitutions().getNbInstitutions(); i++) {
-            this.institutionFields.add(new ClearableSliderItem(SheetCategory.PROVINCE_INSTITUTIONS,
-                                                               save.getGame().getInstitution(i).getLocalizedName(),
+            this.institutionFields.add(new ClearableSliderItem(this.messageSource.getMessage("ose.category.institutions", null, Constants.LOCALE),
+                                                               Eu4SaveEditorUtils.localize(save.getGame().getInstitution(i).getName(), save.getGame()),
                                                                0, 100));
         }
 
         this.buildingsFields = new ArrayList<>();
+        try {
+            defaultBuildingImage1 = new ClassPathResource("images/no_building.png").getFile();
+        } catch (IOException ignored) {
+            defaultBuildingImage1 = null;
+        }
+        this.defaultBuildingImage = defaultBuildingImage1;
+
+        Eu4Utils.buildingsTree(save.getGame().getBuildings()).forEach(buildings -> {
+            buildings.removeIf(b -> "manufactory".equals(b.getName()));
+
+            if (CollectionUtils.isNotEmpty(buildings)) {
+                SelectableGridViewItem<Building> grid = new SelectableGridViewItem<>(this.messageSource.getMessage("ose.category.buildings", null, Constants.LOCALE),
+                                                                                     new SelectableGridView<>(FXCollections.observableList(buildings),
+                                                                                                              buildings.stream()
+                                                                                                                       .anyMatch(b -> CollectionUtils.isNotEmpty(b.getManufactoryFor())),
+                                                                                                              FXCollections.observableSet(new HashSet<>())));
+                grid.setCellFactory(b -> Eu4SaveEditorUtils.localize("building_" + b.getName(), this.province.getSave().getGame()),
+                                    Building::getImage, this.defaultBuildingImage);
+                this.buildingsFields.add(grid);
+            }
+        });
 
         //Modifiers
         this.modifiers = FXCollections.observableArrayList();
-        this.modifiersButton = new ButtonItem(save.getGame().getLocalisationClean("DOMESTIC_MODIFIERS"), null,
-                                              save.getGame().getLocalisationClean("DOMESTIC_MODIFIERS"));
+        this.modifiersButton = new ButtonItem(save.getGame().getLocalisationClean("DOMESTIC_MODIFIERS", Eu4Language.getDefault()), null,
+                                              save.getGame().getLocalisationClean("DOMESTIC_MODIFIERS", Eu4Language.getDefault()));
+
+        //Great projects
+        this.greatProjectsField = new LinkedHashMap<>();
 
         this.ownerChangeListener = (observable, oldValue, newValue) -> {
             this.controllerComboBox.select(newValue);
@@ -326,6 +376,7 @@ public class ProvincePropertySheet extends VBox {
         this.tradeGoodField.setEditable(false);
         this.latentTradeGoodField.setEditable(false);
         this.cotField.setEditable(false);
+        this.infrastructureField.setEditable(false);
         this.institutionFields.forEach(clearableSliderItem -> clearableSliderItem.setEditable(false));
         this.autonomyField.setEditable(false);
         this.devastationField.setEditable(false);
@@ -367,12 +418,12 @@ public class ProvincePropertySheet extends VBox {
             }
 
             if (this.province.isCity()) {
-                this.coresField.setValue(FXCollections.observableArrayList(this.province.getCores()));
+                this.coresField.setValue(FXCollections.observableList(this.province.getCores()));
                 this.coresField.setSupplier(this.province::getCores);
                 this.coresField.setEditable(true);
                 items.add(this.coresField);
 
-                this.claimsField.setValue(FXCollections.observableArrayList(this.province.getClaims()));
+                this.claimsField.setValue(FXCollections.observableList(this.province.getClaims()));
                 this.claimsField.setSupplier(this.province::getClaims);
                 this.claimsField.setEditable(true);
                 items.add(this.claimsField);
@@ -381,7 +432,6 @@ public class ProvincePropertySheet extends VBox {
                 this.hreField.setEditable(true);
                 items.add(this.hreField);
             }
-
 
             //COLONY
             if (!this.province.isCity()) {
@@ -410,7 +460,6 @@ public class ProvincePropertySheet extends VBox {
                 this.nativeFerocityField.setEditable(true);
                 items.add(this.nativeFerocityField);
             }
-
 
             //ECONOMY
             this.baseTaxField.setValue(this.province.getBaseTax());
@@ -443,6 +492,11 @@ public class ProvincePropertySheet extends VBox {
             this.cotField.setEditable(true);
             items.add(this.cotField);
 
+            this.infrastructureField.setValue(this.province.getExpandInfrastructure());
+            this.infrastructureField.setSupplier(this.province::getExpandInfrastructure);
+            this.infrastructureField.setEditable(true);
+            items.add(this.infrastructureField);
+
             if (this.province.isCity()) {
                 this.autonomyField.setValue(this.province.getTrueLocalAutonomy());
                 this.autonomyField.setSupplier(this.province::getTrueLocalAutonomy);
@@ -472,41 +526,38 @@ public class ProvincePropertySheet extends VBox {
                 items.addAll(this.institutionFields);
             }
 
-            this.buildingsFields.clear();
             if (this.province.isCity()) {
                 //BUILDINGS
-                this.province.getAvailableBuildingsTree().forEach(buildings -> {
-                    ObservableSet<Building> buildingsBuilt = FXCollections.observableSet(this.province.getBuildings()
-                                                                                                      .stream()
-                                                                                                      .filter(buildings::contains)
-                                                                                                      .collect(Collectors
-                                                                                                                       .toSet()));
-                    SelectableGridViewItem<Building> gridViewItem = new SelectableGridViewItem<>(SheetCategory.PROVINCE_BUILDINGS,
-                                                                                                 new SelectableGridView<>(FXCollections
-                                                                                                                                  .observableList(buildings),
-                                                                                                                          buildingsBuilt));
-
-                    gridViewItem.setCellFactory(Building::getLocalizedName, Building::getImageFile);
-                    this.buildingsFields.add(gridViewItem);
+                Set<Building> availableBuildings = new HashSet<>(this.province.getAvailableBuildings());
+                Set<Building> buildings = this.province.getBuildings().stream().map(ProvinceBuilding::getBuilding).collect(Collectors.toSet());
+                this.buildingsFields.forEach(item -> {
+                    item.getSelectableGridView().setFilter(availableBuildings::contains);
+                    item.getSelectableGridView().getSelectedItems().clear();
+                    item.getSelectableGridView().getSelectedItems().addAll(buildings);
                 });
+                List<SelectableGridViewItem<Building>> grids = this.buildingsFields.stream()
+                                                                                   .filter(item -> !item.getSelectableGridView().getItems().isEmpty())
+                                                                                   .toList();
+                for (int i = 0; i < grids.size(); i++) {
+                    SelectableGridViewItem<Building> current = grids.get(i);
+                    HBox hBox = new HBox(13);
+                    HBox.setHgrow(current.getSelectableGridView(), Priority.ALWAYS);
 
-                for (int i = 0; i < this.buildingsFields.size(); i++) {
-                    SelectableGridViewItem<Building> current = this.buildingsFields.get(i);
-                    if (i < this.buildingsFields.size() - 1) {
-                        SelectableGridViewItem<Building> next = this.buildingsFields.get(i + 1);
+                    if (i < grids.size() - 1) {
+                        SelectableGridViewItem<Building> next = grids.get(i + 1);
+
                         if (current.getNbItems() <= 4 && next.getNbItems() <= 4) {
-                            HBox hBox = new HBox(13);
-                            HBox.setHgrow(current.getSelectableGridView(), Priority.ALWAYS);
                             HBox.setHgrow(next.getSelectableGridView(), Priority.ALWAYS);
                             hBox.getChildren().addAll(current.getSelectableGridView(), next.getSelectableGridView());
-                            items.add(new HBoxItem<Building>(SheetCategory.PROVINCE_BUILDINGS, hBox));
                             i++;
                         } else {
-                            items.add(current);
+                            hBox.getChildren().add(current.getSelectableGridView());
                         }
                     } else {
-                        items.add(current);
+                        hBox.getChildren().add(current.getSelectableGridView());
                     }
+
+                    items.add(new HBoxItem<>(this.messageSource.getMessage("ose.category.buildings", null, Constants.LOCALE), hBox));
                 }
             }
         }
@@ -517,7 +568,9 @@ public class ProvincePropertySheet extends VBox {
             TableView2Modifier tableView2Modifier = new TableView2Modifier(this.province.getSave(), this.modifiers);
             TableViewDialog<Modifier> dialog = new TableViewDialog<>(this.province.getSave(),
                                                                      tableView2Modifier,
-                                                                     this.province.getSave().getGame().getLocalisationClean("DOMESTIC_MODIFIERS"),
+                                                                     this.province.getSave()
+                                                                                  .getGame()
+                                                                                  .getLocalisationClean("DOMESTIC_MODIFIERS", Eu4Language.getDefault()),
                                                                      list -> null,
                                                                      () -> this.modifiers);
             dialog.setDisableAddProperty(new SimpleBooleanProperty(true));
@@ -527,6 +580,18 @@ public class ProvincePropertySheet extends VBox {
         });
         items.add(this.modifiersButton);
 
+        //Great projects
+        this.greatProjectsField = this.province.getGreatProjects()
+                                               .stream()
+                                               .map(p -> Map.entry(p,
+                                                                   new ClearableSpinnerItem<>(this.messageSource.getMessage("ose.category.great-projects", null, Constants.LOCALE),
+                                                                                              Eu4SaveEditorUtils.localize(p.getName(), this.province.getSave()
+                                                                                                                                                    .getGame()),
+                                                                                              new ClearableSpinnerInt(0, p.getGreatProject().getMaxLevel(),
+                                                                                                                      p.getDevelopmentTier(), 1, p::getDevelopmentTier))))
+                                               .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        items.addAll(this.greatProjectsField.values());
+
         this.propertySheet.getItems().setAll(items);
 
         if (expandedPaneName != null) {
@@ -535,8 +600,7 @@ public class ProvincePropertySheet extends VBox {
                                   .stream()
                                   .filter(titledPane -> titledPane.getText().equals(expandedPaneName))
                                   .findFirst()
-                                  .ifPresent(titledPane -> this.propertySheetSkin.getAccordion()
-                                                                                 .setExpandedPane(titledPane));
+                                  .ifPresent(titledPane -> this.propertySheetSkin.getAccordion().setExpandedPane(titledPane));
         }
 
         this.ownerComboBox.valueProperty().addListener(this.ownerChangeListener);
@@ -660,6 +724,12 @@ public class ProvincePropertySheet extends VBox {
             }
         }
 
+        if (this.infrastructureField.isEditable().getValue()) {
+            if (!Objects.deepEquals(this.province.getExpandInfrastructure(), this.infrastructureField.getTrueValue())) {
+                this.province.setExpandInfrastructure(this.infrastructureField.getTrueValue());
+            }
+        }
+
         if (this.autonomyField.isEditable().getValue()) {
             if (!Objects.deepEquals(this.province.getTrueLocalAutonomy(), this.autonomyField.getDoubleValue())) {
                 this.province.setLocalAutonomy(this.autonomyField.getDoubleValue());
@@ -682,8 +752,9 @@ public class ProvincePropertySheet extends VBox {
             List<Building> buildings = this.buildingsFields.stream()
                                                            .map(SelectableGridViewItem::getSelectedValues)
                                                            .flatMap(Collection::stream)
+                                                           .distinct()
                                                            .collect(Collectors.toList());
-            if (!this.province.getBuildings().equals(buildings)) {
+            if (!CollectionUtils.isEqualCollection(this.province.getBuildings().stream().map(ProvinceBuilding::getBuilding).toList(), buildings)) {
                 this.province.setBuildings(buildings);
             }
         }
@@ -715,6 +786,14 @@ public class ProvincePropertySheet extends VBox {
                                                                                      this.modifiers.remove(modifier);
                                                                                  },
                                                                                  () -> this.province.removeModifier(saveModifier.getModifier())));
+        }
+
+        if (MapUtils.isNotEmpty(this.greatProjectsField) && CollectionUtils.isNotEmpty(this.province.getGreatProjects())) {
+            this.greatProjectsField.forEach((p, item) -> {
+                if (!Objects.equals(p.getDevelopmentTier(), item.getTrueValue())) {
+                    p.setDevelopmentTier(item.getTrueValue());
+                }
+            });
         }
     }
 

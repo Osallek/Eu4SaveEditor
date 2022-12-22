@@ -2,6 +2,7 @@ package fr.osallek.eu4saveeditor.controller.converter;
 
 import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.gameplayoptions.CustomNationDifficulty;
+import fr.osallek.eu4saveeditor.common.Eu4SaveEditorUtils;
 import javafx.util.StringConverter;
 
 public class CustomNationDifficultyStringConverter extends StringConverter<CustomNationDifficulty> {
@@ -14,7 +15,7 @@ public class CustomNationDifficultyStringConverter extends StringConverter<Custo
 
     @Override
     public String toString(CustomNationDifficulty difficulty) {
-        return difficulty == null ? "" : this.save.getGame().getLocalisation(difficulty.name());
+        return difficulty == null ? "" : Eu4SaveEditorUtils.localize(difficulty.name(), this.save.getGame());
     }
 
     @Override

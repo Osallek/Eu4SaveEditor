@@ -2,19 +2,19 @@ package fr.osallek.eu4saveeditor.controller.mapview;
 
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.eu4parser.model.game.Culture;
-import fr.osallek.eu4parser.model.game.RulerPersonality;
+import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.save.SaveReligion;
-import fr.osallek.eu4parser.model.save.country.Country;
 import fr.osallek.eu4parser.model.save.country.Heir;
 import fr.osallek.eu4parser.model.save.country.Monarch;
-import fr.osallek.eu4saveeditor.Eu4SaveEditor;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
+import fr.osallek.eu4saveeditor.Eu4SaveEditorApplication;
 import fr.osallek.eu4saveeditor.controller.control.ClearableComboBox;
 import fr.osallek.eu4saveeditor.controller.control.ClearableSpinnerInt;
 import fr.osallek.eu4saveeditor.controller.control.TableView2Personalities;
 import fr.osallek.eu4saveeditor.controller.converter.CultureStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.CultureStringConverter;
-import fr.osallek.eu4saveeditor.controller.converter.ReligionStringConverter;
 import fr.osallek.eu4saveeditor.controller.converter.SaveReligionStringCellFactory;
+import fr.osallek.eu4saveeditor.controller.converter.SaveReligionStringConverter;
 import fr.osallek.eu4saveeditor.controller.object.Personality;
 import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
 import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheetSkin;
@@ -23,7 +23,6 @@ import fr.osallek.eu4saveeditor.controller.propertyeditor.CustomPropertyEditorFa
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ButtonItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableComboBoxItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableDatePickerItem;
-import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderIntItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSpinnerItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableTextItem;
@@ -47,7 +46,7 @@ import java.util.stream.Collectors;
 
 public class MonarchPropertySheet extends VBox {
 
-    private final Country country;
+    private final SaveCountry country;
 
     private final Monarch monarch;
 
@@ -67,18 +66,13 @@ public class MonarchPropertySheet extends VBox {
 
     private final ClearableDatePickerItem birthDateField;
 
-    private ClearableSliderItem claimField;
-
-    private final ButtonItem personalitiesButton;
+    private final ClearableSliderItem claimField;
 
     private final ObservableList<Personality> personalities = FXCollections.observableArrayList();
 
     private final ValidationSupport validationSupport;
 
-    private CustomPropertySheetSkin propertySheetSkin;
-
-    public MonarchPropertySheet(Country country, Monarch monarch, String name, ObservableList<Culture> cultures,
-                                ObservableList<SaveReligion> religions) {
+    public MonarchPropertySheet(SaveCountry country, Monarch monarch, String name, ObservableList<Culture> cultures, ObservableList<SaveReligion> religions) {
         this.country = country;
         this.monarch = monarch;
         this.propertySheet = new CustomPropertySheet();
@@ -89,65 +83,75 @@ public class MonarchPropertySheet extends VBox {
 
         List<CustomPropertySheet.Item> items = new ArrayList<>();
 
-        this.propertySheetSkin = new CustomPropertySheetSkin(this.propertySheet);
-        this.propertySheet.setSkin(this.propertySheetSkin);
+        CustomPropertySheetSkin propertySheetSkin = new CustomPropertySheetSkin(this.propertySheet);
+        this.propertySheet.setSkin(propertySheetSkin);
 
-        this.nameField = new ClearableTextItem(name, this.country.getSave().getGame().getLocalisation("LEDGER_NAME"));
-        this.nameField.getTextField().getStylesheets().add(Eu4SaveEditor.class.getResource("styles/propertySheetsStyle.css").toExternalForm());
+        this.nameField = new ClearableTextItem(name, this.country.getSave().getGame().getLocalisationClean("LEDGER_NAME", Eu4Language.getDefault()));
+        this.nameField.getTextField().getStylesheets().add(Eu4SaveEditorApplication.class.getResource("/styles/style.css").toExternalForm());
         this.nameField.setValue(ClausewitzUtils.removeQuotes(this.monarch.getName()));
         this.nameField.setSupplier(() -> ClausewitzUtils.removeQuotes(this.monarch.getName()));
         items.add(this.nameField);
 
         this.cultureField = new ClearableComboBoxItem<>(name,
-                                                        this.country.getSave().getGame().getLocalisation("LEDGER_CULTURE"),
+                                                        this.country.getSave().getGame().getLocalisationClean("LEDGER_CULTURE", Eu4Language.getDefault()),
                                                         cultures,
                                                         new ClearableComboBox<>(new SearchableComboBox<>()));
-        this.cultureField.setConverter(new CultureStringConverter());
-        this.cultureField.setCellFactory(new CultureStringCellFactory());
+        this.cultureField.setConverter(CultureStringConverter.INSTANCE);
+        this.cultureField.setCellFactory(CultureStringCellFactory.INSTANCE);
         this.cultureField.setValue(this.monarch.getCulture());
         this.cultureField.setSupplier(this.monarch::getCulture);
         items.add(this.cultureField);
 
         this.religionField = new ClearableComboBoxItem<>(name,
-                                                         this.country.getSave().getGame().getLocalisation("LEDGER_RELIGION"),
+                                                         this.country.getSave().getGame().getLocalisationClean("LEDGER_RELIGION", Eu4Language.getDefault()),
                                                          religions,
                                                          new ClearableComboBox<>(new SearchableComboBox<>()));
-        this.religionField.setConverter(new ReligionStringConverter());
-        this.religionField.setCellFactory(new SaveReligionStringCellFactory());
+        this.religionField.setConverter(SaveReligionStringConverter.INSTANCE);
+        this.religionField.setCellFactory(SaveReligionStringCellFactory.INSTANCE);
         this.religionField.setValue(this.monarch.getReligion());
         this.religionField.setSupplier(this.monarch::getReligion);
         items.add(this.religionField);
 
         this.admPointField = new ClearableSpinnerItem<>(name,
-                                                        this.country.getSave().getGame().getLocalisationCleanNoPunctuation("COURT_ADM"),
+                                                        this.country.getSave()
+                                                                    .getGame()
+                                                                    .getLocalisationCleanNoPunctuation("COURT_ADM", Eu4Language.getDefault()),
                                                         new ClearableSpinnerInt(this.country.getSave().getGame().getMonarchMinSkill(),
                                                                                 this.country.getSave().getGame().getMonarchMaxSkill(),
                                                                                 this.monarch.getAdm(), 1, this.monarch::getAdm));
         items.add(this.admPointField);
 
         this.dipPointField = new ClearableSpinnerItem<>(name,
-                                                        this.country.getSave().getGame().getLocalisationCleanNoPunctuation("COURT_DIP"),
+                                                        this.country.getSave()
+                                                                    .getGame()
+                                                                    .getLocalisationCleanNoPunctuation("COURT_DIP", Eu4Language.getDefault()),
                                                         new ClearableSpinnerInt(this.country.getSave().getGame().getMonarchMinSkill(),
                                                                                 this.country.getSave().getGame().getMonarchMaxSkill(),
                                                                                 this.monarch.getDip(), 1, this.monarch::getDip));
         items.add(this.dipPointField);
 
         this.milPointField = new ClearableSpinnerItem<>(name,
-                                                        this.country.getSave().getGame().getLocalisationCleanNoPunctuation("COURT_MIL"),
+                                                        this.country.getSave()
+                                                                    .getGame()
+                                                                    .getLocalisationCleanNoPunctuation("COURT_MIL", Eu4Language.getDefault()),
                                                         new ClearableSpinnerInt(this.country.getSave().getGame().getMonarchMinSkill(),
                                                                                 this.country.getSave().getGame().getMonarchMaxSkill(),
                                                                                 this.monarch.getMil(), 1, this.monarch::getMil));
         items.add(this.milPointField);
 
         if (ChronoUnit.YEARS.between(this.monarch.getBirthDate(), this.country.getSave().getDate()) >= this.country.getSave().getGame().getAgeOfAdulthood()) {
-            this.birthDateField = new ClearableDatePickerItem(name, this.country.getSave().getGame().getLocalisationClean("DATE_OF_BIRTH_REQUIRED"),
+            this.birthDateField = new ClearableDatePickerItem(name, this.country.getSave()
+                                                                                .getGame()
+                                                                                .getLocalisationClean("DATE_OF_BIRTH_REQUIRED", Eu4Language.getDefault()),
                                                               this.monarch.getBirthDate(), this.monarch::getBirthDate,
                                                               null,
                                                               this.country.getSave()
                                                                           .getDate()
                                                                           .minusYears(this.country.getSave().getGame().getAgeOfAdulthood()));
         } else {
-            this.birthDateField = new ClearableDatePickerItem(name, this.country.getSave().getGame().getLocalisationClean("DATE_OF_BIRTH_REQUIRED"),
+            this.birthDateField = new ClearableDatePickerItem(name, this.country.getSave()
+                                                                                .getGame()
+                                                                                .getLocalisationClean("DATE_OF_BIRTH_REQUIRED", Eu4Language.getDefault()),
                                                               this.monarch.getBirthDate(), this.monarch::getBirthDate,
                                                               this.country.getSave()
                                                                           .getDate()
@@ -157,7 +161,9 @@ public class MonarchPropertySheet extends VBox {
         items.add(this.birthDateField);
 
         if (Heir.class.equals(this.monarch.getClass()) && ((Heir) this.monarch).getClaim() != null) {
-            this.claimField = new ClearableSliderItem(name, this.country.getSave().getGame().getLocalisationClean("legitimacy"), 0, 100,
+            this.claimField = new ClearableSliderItem(name, this.country.getSave()
+                                                                        .getGame()
+                                                                        .getLocalisationClean("legitimacy", Eu4Language.getDefault()), 0, 100,
                                                       ((Heir) this.monarch).getClaim(), ((Heir) this.monarch)::getClaim);
             items.add(this.claimField);
         } else {
@@ -169,8 +175,10 @@ public class MonarchPropertySheet extends VBox {
                                                                                                             .stream()
                                                                                                             .map(Personality::new)
                                                                                                             .collect(Collectors.toList()));
-        this.personalitiesButton = new ButtonItem(name, null, this.country.getSave().getGame().getLocalisationClean("LEDGER_PERSONALITIES"), 2);
-        this.personalitiesButton.getButton().setOnAction(event -> {
+        ButtonItem personalitiesButton = new ButtonItem(name, null, this.country.getSave()
+                                                                                .getGame()
+                                                                                .getLocalisationClean("LEDGER_PERSONALITIES", Eu4Language.getDefault()), 2);
+        personalitiesButton.getButton().setOnAction(event -> {
             TableView2Personalities view2Personalities = new TableView2Personalities(this.country, this.monarch, this.personalities,
                                                                                      this.country.getSave()
                                                                                                  .getGame()
@@ -181,7 +189,7 @@ public class MonarchPropertySheet extends VBox {
             TableViewDialog<Personality> dialog =
                     new TableViewDialog<>(this.country.getSave(),
                                           view2Personalities,
-                                          this.country.getSave().getGame().getLocalisationClean("LEDGER_PERSONALITIES"),
+                                          this.country.getSave().getGame().getLocalisationClean("LEDGER_PERSONALITIES", Eu4Language.getDefault()),
                                           list -> this.country.getSave()
                                                               .getGame()
                                                               .getRulerPersonalities()
@@ -197,7 +205,7 @@ public class MonarchPropertySheet extends VBox {
 
             rulerPersonalities.ifPresent(this.personalities::setAll);
         });
-        items.add(this.personalitiesButton);
+        items.add(personalitiesButton);
 
         this.validationSupport = new ValidationSupport();
         this.validationSupport.setValidationDecorator(new CompoundValidationDecoration(new CustomGraphicValidationDecoration(),
@@ -241,7 +249,11 @@ public class MonarchPropertySheet extends VBox {
 
         if ((this.monarch.getPersonalities() == null && CollectionUtils.isNotEmpty(this.personalities))
             || (this.monarch.getPersonalities() != null
-                && !Objects.equals(this.monarch.getPersonalities().getPersonalities().stream().map(Personality::new).collect(Collectors.toList()), this.personalities))) {
+                && !Objects.equals(this.monarch.getPersonalities()
+                                               .getPersonalities()
+                                               .stream()
+                                               .map(Personality::new)
+                                               .collect(Collectors.toList()), this.personalities))) {
             if (this.monarch.getPersonalities() != null) {
                 this.monarch.getPersonalities()
                             .getPersonalities()

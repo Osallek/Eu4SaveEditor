@@ -1,8 +1,9 @@
 package fr.osallek.eu4saveeditor.controller.object;
 
+import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.changeprices.ChangePrice;
 import fr.osallek.eu4saveeditor.common.Copy;
-
+import fr.osallek.eu4saveeditor.common.Eu4SaveEditorUtils;
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -16,8 +17,8 @@ public class PriceChange extends Copy<PriceChange> {
 
     private boolean changed;
 
-    public PriceChange(ChangePrice changePrice) {
-        this.name = changePrice.getLocalizedName();
+    public PriceChange(ChangePrice changePrice, Save save) {
+        this.name = Eu4SaveEditorUtils.localize(changePrice.getKey(), save.getGame());
         this.expiryDate = changePrice.getExpiryDate();
         this.value = changePrice.getValue();
         this.changed = true;

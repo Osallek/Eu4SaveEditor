@@ -1,9 +1,11 @@
 package fr.osallek.eu4saveeditor.controller.pane;
 
 import fr.osallek.eu4parser.model.game.GovernmentReform;
-import fr.osallek.eu4parser.model.save.country.Country;
-import fr.osallek.eu4saveeditor.Eu4SaveEditor;
+import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
+import fr.osallek.eu4saveeditor.Eu4SaveEditorApplication;
 import fr.osallek.eu4saveeditor.common.Constants;
+import fr.osallek.eu4saveeditor.common.Eu4SaveEditorUtils;
 import fr.osallek.eu4saveeditor.controller.control.SelectableGridView;
 import javafx.collections.FXCollections;
 import javafx.geometry.Pos;
@@ -29,7 +31,7 @@ public class GovernmentReformsDialog extends Dialog<List<GovernmentReform>> {
 
     private final List<SelectableGridView<GovernmentReform>> selectableGridViews = new ArrayList<>();
 
-    public GovernmentReformsDialog(Country country, List<GovernmentReform> governmentReforms) {
+    public GovernmentReformsDialog(SaveCountry country, List<GovernmentReform> governmentReforms) {
         VBox vBox = new VBox(3);
         vBox.setAlignment(Pos.TOP_RIGHT);
         vBox.setMaxWidth(Double.MAX_VALUE);
@@ -42,9 +44,9 @@ public class GovernmentReformsDialog extends Dialog<List<GovernmentReform>> {
                .getAvailableReforms()
                .forEach((s, reforms) -> {
                    TitledPane titledPane = new TitledPane();
-                   titledPane.setText(country.getSave().getGame().getLocalisationClean(s));
-                   SelectableGridView<GovernmentReform> gridView = new SelectableGridView<>(FXCollections.observableArrayList(reforms));
-                   gridView.setCellFactory(GovernmentReform::getLocalizedName, GovernmentReform::getImageFile);
+                   titledPane.setText(country.getSave().getGame().getLocalisationClean(s, Eu4Language.getDefault()));
+                   SelectableGridView<GovernmentReform> gridView = new SelectableGridView<>(FXCollections.observableArrayList(reforms), false);
+                   gridView.setCellFactory(r -> Eu4SaveEditorUtils.localize(r.getName(), country.getSave().getGame()), GovernmentReform::getImageFile, null);
                    gridView.getItems().stream().filter(this.governmentReforms::contains).findFirst().ifPresent(gridView::select);
                    this.governmentReforms.removeAll(reforms);
                    this.selectableGridViews.add(gridView);
@@ -58,7 +60,7 @@ public class GovernmentReformsDialog extends Dialog<List<GovernmentReform>> {
         vBox.getChildren().add(emptyPane);
         VBox.setVgrow(emptyPane, Priority.ALWAYS);
 
-        Button resetButton = new Button(country.getSave().getGame().getLocalisation("PW_RESET"));
+        Button resetButton = new Button(Eu4SaveEditorUtils.localize("PW_RESET", country.getSave().getGame()));
         resetButton.setPrefHeight(20);
         resetButton.setOnAction(event -> {
             this.governmentReforms.clear();
@@ -78,13 +80,13 @@ public class GovernmentReformsDialog extends Dialog<List<GovernmentReform>> {
         scrollPane.setFitToHeight(true);
         scrollPane.setContent(vBox);
 
-        setTitle(country.getSave().getGame().getLocalisationClean("governmental_reforms"));
+        setTitle(country.getSave().getGame().getLocalisationClean("governmental_reforms", Eu4Language.getDefault()));
         setResizable(true);
         getDialogPane().setMaxWidth(Double.MAX_VALUE);
         getDialogPane().setPrefWidth(800);
         getDialogPane().setContent(scrollPane);
         getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-        ((Stage) getDialogPane().getScene().getWindow()).getIcons().addAll(new Image(Eu4SaveEditor.class.getResourceAsStream(Constants.IMAGE_ICON)));
+        ((Stage) getDialogPane().getScene().getWindow()).getIcons().addAll(new Image(Eu4SaveEditorApplication.class.getResourceAsStream(Constants.IMAGE_ICON)));
         setResultConverter(button -> {
             if (button.getButtonData().isDefaultButton() && !button.getButtonData().isCancelButton()) {
                 this.selectableGridViews.forEach(view -> this.governmentReforms.addAll(view.getSelectedItems()));

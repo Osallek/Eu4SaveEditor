@@ -1,15 +1,13 @@
 package fr.osallek.eu4saveeditor.controller.propertyeditor.item;
 
 import fr.osallek.eu4saveeditor.controller.control.ClearableSliderInt;
-import fr.osallek.eu4saveeditor.i18n.SheetCategory;
+import java.util.Optional;
+import java.util.function.IntSupplier;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.util.converter.IntegerStringConverter;
-
-import java.util.Optional;
-import java.util.function.IntSupplier;
 
 public class ClearableSliderIntItem implements CustomItem<Integer> {
 
@@ -21,28 +19,12 @@ public class ClearableSliderIntItem implements CustomItem<Integer> {
 
     private final BooleanProperty editable;
 
-    public ClearableSliderIntItem(SheetCategory category, String name, int min, int max) {
-        this(category.getForDefaultLocale(), name, min, max);
-    }
-
     public ClearableSliderIntItem(String category, String name, int min, int max) {
         this(category, name, min, max, null, null);
     }
 
-    public ClearableSliderIntItem(SheetCategory category, String name, int min, int max, Integer value, IntSupplier supplier) {
-        this(category.getForDefaultLocale(), name, min, max, value, supplier);
-    }
-
     public ClearableSliderIntItem(String category, String name, int min, int max, Integer value, IntSupplier supplier) {
         this(category, name, new ClearableSliderInt(min, max, value, supplier, new IntegerStringConverter()), new SimpleBooleanProperty(true));
-    }
-
-    public ClearableSliderIntItem(SheetCategory category, String name, ClearableSliderInt slider) {
-        this(category, name, slider, new SimpleBooleanProperty(true));
-    }
-
-    public ClearableSliderIntItem(SheetCategory category, String name, ClearableSliderInt slider, BooleanProperty editable) {
-        this(category.getForDefaultLocale(), name, slider, editable);
     }
 
     public ClearableSliderIntItem(String category, String name, ClearableSliderInt slider, BooleanProperty editable) {

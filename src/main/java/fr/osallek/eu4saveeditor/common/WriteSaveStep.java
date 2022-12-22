@@ -1,7 +1,6 @@
 package fr.osallek.eu4saveeditor.common;
 
 import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
-
 import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Function;

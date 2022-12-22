@@ -1,5 +1,8 @@
 package fr.osallek.eu4saveeditor.common;
 
+import java.io.File;
+import java.net.URI;
+import java.time.LocalDate;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.appender.ConsoleAppender;
@@ -13,10 +16,6 @@ import org.apache.logging.log4j.core.config.builder.api.LayoutComponentBuilder;
 import org.apache.logging.log4j.core.config.builder.api.RootLoggerComponentBuilder;
 import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 import org.apache.logging.log4j.core.config.plugins.Plugin;
-
-import java.io.File;
-import java.net.URI;
-import java.time.LocalDate;
 
 @Order(50)
 @Plugin(name = "LoggerConfigurationFactory", category = ConfigurationFactory.CATEGORY)

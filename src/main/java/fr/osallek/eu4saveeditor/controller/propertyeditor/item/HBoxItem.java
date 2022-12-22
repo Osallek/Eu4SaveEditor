@@ -1,11 +1,9 @@
 package fr.osallek.eu4saveeditor.controller.propertyeditor.item;
 
-import fr.osallek.eu4saveeditor.i18n.SheetCategory;
+import java.util.Optional;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.scene.layout.HBox;
-
-import java.util.Optional;
 
 public class HBoxItem<U> implements CustomItem<U> {
 
@@ -17,16 +15,16 @@ public class HBoxItem<U> implements CustomItem<U> {
 
     private final Integer colSpan;
 
-    public HBoxItem(SheetCategory category, HBox hBox) {
+    public HBoxItem(String category, HBox hBox) {
         this(category, null, hBox);
     }
 
-    public HBoxItem(SheetCategory category, String name, HBox hBox) {
+    public HBoxItem(String category, String name, HBox hBox) {
         this(category, name, hBox, null);
     }
 
-    public HBoxItem(SheetCategory category, String name, HBox hBox, Integer colSpan) {
-        this.category = category.getForDefaultLocale();
+    public HBoxItem(String category, String name, HBox hBox, Integer colSpan) {
+        this.category = category;
         this.name = name;
         this.hBox = hBox;
         this.colSpan = colSpan;

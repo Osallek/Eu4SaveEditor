@@ -1,20 +1,25 @@
 package fr.osallek.eu4saveeditor.controller.mapview;
 
-import fr.osallek.clausewitzparser.common.ClausewitzUtils;
+import fr.osallek.eu4parser.common.Eu4MapUtils;
+import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 import fr.osallek.eu4saveeditor.common.Eu4SaveEditorUtils;
+import fr.osallek.eu4saveeditor.controller.converter.CountryStringConverter;
+import fr.osallek.eu4saveeditor.controller.converter.ProvinceIdStringConverter;
 import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
-import javafx.beans.property.ReadOnlyBooleanWrapper;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.image.PixelWriter;
-import javafx.scene.paint.Color;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import javafx.beans.property.ReadOnlyBooleanWrapper;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.paint.Color;
+import org.springframework.context.MessageSource;
 
 public class CountriesMapView extends AbstractMapView {
+
+    private final Save save;
 
     private final ToggleButton countryButton;
 
@@ -24,9 +29,10 @@ public class CountriesMapView extends AbstractMapView {
 
     private final CountryPropertySheet countrySheet;
 
-    public CountriesMapView(MapViewContainer mapViewContainer) {
+    public CountriesMapView(MapViewContainer mapViewContainer, Save save, MessageSource messageSource) {
         super(mapViewContainer, MapViewType.COUNTRIES_MAP_VIEW);
-        this.provinceSheet = new ProvincePropertySheet(this.mapViewContainer.getSave(),
+        this.save = save;
+        this.provinceSheet = new ProvincePropertySheet(messageSource, this.mapViewContainer.getSave(),
                                                        this.mapViewContainer.getPlayableCountries(),
                                                        this.mapViewContainer.getCultures(),
                                                        this.mapViewContainer.getPlayableReligions(),
@@ -34,23 +40,21 @@ public class CountriesMapView extends AbstractMapView {
                                                        this.mapViewContainer.getTradeNodes());
         this.provinceSheet.countryChangedProperty().addListener((observable, oldValue, newValue) -> {
             if (Boolean.FALSE.equals(oldValue) && Boolean.TRUE.equals(newValue)) {
-                drawProvince(this.provinceSheet.getProvince().getId());
+                draw();
             }
         });
 
-        this.countrySheet = new CountryPropertySheet(this.mapViewContainer.getSave(),
+        this.countrySheet = new CountryPropertySheet(messageSource, this.mapViewContainer.getSave(),
                                                      this.mapViewContainer.getCountriesAlive(),
                                                      this.mapViewContainer.getCultures(),
                                                      this.mapViewContainer.getPlayableReligions());
         this.countrySheet.colorChangedProperty().addListener((observable, oldValue, newValue) -> {
             if (Boolean.FALSE.equals(oldValue) && Boolean.TRUE.equals(newValue)) {
-                this.countrySheet.getCountry().getOwnedProvinces().forEach(saveProvince -> drawProvince(saveProvince.getId()));
+                draw();
             }
         });
 
-        this.countryButton = new ToggleButton(this.mapViewContainer.getSave()
-                                                                   .getGame()
-                                                                   .getLocalisation("TRIGGER_COUNTRY"));
+        this.countryButton = new ToggleButton(Eu4SaveEditorUtils.localize("TRIGGER_COUNTRY", this.mapViewContainer.getSave().getGame()));
         this.countryButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
             if (Boolean.FALSE.equals(oldValue) && Boolean.TRUE.equals(newValue)) {
                 selectCountryButton();
@@ -58,9 +62,7 @@ public class CountriesMapView extends AbstractMapView {
         });
         this.countryButton.disableProperty().bind(this.countryButton.selectedProperty());
 
-        this.provinceButton = new ToggleButton(this.mapViewContainer.getSave()
-                                                                    .getGame()
-                                                                    .getLocalisation("UNKNOWN_LOC"));
+        this.provinceButton = new ToggleButton(Eu4SaveEditorUtils.localize("UNKNOWN_LOC", this.mapViewContainer.getSave().getGame()));
         this.provinceButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
             if (Boolean.FALSE.equals(oldValue) && Boolean.TRUE.equals(newValue)) {
                 selectProvinceButton();
@@ -81,17 +83,23 @@ public class CountriesMapView extends AbstractMapView {
 
     @Override
     public void draw() {
-        for (DrawableProvince drawableProvince : this.mapViewContainer.getDrawableProvinces().values()) {
-            if (drawableProvince != null) {
-                drawProvince(drawableProvince.getProvince() == null ? null : drawableProvince.getProvince().getId());
-            }
-        }
+        GraphicsContext graphicsContext = this.mapViewContainer.getCanvas().getGraphicsContext2D();
+        graphicsContext.drawImage(Eu4SaveEditorUtils.bufferedToView(Eu4MapUtils.generateMapPng(this.save.getGame(), province -> {
+            Color color = getOwnerColor(this.save.getProvince(province.getId()));
+
+            return new java.awt.Color((float) color.getRed(), (float) color.getGreen(), (float) color.getBlue(), (float) color.getOpacity());
+        })).getImage(), 0, 0);
     }
 
     @Override
     public void onProvinceSelected(SaveProvince province) {
-        this.provinceSheet.update(province);
-        this.countrySheet.update(province.getOwner());
+        if (!Objects.equals(this.provinceSheet.getProvince(), province)) {
+            this.provinceSheet.update(province);
+        }
+
+        if (!Objects.equals(this.countrySheet.getCountry(), province.getOwner())) {
+            this.countrySheet.update(province.getOwner());
+        }
 
         if (Boolean.FALSE.equals(this.selected.getValue())) {
             this.mapViewContainer.addTabsSegmentedButtons(this.countryButton, this.provinceButton);
@@ -117,20 +125,6 @@ public class CountriesMapView extends AbstractMapView {
     }
 
     @Override
-    public void drawProvince(Integer provinceId) {
-        GraphicsContext graphicsContext = this.mapViewContainer.getCanvas().getGraphicsContext2D();
-        Color color = getOwnerColor(this.mapViewContainer.getDrawableProvinces().get(provinceId).getProvince());
-        graphicsContext.setFill(color);
-        this.mapViewContainer.getDrawableProvinces().get(provinceId).getRectangles()
-                             .forEach(rectangle -> graphicsContext.fillRect(rectangle.getMinX(), rectangle.getMinY(), rectangle.getWidth(),
-                                                                            rectangle.getHeight()));
-
-        PixelWriter pixelWriter = graphicsContext.getPixelWriter();
-        this.mapViewContainer.getDrawableProvinces().get(provinceId).getBorders()
-                             .forEach(point2D -> pixelWriter.setColor((int) point2D.getX(), (int) point2D.getY(), Color.BLACK));
-    }
-
-    @Override
     public List<CustomPropertySheet> removeSheets() {
         List<CustomPropertySheet> sheets = new ArrayList<>();
 
@@ -149,7 +143,8 @@ public class CountriesMapView extends AbstractMapView {
     public String updateTitle(SaveProvince selectedProvince) {
         if (this.countryButton.isSelected()) {
             return selectedProvince.getOwner() == null ? getTitle(selectedProvince)
-                                                       : (selectedProvince.getOwner().getLocalizedName() + " (" + selectedProvince.getOwner().getTag() + ")");
+                                                       :
+                   (CountryStringConverter.INSTANCE.toString(selectedProvince.getOwner()) + " (" + selectedProvince.getOwner().getTag() + ")");
         } else if (this.provinceButton.isSelected()) {
             return getTitle(selectedProvince);
         }
@@ -194,11 +189,10 @@ public class CountriesMapView extends AbstractMapView {
     }
 
     private String getTitle(SaveProvince saveProvince) {
-        String title = ClausewitzUtils.removeQuotes(saveProvince.getName());
-        title += " (" + saveProvince.getId() + ")";
+        String title = ProvinceIdStringConverter.INSTANCE.toString(saveProvince);
 
         if (saveProvince.getOwner() != null) {
-            title += " - " + saveProvince.getOwner().getLocalizedName();
+            title += " - " + CountryStringConverter.INSTANCE.toString(saveProvince.getOwner());
         }
 
         return title;
@@ -211,11 +205,11 @@ public class CountriesMapView extends AbstractMapView {
             return Eu4SaveEditorUtils.countryToMapColor(province.getOwner());
         } else {
             if (province.isOcean() || province.isLake()) {
-                return Color.rgb(68, 107, 163);
+                return Color.rgb(Eu4MapUtils.OCEAN_COLOR.getRed(), Eu4MapUtils.OCEAN_COLOR.getGreen(), Eu4MapUtils.OCEAN_COLOR.getBlue());
             } else if (province.isImpassable()) {
-                return Color.rgb(94, 94, 94);
+                return Color.rgb(Eu4MapUtils.IMPASSABLE_COLOR.getRed(), Eu4MapUtils.IMPASSABLE_COLOR.getGreen(), Eu4MapUtils.IMPASSABLE_COLOR.getBlue());
             } else {
-                return Color.rgb(148, 146, 149);
+                return Color.rgb(Eu4MapUtils.EMPTY_COLOR.getRed(), Eu4MapUtils.EMPTY_COLOR.getGreen(), Eu4MapUtils.EMPTY_COLOR.getBlue());
             }
         }
     }

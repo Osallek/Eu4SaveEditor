@@ -1,23 +1,24 @@
 package fr.osallek.eu4saveeditor.controller.converter;
 
-import fr.osallek.eu4parser.model.save.country.Country;
-import fr.osallek.eu4saveeditor.controller.EditorController;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.util.Callback;
 
-public class CountryStringCellFactory implements Callback<ListView<Country>, ListCell<Country>> {
+public class CountryStringCellFactory implements Callback<ListView<SaveCountry>, ListCell<SaveCountry>> {
+
+    public static final CountryStringCellFactory INSTANCE = new CountryStringCellFactory();
 
     @Override
-    public ListCell<Country> call(ListView<Country> param) {
-        return new ListCell<Country>() {
+    public ListCell<SaveCountry> call(ListView<SaveCountry> param) {
+        return new ListCell<>() {
 
             @Override
-            protected void updateItem(Country value, boolean empty) {
+            protected void updateItem(SaveCountry value, boolean empty) {
                 super.updateItem(value, empty);
 
                 if (value != null) {
-                    setText(EditorController.dummyCountry.equals(value) ? "" : value.getLocalizedName());
+                    setText(CountryStringConverter.INSTANCE.toString(value));
                 } else {
                     setText(null);
                 }

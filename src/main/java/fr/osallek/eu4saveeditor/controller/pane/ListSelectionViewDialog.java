@@ -1,7 +1,8 @@
 package fr.osallek.eu4saveeditor.controller.pane;
 
+import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.save.Save;
-import fr.osallek.eu4saveeditor.Eu4SaveEditor;
+import fr.osallek.eu4saveeditor.Eu4SaveEditorApplication;
 import fr.osallek.eu4saveeditor.common.Constants;
 import fr.osallek.eu4saveeditor.controller.control.CustomListSelectionView;
 import javafx.geometry.Pos;
@@ -25,7 +26,7 @@ public class ListSelectionViewDialog<S> extends Dialog<List<S>> {
     public ListSelectionViewDialog(Save save, CustomListSelectionView<S> listSelectionView, String title, Supplier<Collection<S>> sourceSupplier,
                                    Supplier<Collection<S>> targetSupplier) {
         this.listSelectionView = listSelectionView;
-        Button resetButton = new Button(save.getGame().getLocalisation("PW_RESET"));
+        Button resetButton = new Button(save.getGame().getLocalisationClean("PW_RESET", Eu4Language.getDefault()));
         resetButton.setOnAction(event -> this.listSelectionView.onReset(sourceSupplier, targetSupplier));
 
         VBox vBox = new VBox(3);
@@ -39,7 +40,7 @@ public class ListSelectionViewDialog<S> extends Dialog<List<S>> {
         getDialogPane().setMaxWidth(Double.MAX_VALUE);
         getDialogPane().setContent(vBox);
         getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-        ((Stage) getDialogPane().getScene().getWindow()).getIcons().addAll(new Image(Eu4SaveEditor.class.getResourceAsStream(Constants.IMAGE_ICON)));
+        ((Stage) getDialogPane().getScene().getWindow()).getIcons().addAll(new Image(Eu4SaveEditorApplication.class.getResourceAsStream(Constants.IMAGE_ICON)));
         setResultConverter(button -> {
             if (button.getButtonData().isDefaultButton() && !button.getButtonData().isCancelButton()) {
                 return this.listSelectionView.getTargetItems();

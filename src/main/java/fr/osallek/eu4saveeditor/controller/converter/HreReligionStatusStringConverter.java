@@ -1,5 +1,6 @@
 package fr.osallek.eu4saveeditor.controller.converter;
 
+import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.empire.HreReligionStatus;
 import javafx.util.StringConverter;
@@ -17,20 +18,20 @@ public class HreReligionStatusStringConverter extends StringConverter<HreReligio
         String text;
 
         if (hreReligionStatus == null) {
-            text = this.save.getGame().getLocalisationClean("HRE_RELIGIOUS_PEACE");
+            text = this.save.getGame().getLocalisationClean("HRE_RELIGIOUS_PEACE", Eu4Language.getDefault());
         } else {
             switch (hreReligionStatus) {
                 case PROTESTANT:
-                    text = this.save.getGame().getLocalisation("protestant");
+                    text = this.save.getGame().getLocalisationClean("protestant", Eu4Language.getDefault());
                     break;
 
                 case CATHOLIC:
-                    text = this.save.getGame().getLocalisation("catholic");
+                    text = this.save.getGame().getLocalisationClean("catholic", Eu4Language.getDefault());
                     break;
 
                 case PEACE:
                 default:
-                    text = this.save.getGame().getLocalisationClean("HRE_RELIGIOUS_PEACE");
+                    text = this.save.getGame().getLocalisationClean("HRE_RELIGIOUS_PEACE", Eu4Language.getDefault());
             }
         }
 

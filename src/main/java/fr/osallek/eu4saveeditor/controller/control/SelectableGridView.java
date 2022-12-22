@@ -1,32 +1,36 @@
 package fr.osallek.eu4saveeditor.controller.control;
 
+import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
 import org.controlsfx.control.GridView;
 
-import java.io.File;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.function.Function;
-
 public class SelectableGridView<T> extends GridView<T> {
 
     private ObservableSet<T> selection = FXCollections.observableSet(new HashSet<>());
 
-    private Set<SelectableGridCell<T>> cells = new HashSet<>();
+    private final Set<SelectableGridCell<T>> cells = new HashSet<>();
 
     private boolean anyItemChanged;
 
     private int size = 48;
 
+    private final boolean multiSelect;
 
-    public SelectableGridView(ObservableList<T> items) {
-        this(items, (Integer) null);
+    private final ObservableList<T> allItems;
+
+    public SelectableGridView(ObservableList<T> items, boolean multiSelect) {
+        this(items, multiSelect, (Integer) null);
     }
 
-    public SelectableGridView(ObservableList<T> items, Integer size) {
+    public SelectableGridView(ObservableList<T> items, boolean multiSelect, Integer size) {
         super();
+        this.multiSelect = multiSelect;
 
         if (size != null) {
             this.size = size;
@@ -38,23 +42,27 @@ public class SelectableGridView<T> extends GridView<T> {
         setVerticalCellSpacing(5);
         itemsProperty().addListener((observable, oldValue, newValue) -> setMaxHeight(62 * Math.ceil((double) observable.getValue().size() / 6)));
         setItems(items);
+        this.allItems = items;
     }
 
-    public SelectableGridView(ObservableList<T> items, ObservableSet<T> selectedItems) {
-        this(items, selectedItems, null);
+    public SelectableGridView(ObservableList<T> items, boolean multiSelect, ObservableSet<T> selectedItems) {
+        this(items, multiSelect, selectedItems, null);
     }
 
-    public SelectableGridView(ObservableList<T> items, ObservableSet<T> selectedItems, Integer size) {
-        this(items, size);
+    public SelectableGridView(ObservableList<T> items, boolean multiSelect, ObservableSet<T> selectedItems, Integer size) {
+        this(items, multiSelect, size);
         this.selection = selectedItems;
     }
 
-    public void setCellFactory(Function<T, String> textFunction, Function<T, File> imageFunction) {
-        super.setCellFactory(param -> new SelectableGridCell<>(textFunction, imageFunction, this.size));
+    public void setCellFactory(Function<T, String> textFunction, Function<T, File> imageFunction, File defaultFile) {
+        super.setCellFactory(param -> new SelectableGridCell<>(textFunction, imageFunction, this.size, !this.multiSelect, defaultFile));
     }
 
     public void select(T t) {
-        this.selection.forEach(this::unSelect);
+        if (!this.multiSelect) {
+            this.selection.forEach(this::unSelect);
+        }
+
         this.selection.add(t);
         this.anyItemChanged = true;
     }
@@ -78,5 +86,13 @@ public class SelectableGridView<T> extends GridView<T> {
 
     Set<SelectableGridCell<T>> getCells() {
         return cells;
+    }
+
+    public void setFilter(Predicate<T> filter) {
+        if (filter != null) {
+            setItems(this.allItems.filtered(filter));
+        } else {
+            setItems(this.allItems);
+        }
     }
 }

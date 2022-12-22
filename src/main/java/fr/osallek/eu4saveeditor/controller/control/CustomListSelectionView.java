@@ -1,13 +1,12 @@
 package fr.osallek.eu4saveeditor.controller.control;
 
+import java.util.Collection;
+import java.util.function.Supplier;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.util.Callback;
 import org.controlsfx.control.ListSelectionView;
-
-import java.util.Collection;
-import java.util.function.Supplier;
 
 public class CustomListSelectionView<T> extends ListSelectionView<T> {
 

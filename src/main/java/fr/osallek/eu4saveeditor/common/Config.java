@@ -1,16 +1,17 @@
 package fr.osallek.eu4saveeditor.common;
 
-import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import fr.osallek.eu4parser.Eu4Parser;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.Properties;
+import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Config {
 
@@ -24,11 +25,9 @@ public class Config {
 
     private static final Path CONFIG_FILE_PATH = Constants.EDITOR_FOLDER.toPath().resolve("config").resolve("config.txt");
     private static final String GAME_FOLDER_PROP = "game_folder";
-    private static final String MOD_FOLDER_PROP = "mod_folder";
     private static final String SAVE_FOLDER_PROP = "save_folder";
-    private static final String SAVE_FILE_PROP = "save_file";
 
-    public static File getGameFolder() {
+    public static Optional<File> getGameFolder() {
         if (!loaded) {
             load();
         }
@@ -36,16 +35,16 @@ public class Config {
         String gameFolderPath = PROPERTIES.getProperty(GAME_FOLDER_PROP);
 
         if (gameFolderPath == null) {
-            return null;
+            return Optional.empty();
         }
 
         File file = new File(gameFolderPath);
 
         if (file.exists() && file.canRead()) {
-            return file;
+            return Optional.of(file);
         }
 
-        return null;
+        return Optional.empty();
     }
 
     public static void setGameFolder(File newValue) {
@@ -53,53 +52,14 @@ public class Config {
             load();
         }
 
-        PROPERTIES.setProperty(GAME_FOLDER_PROP, newValue.getAbsolutePath());
+        if (newValue != null && newValue.exists()) {
+            PROPERTIES.setProperty(GAME_FOLDER_PROP, newValue.getAbsolutePath());
+        }
 
         store();
     }
 
-    public static File getModFolder() {
-        if (!loaded) {
-            load();
-        }
-
-        String modFolderPath = PROPERTIES.getProperty(MOD_FOLDER_PROP);
-
-        if (modFolderPath == null) {
-            return null;
-        }
-
-        File file = new File(modFolderPath);
-
-        if (file.exists() && file.canRead()) {
-            return file;
-        }
-
-        return null;
-    }
-
-    public static void setModFolder(File newValue) {
-        if (!loaded) {
-            load();
-        }
-
-        PROPERTIES.setProperty(MOD_FOLDER_PROP, newValue.getAbsolutePath());
-
-        store();
-    }
-
-    public static void setSaveFile(File newValue) {
-        if (!loaded) {
-            load();
-        }
-
-        PROPERTIES.setProperty(SAVE_FILE_PROP, newValue.getAbsolutePath());
-        PROPERTIES.setProperty(SAVE_FOLDER_PROP, newValue.getParent());
-
-        store();
-    }
-
-    public static File getSaveFolder() {
+    public static Optional<File> getSaveFolder() {
         if (!loaded) {
             load();
         }
@@ -107,54 +67,24 @@ public class Config {
         String saveFolderPath = PROPERTIES.getProperty(SAVE_FOLDER_PROP);
 
         if (saveFolderPath == null) {
-            return null;
+            return Optional.empty();
         }
 
         File file = new File(saveFolderPath);
 
         if (file.exists() && file.canRead()) {
-            return file;
+            return Optional.of(file);
         }
 
-        return null;
-    }
-
-    public static File getSaveFile() {
-        if (!loaded) {
-            load();
-        }
-
-        String saveFolderPath = PROPERTIES.getProperty(SAVE_FILE_PROP);
-
-        if (saveFolderPath == null) {
-            return null;
-        }
-
-        File file = new File(saveFolderPath);
-
-        if (file.exists() && file.canRead()) {
-            return file;
-        }
-
-        return null;
+        return Optional.empty();
     }
 
     private static void load() {
         File file = CONFIG_FILE_PATH.toFile();
 
         if (!file.exists()) {
-            if (Constants.DEFAULT_INSTALLATION_FOLDER.exists() && Constants.DEFAULT_INSTALLATION_FOLDER.canRead()) {
-                PROPERTIES.setProperty(GAME_FOLDER_PROP, Constants.DEFAULT_INSTALLATION_FOLDER.getAbsolutePath());
-            }
-
-            if (Constants.MODS_FOLDER.exists() && Constants.MODS_FOLDER.canRead()) {
-                PROPERTIES.setProperty(MOD_FOLDER_PROP, Constants.MODS_FOLDER.getAbsolutePath());
-            }
-
-            if (Constants.SAVES_FOLDER.exists() && Constants.SAVES_FOLDER.canRead()) {
-                PROPERTIES.setProperty(SAVE_FOLDER_PROP, Constants.SAVES_FOLDER.getAbsolutePath());
-            }
-
+            tryDetectGameFolder();
+            tryDetectSaveFolder();
             store();
         } else {
             try {
@@ -162,18 +92,13 @@ public class Config {
                     PROPERTIES.load(inputStream);
                 }
 
-                if (!PROPERTIES.containsKey(GAME_FOLDER_PROP) && Constants.DEFAULT_INSTALLATION_FOLDER.exists() && Constants.DEFAULT_INSTALLATION_FOLDER.canRead()) {
-                    PROPERTIES.setProperty(GAME_FOLDER_PROP, Constants.DEFAULT_INSTALLATION_FOLDER.getAbsolutePath());
+                if (!PROPERTIES.containsKey(GAME_FOLDER_PROP)) {
+                    tryDetectGameFolder();
                     store();
                 }
 
-                if (!PROPERTIES.containsKey(MOD_FOLDER_PROP) && Constants.MODS_FOLDER.exists() && Constants.MODS_FOLDER.canRead()) {
-                    PROPERTIES.setProperty(MOD_FOLDER_PROP, Constants.MODS_FOLDER.getAbsolutePath());
-                    store();
-                }
-
-                if (!PROPERTIES.containsKey(SAVE_FOLDER_PROP) && Constants.SAVES_FOLDER.exists() && Constants.SAVES_FOLDER.canRead()) {
-                    PROPERTIES.setProperty(SAVE_FOLDER_PROP, Constants.SAVES_FOLDER.getAbsolutePath());
+                if (!PROPERTIES.containsKey(SAVE_FOLDER_PROP)) {
+                    tryDetectSaveFolder();
                     store();
                 }
 
@@ -198,6 +123,29 @@ public class Config {
             }
         } catch (IOException e) {
             LOGGER.error("An error occurred while writing config file: {}", e.getMessage());
+        }
+    }
+
+    private static void tryDetectGameFolder() {
+        Eu4Parser.detectInstallationFolder().ifPresent(path -> PROPERTIES.setProperty(GAME_FOLDER_PROP, path.toAbsolutePath().toString()));
+    }
+
+    private static void tryDetectSaveFolder() {
+        if (PROPERTIES.contains(GAME_FOLDER_PROP)) {
+            try {
+                Path savePath = Eu4Parser.loadSettings(Path.of(PROPERTIES.getProperty(GAME_FOLDER_PROP))).getSavesFolder();
+
+                if (Files.exists(savePath) && Files.isReadable(savePath)) {
+                    PROPERTIES.setProperty(SAVE_FOLDER_PROP, savePath.toAbsolutePath().toString());
+                }
+            } catch (IOException ignored) {
+            }
+        }
+
+        if (!PROPERTIES.contains(SAVE_FOLDER_PROP)) {
+            if (Constants.DEFAULT_SAVES_FOLDER.exists() && Constants.DEFAULT_SAVES_FOLDER.canRead()) {
+                PROPERTIES.setProperty(SAVE_FOLDER_PROP, Constants.DEFAULT_SAVES_FOLDER.getAbsolutePath());
+            }
         }
     }
 }

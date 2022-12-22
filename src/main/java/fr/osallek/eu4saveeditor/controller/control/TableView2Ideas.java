@@ -2,9 +2,13 @@ package fr.osallek.eu4saveeditor.controller.control;
 
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.game.IdeaGroup;
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
+import fr.osallek.eu4saveeditor.common.Eu4SaveEditorUtils;
 import fr.osallek.eu4saveeditor.controller.converter.IdeaGroupStringConverter;
 import fr.osallek.eu4saveeditor.controller.object.Idea;
+import java.util.Comparator;
+import java.util.stream.Collectors;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -16,9 +20,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.util.converter.IntegerStringConverter;
 
-import java.util.Comparator;
-import java.util.stream.Collectors;
-
 public class TableView2Ideas extends TableView<Idea> {
 
     private final BooleanProperty disableAddProperty;
@@ -27,13 +28,17 @@ public class TableView2Ideas extends TableView<Idea> {
 
     private final ObservableMap<Idea, ObservableList<IdeaGroup>> ideasMap = FXCollections.observableHashMap();
 
-    public TableView2Ideas(Country country, ObservableList<Idea> enactedIdeas, ObservableList<IdeaGroup> ideaGroups) {
+    public TableView2Ideas(SaveCountry country, ObservableList<Idea> enactedIdeas, ObservableList<IdeaGroup> ideaGroups) {
         this.ideaGroups = ideaGroups;
-        TableColumn<Idea, IdeaGroup> ideaGroup = new TableColumn<>(country.getSave().getGame().getLocalisationCleanNoPunctuation("IDEA_TITLE"));
+        TableColumn<Idea, IdeaGroup> ideaGroup = new TableColumn<>(country.getSave()
+                                                                          .getGame()
+                                                                          .getLocalisationCleanNoPunctuation("IDEA_TITLE", Eu4Language.getDefault()));
         ideaGroup.setCellValueFactory(p -> p.getValue() == null ? null : new ReadOnlyObjectWrapper<>(p.getValue().getIdeaGroup()));
-        ideaGroup.setCellFactory(UniqueComboBoxTableCell.forTableColumn(new IdeaGroupStringConverter(),
+        ideaGroup.setCellFactory(UniqueComboBoxTableCell.forTableColumn(new IdeaGroupStringConverter(country.getSave().getGame()),
                                                                         this.ideasMap,
-                                                                        Comparator.comparing(IdeaGroup::getLocalizedName, Eu4Utils.COLLATOR),
+                                                                        Comparator.comparing(i -> Eu4SaveEditorUtils.localize(i.getName(),
+                                                                                                                              country.getSave().getGame()),
+                                                                                             Eu4Utils.COLLATOR),
                                                                         getItems(),
                                                                         this::getNewList
                                                                        ));
@@ -41,7 +46,9 @@ public class TableView2Ideas extends TableView<Idea> {
         ideaGroup.setPrefWidth(250);
         ideaGroup.setStyle("-fx-alignment: CENTER-LEFT");
 
-        TableColumn<Idea, Integer> amount = new TableColumn<>(country.getSave().getGame().getLocalisationCleanNoPunctuation("LEDGER_IDEASUNLOCKED"));
+        TableColumn<Idea, Integer> amount = new TableColumn<>(country.getSave()
+                                                                     .getGame()
+                                                                     .getLocalisationCleanNoPunctuation("LEDGER_IDEASUNLOCKED", Eu4Language.getDefault()));
         amount.setCellValueFactory(p -> p.getValue() == null ? null : new ReadOnlyObjectWrapper<>(p.getValue().getLevel()));
         amount.setCellFactory(SpinnerTableCell.forTableColumn(0, ideaGroups.stream().mapToInt(i -> i.getIdeas().size()).max().orElse(0), 1,
                                                               new IntegerStringConverter(), idea -> idea == null || idea.getIdeaGroup().isFree()));

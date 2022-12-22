@@ -1,6 +1,5 @@
 package fr.osallek.eu4saveeditor.controller;
 
-import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.game.Culture;
 import fr.osallek.eu4parser.model.game.TradeGood;
@@ -8,29 +7,33 @@ import fr.osallek.eu4parser.model.game.TradeNode;
 import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.SaveReligion;
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
-import fr.osallek.eu4saveeditor.Eu4SaveEditor;
+import fr.osallek.eu4saveeditor.common.Config;
 import fr.osallek.eu4saveeditor.common.Constants;
 import fr.osallek.eu4saveeditor.common.WriteSaveTask;
+import fr.osallek.eu4saveeditor.controller.converter.CountryStringConverter;
+import fr.osallek.eu4saveeditor.controller.converter.CultureStringConverter;
 import fr.osallek.eu4saveeditor.controller.converter.ProvinceCountryCallBack;
 import fr.osallek.eu4saveeditor.controller.converter.ProvinceCountryStringConverter;
+import fr.osallek.eu4saveeditor.controller.converter.ProvinceIdStringConverter;
+import fr.osallek.eu4saveeditor.controller.converter.ProvinceStringConverter;
+import fr.osallek.eu4saveeditor.controller.converter.SaveReligionStringConverter;
 import fr.osallek.eu4saveeditor.controller.converter.SuggestionProvider;
-import fr.osallek.eu4saveeditor.controller.mapview.DrawableProvince;
+import fr.osallek.eu4saveeditor.controller.converter.TradeGoodStringConverter;
+import fr.osallek.eu4saveeditor.controller.converter.TradeNodeStringConverter;
+import fr.osallek.eu4saveeditor.controller.mapview.CountriesMapView;
 import fr.osallek.eu4saveeditor.controller.mapview.MapViewContainer;
 import fr.osallek.eu4saveeditor.controller.mapview.MapViewType;
 import fr.osallek.eu4saveeditor.controller.pane.ZoomableScrollPane;
-import fr.osallek.eu4saveeditor.i18n.MenusI18n;
 import javafx.animation.PauseTransition;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
 import javafx.concurrent.WorkerStateEvent;
-import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.geometry.Rectangle2D;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.ImageCursor;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
@@ -41,45 +44,49 @@ import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.controlsfx.control.MaskerPane;
 import org.controlsfx.control.textfield.AutoCompletionBinding;
 import org.controlsfx.control.textfield.TextFields;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.MessageSource;
+import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
+import java.awt.Polygon;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
-import java.util.ResourceBundle;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class EditorController implements Initializable {
+@Component
+public class EditorController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EditorController.class);
 
-    public static Country dummyCountry;
-
-    private static final DateTimeFormatter PRETTY_DATE_FORMAT = DateTimeFormatter.ofPattern("dd MMMM yyyy");
+    public static SaveCountry dummyCountry;
 
     private final FileChooser saveFileChooser = new FileChooser();
+
+    private final MessageSource messageSource;
 
     private File saveFile;
 
@@ -90,8 +97,6 @@ public class EditorController implements Initializable {
     private final Tooltip tooltip = new Tooltip();
 
     private SaveProvince[][] provincesMap;
-
-    private Map<Integer, DrawableProvince> drawableProvinces;
 
     private final BooleanProperty mouseMoving = new SimpleBooleanProperty();
 
@@ -109,63 +114,41 @@ public class EditorController implements Initializable {
 
     private MapViewContainer mapViewContainer;
 
-    private ImageCursor imageCursor;
-
     private ZoomableScrollPane provincesPane;
 
     private Canvas provincesCanvas;
 
-    private ObservableList<SaveProvince> cities;
-
-    private ObservableList<Country> playableCountries;
-
-    private ObservableList<Country> countriesAlive;
-
-    private ObservableList<Culture> cultures;
-
-    private ObservableList<SaveReligion> religions;
-
-    private ObservableList<SaveReligion> playableReligions;
-
-    private ObservableList<TradeGood> tradeGoods;
-
-    private ObservableList<TradeNode> tradeNodes;
-
-    private AutoCompletionBinding<Object> autoCompletionBinding;
-
     private SaveProvince autoCompletedProvince;
 
-    private Country autoCompletedCountry;
+    private SaveCountry autoCompletedCountry;
 
-    @FXML
+    private StackPane root;
+
     private Text title;
 
-    @FXML
     private Button saveButton;
 
-    @FXML
     private TextField searchTextField;
 
-    @FXML
     private Button searchButton;
 
-    @FXML
     private VBox editPane;
 
-    @FXML
-    private BorderPane pane;
-
-    @FXML
     private MaskerPane masker;
 
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        this.saveFileChooser.setTitle(MenusI18n.SAVE_AS.getForDefaultLocale());
-        this.saveFileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(MenusI18n.EU4_EXT_DESC.getForDefaultLocale(), "*.eu4"));
+    public EditorController(MessageSource messageSource) {
+        this.messageSource = messageSource;
+    }
 
-        if (Constants.EU4_DOCUMENTS_FOLDER.exists()) {
-            this.saveFileChooser.setInitialDirectory(Constants.SAVES_FOLDER);
-        }
+    public void initialize() {
+        this.root = new StackPane();
+        this.masker = new MaskerPane();
+        this.masker.setVisible(false);
+
+        this.saveFileChooser.setTitle(this.messageSource.getMessage("ose.save-as", null, Constants.LOCALE));
+        this.saveFileChooser.getExtensionFilters()
+                            .add(new FileChooser.ExtensionFilter(this.messageSource.getMessage("ose.eu-4-ext-desc", null, Constants.LOCALE), "*.eu4"));
+        Config.getSaveFolder().ifPresent(this.saveFileChooser::setInitialDirectory);
 
         this.provincesCanvas = new Canvas();
         this.provincesCanvas.setOnMouseReleased(this::onMouseReleasedProvinceImageView);
@@ -185,17 +168,57 @@ public class EditorController implements Initializable {
                 SaveProvince province = this.provincesMap[(int) this.mouseProvinceImageX][(int) this.mouseProvinceImageY];
 
                 if (province != null) {
-                    this.tooltip.setText(ClausewitzUtils.removeQuotes(province.getName()) + " (" + province.getId() + ")");
+                    this.tooltip.setText(ProvinceIdStringConverter.INSTANCE.toString(province));
                     this.tooltip.setAnchorX(this.mouseSceneX + 20);
                     this.tooltip.setAnchorY(this.mouseSceneY - 20);
                 }
             }
         });
 
-        this.pane.setCenter(this.provincesPane);
+        this.title = new Text();
+        this.title.setTextAlignment(TextAlignment.CENTER);
+        this.title.setStyle("-fx-font-size: 16px; -fx-font-weight: bold");
+
+        this.saveButton = new Button();
+        this.saveButton.onMouseClickedProperty().set(this::onClickExportButton);
+        this.saveButton.setStyle("-fx-font-weight: bold");
+
+        this.searchTextField = new TextField();
+        this.searchTextField.setMinWidth(100);
+        this.searchTextField.setPrefWidth(250);
+
+        this.searchButton = new Button(this.messageSource.getMessage("ose.go", null, Constants.LOCALE));
+
+        HBox searchBox = new HBox();
+        searchBox.getChildren().add(this.searchTextField);
+        searchBox.getChildren().add(this.searchButton);
+
+        HBox titleBox = new HBox();
+        titleBox.setAlignment(Pos.CENTER);
+        titleBox.getChildren().add(this.saveButton);
+
+        HBox top = new HBox(10);
+        top.setAlignment(Pos.CENTER);
+        top.setPadding(new Insets(3, 0, 3, 0));
+        top.getChildren().add(titleBox);
+        top.getChildren().add(searchBox);
+
+        this.editPane = new VBox(5);
+        this.editPane.setAlignment(Pos.TOP_CENTER);
+        this.editPane.setMinWidth(300);
+        this.editPane.setPrefWidth(600);
+        this.editPane.maxHeight(600);
+        this.editPane.setPadding(new Insets(5, 5, 5, 10));
+
+        BorderPane pane = new BorderPane();
+        pane.setCenter(this.provincesPane);
+        pane.setRight(this.editPane);
+        pane.setTop(top);
+
+        this.root.getChildren().add(pane);
+        this.root.getChildren().add(this.masker);
     }
 
-    @FXML
     public void onMouseReleasedProvinceImageView(MouseEvent event) {
         if (this.wasDragging) {
             this.wasDragging = false;
@@ -210,12 +233,10 @@ public class EditorController implements Initializable {
         }
     }
 
-    @FXML
     public void onDragDetected(MouseEvent event) {
         this.wasDragging = true;
     }
 
-    @FXML
     public void onMouseMovedProvinceImageView(MouseEvent event) {
         this.mouseMoving.set(true);
         this.mouseProvinceImageX = event.getX();
@@ -225,17 +246,16 @@ public class EditorController implements Initializable {
         this.mousePauseTransition.playFromStart();
     }
 
-    @FXML
     public void onClickExportButton(MouseEvent mouseEvent) {
         if (MouseButton.PRIMARY.equals(mouseEvent.getButton())) {
-            File file = Eu4SaveEditor.override ? this.saveFile : this.saveFileChooser.showSaveDialog(((Node) mouseEvent.getSource()).getScene().getWindow());
+            File file = this.saveFileChooser.showSaveDialog(((Node) mouseEvent.getSource()).getScene().getWindow());
 
             if (file != null) {
                 WriteSaveTask task = new WriteSaveTask(this.save, file, Eu4Language.getByLocale(Locale.getDefault()));
 
                 task.setOnFailed(event -> {
-                    LOGGER.error("Can't write save {} ! ", task.getException().getMessage(), task.getException());
-                    this.title.setText("Can't write save ! " + task.getException().getLocalizedMessage());
+                    LOGGER.error(this.messageSource.getMessage("ose.error.cant-write", new Object[] {task.getException().getMessage()}, Constants.LOCALE), task.getException());
+                    this.title.setText(this.messageSource.getMessage("ose.error.cant-write", new Object[] {task.getException().getLocalizedMessage()}, Constants.LOCALE));
                     this.title.setFill(Paint.valueOf(Color.RED.toString()));
                 });
 
@@ -243,7 +263,7 @@ public class EditorController implements Initializable {
                     this.masker.setVisible(false);
                     this.masker.textProperty().unbind();
                     this.masker.progressProperty().unbind();
-                    this.masker.setText("Please Wait...");
+                    this.masker.setText(this.messageSource.getMessage("ose.wait", null, Constants.LOCALE));
                     this.masker.setProgress(-1.0);
                 });
 
@@ -256,15 +276,13 @@ public class EditorController implements Initializable {
         }
     }
 
-    public void load(Save save, File saveFile) {
+    public Pane load(Save save, File saveFile) throws IOException {
         this.save = save;
         this.saveFile = saveFile;
         int extIndex = FilenameUtils.indexOfExtension(this.save.getName());
         this.saveFileChooser.setInitialFileName(this.save.getName().substring(0, extIndex) + "_edit" + this.save.getName().substring(extIndex));
-
-        if (saveFile != null && saveFile.getParentFile() != null && saveFile.getParentFile().isDirectory() && saveFile.getParentFile().isAbsolute()) {
-            this.saveFileChooser.setInitialDirectory(saveFile.getParentFile());
-        }
+        Config.getSaveFolder().ifPresent(this.saveFileChooser::setInitialDirectory);
+        initialize();
 
         try {
             EditorController.dummyCountry = this.save.getCountry(Eu4Utils.DEFAULT_TAG);
@@ -284,82 +302,45 @@ public class EditorController implements Initializable {
                 }
             }
 
-            this.cities = FXCollections.observableArrayList(this.provincesMap[0][0].getSave().getCities());
+            ObservableList<SaveProvince> cities = FXCollections.observableArrayList(this.save.getCities())
+                                                               .sorted(Comparator.comparing(ProvinceStringConverter.INSTANCE::toString, Eu4Utils.COLLATOR));
+            ObservableList<SaveCountry> playableCountries = FXCollections.observableArrayList(this.save.getPlayableCountries())
+                                                                         .sorted(Comparator.comparing(CountryStringConverter.INSTANCE::toString, Eu4Utils.COLLATOR));
+            ObservableList<SaveCountry> countriesAlive = playableCountries.filtered(SaveCountry::isAlive);
+            ObservableList<Culture> cultures = FXCollections.observableArrayList(this.save.getGame().getCultures())
+                                                            .sorted(Comparator.comparing(CultureStringConverter.INSTANCE::toString, Eu4Utils.COLLATOR));
+            ObservableList<TradeGood> tradeGoods = FXCollections.observableArrayList(this.save.getGame().getTradeGoods())
+                                                                .sorted(Comparator.comparing(TradeGoodStringConverter.INSTANCE::toString, Eu4Utils.COLLATOR));
+            ObservableList<TradeNode> tradeNodes = FXCollections.observableArrayList(this.save.getGame().getTradeNodes())
+                                                                .sorted(Comparator.comparing(TradeNodeStringConverter.INSTANCE::toString, Eu4Utils.COLLATOR));
+            ObservableList<SaveReligion> religions = this.save.getReligions()
+                                                              .getReligions()
+                                                              .values()
+                                                              .stream()
+                                                              .sorted(Comparator.comparing(SaveReligionStringConverter.INSTANCE::toString, Eu4Utils.COLLATOR))
+                                                              .collect(Collectors.toCollection(FXCollections::observableArrayList));
+            ObservableList<SaveReligion> playableReligions = religions.filtered(saveReligion -> saveReligion.getGameReligion() != null);
 
-            this.playableCountries = FXCollections.observableArrayList(this.provincesMap[0][0].getSave()
-                                                                                              .getPlayableCountries());
-
-            this.countriesAlive = new FilteredList<>(this.playableCountries, Country::isAlive);
-            this.cultures = FXCollections.observableArrayList(this.save.getGame().getCultures());
-            this.tradeGoods = FXCollections.observableArrayList(this.save.getGame().getTradeGoods());
-            this.tradeNodes = FXCollections.observableArrayList(this.save.getGame().getTradeNodes());
-            this.religions = this.save.getReligions()
-                                      .getReligions()
-                                      .values()
-                                      .stream()
-                                      .sorted(Comparator.comparing(SaveReligion::getLocalizedName, Eu4Utils.COLLATOR))
-                                      .collect(Collectors.toCollection(FXCollections::observableArrayList));
-            this.playableReligions = this.save.getReligions()
-                                              .getReligions()
-                                              .values()
-                                              .stream()
-                                              .filter(saveReligion -> saveReligion.getGameReligion() != null)
-                                              .sorted(Comparator.comparing(r -> r.getGameReligion().getLocalizedName(), Eu4Utils.COLLATOR))
-                                              .collect(Collectors.toCollection(FXCollections::observableArrayList));
-
-            this.drawableProvinces = new HashMap<>();
-            for (int x = 0; x < this.provincesMap.length; x++) {
-                for (int y = 0; y < this.provincesMap[x].length; y++) {
-                    SaveProvince province = this.provincesMap[x][y];
-                    int startY = y;
-                    while (y < this.provincesMap[x].length && Objects.equals(this.provincesMap[x][y], province)) {
-                        y++;
-                    }
-                    y--;
-
-                    if (province != null) {
-                        DrawableProvince drawableProvince = this.drawableProvinces.getOrDefault(province.getId(), new DrawableProvince(province));
-                        drawableProvince.addRectangle(x, startY, 1, y - startY);
-                        this.drawableProvinces.put(province.getId(), drawableProvince);
-                    } else {
-                        DrawableProvince drawableProvince = this.drawableProvinces.getOrDefault(null, new DrawableProvince(null));
-                        drawableProvince.addRectangle(x, startY, 1, y - startY);
-                        this.drawableProvinces.put(null, drawableProvince);
-                    }
-                }
-            }
-
-            for (int x = 1; x < this.provincesMap.length; x++) {
-                for (int y = 1; y < this.provincesMap[x].length; y++) {
-                    SaveProvince province = this.provincesMap[x][y];
-
-                    if (province != null
-                        && (!Objects.equals(province, this.provincesMap[x - 1][y]) || !Objects.equals(province, this.provincesMap[x][y - 1]))) {
-                        this.drawableProvinces.get(province.getId()).addBorder(x, y - 1);
-                    }
-                }
-            }
-
-            this.saveButton.setText(this.save.getGame().getLocalisation("SAVE"));
-            this.searchTextField.setPromptText(MenusI18n.SEARCH.getForDefaultLocale());
-            this.autoCompletionBinding = TextFields.bindAutoCompletion(this.searchTextField,
-                                                                       SuggestionProvider.create(new ProvinceCountryCallBack(),
-                                                                                                 Stream.concat(this.save.getProvinces()
-                                                                                                                        .values()
-                                                                                                                        .stream()
-                                                                                                                        .filter(Predicate.not(SaveProvince::isImpassable)),
-                                                                                                               this.save.getCountries()
-                                                                                                                        .values()
-                                                                                                                        .stream()
-                                                                                                                        .filter(Country::isAlive))
-                                                                                                       .collect(Collectors.toList())),
-                                                                       new ProvinceCountryStringConverter());
-            this.autoCompletionBinding.setOnAutoCompleted(event -> {
+            this.saveButton.setText(this.messageSource.getMessage("ose.save", null, Constants.LOCALE));
+            this.searchTextField.setPromptText(this.messageSource.getMessage("ose.search", null, Constants.LOCALE));
+            AutoCompletionBinding<Object> autoCompletionBinding = TextFields.bindAutoCompletion(this.searchTextField,
+                                                                                                SuggestionProvider.create(new ProvinceCountryCallBack(),
+                                                                                                                          Stream.concat(this.save.getProvinces()
+                                                                                                                                                 .values()
+                                                                                                                                                 .stream()
+                                                                                                                                                 .filter(Predicate.not(SaveProvince::isImpassable)),
+                                                                                                                                        this.save.getCountries()
+                                                                                                                                                 .values()
+                                                                                                                                                 .stream()
+                                                                                                                                                 .filter(SaveCountry::isAlive))
+                                                                                                                                .toList()),
+                                                                                                new ProvinceCountryStringConverter());
+            autoCompletionBinding.setOnAutoCompleted(event -> {
                 if (SaveProvince.class.equals(event.getCompletion().getClass())) {
                     this.autoCompletedProvince = (SaveProvince) event.getCompletion();
                     this.autoCompletedCountry = null;
-                } else if (Country.class.equals(event.getCompletion().getClass())) {
-                    this.autoCompletedCountry = (Country) event.getCompletion();
+                } else if (SaveCountry.class.equals(event.getCompletion().getClass())) {
+                    this.autoCompletedCountry = (SaveCountry) event.getCompletion();
                     this.autoCompletedProvince = null;
                 } else {
                     this.autoCompletedProvince = null;
@@ -377,51 +358,49 @@ public class EditorController implements Initializable {
                 }
             });
 
-            this.mapViewContainer = new MapViewContainer(this.provincesMap, this.drawableProvinces, this.provincesCanvas, this.editPane, this.save,
-                                                         this.playableCountries, this.countriesAlive, this.cultures, this.religions, this.playableReligions,
-                                                         this.tradeGoods, this.tradeNodes, this.cities);
-            this.mapViewContainer.registerMapView(MapViewType.COUNTRIES_MAP_VIEW);
+            this.mapViewContainer = new MapViewContainer(this.messageSource, this.provincesMap, this.provincesCanvas, this.editPane, this.save,
+                                                         playableCountries, countriesAlive, cultures, religions, playableReligions,
+                                                         tradeGoods, tradeNodes, cities);
+            this.mapViewContainer.registerMapView(MapViewType.COUNTRIES_MAP_VIEW, new CountriesMapView(this.mapViewContainer, this.save, this.messageSource));
             this.mapViewContainer.selectMapView(MapViewType.COUNTRIES_MAP_VIEW);
             this.mapViewContainer.draw();
         } catch (IOException e) {
-            LOGGER.error("Can't load terrain image ! Make sure your game files are not corrupted {} !", e.getMessage(), e);
-            this.title.setText("Can't load terrain image ! Make sure your game files are not corrupted !");
+            LOGGER.error("{} {}", this.messageSource.getMessage("ose.error.terrain", null, Constants.LOCALE), e.getMessage(), e);
+            this.title.setText(this.messageSource.getMessage("ose.error.terrain", null, Constants.LOCALE));
             this.title.setFill(Paint.valueOf(Color.RED.toString()));
+            throw e;
         }
+
+        return this.root;
     }
 
     public void maximize() {
         ((Stage) this.provincesPane.getScene().getWindow()).setMaximized(true);
+        ((Stage) this.provincesPane.getScene().getWindow()).setTitle("Eu4 Save Editor - " + this.title.getText());
         if (this.provincesCanvas.getWidth() > this.provincesPane.getViewportBounds().getWidth()) {
-            if (this.drawableProvinces.get(this.save.getPlayedCountry().getCapitalId()) != null
-                && this.drawableProvinces.get(this.save.getPlayedCountry().getCapitalId()).getRectangles() != null) {
-                moveToProvince(this.save.getPlayedCountry().getCapital());
-            }
+            moveToProvince(this.save.getPlayedCountry().getCapital());
         }
 
-        if (this.drawableProvinces.get(this.save.getPlayedCountry().getCapitalId()) != null
-            && this.drawableProvinces.get(this.save.getPlayedCountry().getCapitalId()).getRectangles() != null) {
-            Rectangle2D rectangle = this.drawableProvinces.get(this.save.getPlayedCountry().getCapitalId())
-                                                          .getRectangles()
-                                                          .get(0);
+        Map<Polygon, Boolean> borders = this.save.getGame().getBorders().get(this.save.getGame().getProvince(this.save.getPlayedCountry().getCapitalId()));
 
-            onMouseReleasedProvinceImageView(new MouseEvent(MouseEvent.MOUSE_RELEASED, rectangle.getMinX(), rectangle.getMinY(),
-                                                            rectangle.getMinX(), rectangle.getMinY(), MouseButton.PRIMARY, 1, false, false,
+        if (MapUtils.isNotEmpty(borders)) {
+            onMouseReleasedProvinceImageView(new MouseEvent(MouseEvent.MOUSE_RELEASED,
+                                                            borders.keySet().iterator().next().xpoints[0],
+                                                            borders.keySet().iterator().next().ypoints[0],
+                                                            borders.keySet().iterator().next().xpoints[0],
+                                                            borders.keySet().iterator().next().ypoints[0],
+                                                            MouseButton.PRIMARY, 1, false, false,
                                                             false, false, true, false, false, false, false, false,
                                                             null));
         }
 
-        this.imageCursor = new ImageCursor(new Image(this.save.getGame()
-                                                              .getNormalCursorImage()
-                                                              .toURI()
-                                                              .toString()));
-
-        this.provincesCanvas.getScene().setCursor(this.imageCursor);
-        this.provincesCanvas.setCursor(this.imageCursor);
+        ImageCursor imageCursor = new ImageCursor(new Image(this.save.getGame().getNormalCursorImage().toURI().toString()));
+        this.provincesPane.getScene().setCursor(imageCursor);
+        this.provincesCanvas.setCursor(imageCursor);
     }
 
     private void setTitle() {
-        this.title.setText(this.save.getName() + " (" + PRETTY_DATE_FORMAT.format(this.save.getDate()) + ")");
+        this.title.setText(this.save.getName() + " (" + Constants.PRETTY_DATE_FORMAT.format(this.save.getDate()) + ")");
     }
 
     private void moveToProvince(SaveProvince province) {

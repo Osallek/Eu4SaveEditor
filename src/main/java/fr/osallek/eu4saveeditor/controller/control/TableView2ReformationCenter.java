@@ -1,10 +1,13 @@
 package fr.osallek.eu4saveeditor.controller.control;
 
 import fr.osallek.eu4parser.common.Eu4Utils;
+import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 import fr.osallek.eu4saveeditor.controller.converter.ProvinceStringConverter;
 import fr.osallek.eu4saveeditor.controller.object.ReformationCenter;
+import java.util.Comparator;
+import java.util.stream.Collectors;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -15,9 +18,6 @@ import javafx.collections.ObservableMap;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import org.controlsfx.control.SearchableComboBox;
-
-import java.util.Comparator;
-import java.util.stream.Collectors;
 
 public class TableView2ReformationCenter extends TableView<ReformationCenter> {
 
@@ -33,7 +33,7 @@ public class TableView2ReformationCenter extends TableView<ReformationCenter> {
         this.save = save;
         this.provinces = provinces;
 
-        TableColumn<ReformationCenter, SaveProvince> province = new TableColumn<>(save.getGame().getLocalisationCleanNoPunctuation("LEDGER_LOCATION"));
+        TableColumn<ReformationCenter, SaveProvince> province = new TableColumn<>(save.getGame().getLocalisationCleanNoPunctuation("LEDGER_LOCATION", Eu4Language.getDefault()));
         province.setCellValueFactory(p -> p.getValue() == null ? null : new ReadOnlyObjectWrapper<>(p.getValue().getProvince()));
         province.setCellFactory(UniqueComboBoxTableCell.forTableColumn(new ProvinceStringConverter(),
                                                                        this.reformationCenters,

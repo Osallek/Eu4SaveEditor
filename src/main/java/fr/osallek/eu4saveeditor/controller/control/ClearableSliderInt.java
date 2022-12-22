@@ -1,5 +1,6 @@
 package fr.osallek.eu4saveeditor.controller.control;
 
+import java.util.function.IntSupplier;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Pos;
@@ -12,8 +13,6 @@ import javafx.scene.layout.Priority;
 import javafx.util.StringConverter;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
-
-import java.util.function.IntSupplier;
 
 public class ClearableSliderInt extends HBox {
 
