@@ -15,6 +15,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
+import org.controlsfx.control.CheckComboBox;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
 
@@ -33,6 +34,7 @@ public class ClearableComboBox<U> extends HBox {
     public ClearableComboBox(ComboBox<U> comboBox, Supplier<U> clearSupplier) {
         this.comboBox = comboBox;
         this.comboBox.setMaxWidth(Double.MAX_VALUE);
+        this.comboBox.getProperties().put(CheckComboBox.COMBO_BOX_ROWS_TO_MEASURE_WIDTH_KEY, 10);
         HBox.setHgrow(this.comboBox, Priority.ALWAYS);
 
         this.button = new Button("", new Glyph("FontAwesome", FontAwesome.Glyph.CLOSE));
