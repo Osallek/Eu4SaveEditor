@@ -167,7 +167,7 @@ public class HomeController {
         localSavesRow.addColumn(new BootstrapColumn(localSavesPanel, new int[] {12, 12, 10, 8, 6}));
 
         this.startExtractButton.disableProperty().bind(this.localSavesCombo.getSelectionModel().selectedItemProperty().isNull()
-                                                                           .or(this.gameDirectory.isNull()));
+                                                                           .or(this.gameDirectory.isNull()).or(this.loading));
 
         this.progressText = new Text();
         this.progressText.setVisible(false);
