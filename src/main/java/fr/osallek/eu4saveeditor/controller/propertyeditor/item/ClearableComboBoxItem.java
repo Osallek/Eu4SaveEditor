@@ -2,6 +2,7 @@ package fr.osallek.eu4saveeditor.controller.propertyeditor.item;
 
 import fr.osallek.eu4saveeditor.controller.control.ClearableComboBox;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -36,6 +37,8 @@ public class ClearableComboBoxItem<U> implements CustomItem<U> {
     private StringConverter<U> converter;
 
     private Callback<ListView<U>, ListCell<U>> cellFactory;
+
+    private Predicate<U> filter;
 
     public ClearableComboBoxItem(String category, String name, ObservableList<U> values, ClearableComboBox<U> comboBox) {
         this(category, name, values, null, null, comboBox);
@@ -92,7 +95,11 @@ public class ClearableComboBoxItem<U> implements CustomItem<U> {
 
     @Override
     public ObservableList<U> getChoices() {
-        return this.values;
+        if (this.filter == null) {
+            return this.values;
+        } else {
+            return this.values.filtered(this.filter);
+        }
     }
 
     @Override
@@ -157,5 +164,25 @@ public class ClearableComboBoxItem<U> implements CustomItem<U> {
 
     public Callback<ListView<U>, ListCell<U>> getCellFactory() {
         return this.cellFactory;
+    }
+
+    public BooleanProperty visibleProperty() {
+        return this.comboBox.visibleProperty();
+    }
+
+    public void setVisible(boolean visible) {
+        visibleProperty().set(visible);
+    }
+
+    public BooleanProperty editableProperty() {
+        return this.editable;
+    }
+
+    public Predicate<U> getFilter() {
+        return filter;
+    }
+
+    public void setFilter(Predicate<U> filter) {
+        this.filter = filter;
     }
 }

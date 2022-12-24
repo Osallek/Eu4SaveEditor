@@ -1,10 +1,12 @@
 package fr.osallek.eu4saveeditor.controller.propertyeditor;
 
+import fr.osallek.eu4saveeditor.controller.control.ClearableCheckBox;
 import fr.osallek.eu4saveeditor.controller.pane.AbstractObjectField;
 import fr.osallek.eu4saveeditor.controller.pane.AbstractPropertyEditor;
 import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
 import fr.osallek.eu4saveeditor.controller.pane.NumericField;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ButtonItem;
+import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableCheckBoxItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableCheckComboBoxItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableColorPickerItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableComboBoxItem;
@@ -398,6 +400,23 @@ public class CustomEditors {
                 checked.forEach(getEditor()::check);
             }
         };
+    }
+
+    public static PropertyEditor<Boolean> createClearableCheckEditor(ClearableCheckBoxItem checkBoxItem) {
+
+        return new AbstractPropertyEditor<>(checkBoxItem, checkBoxItem.getCheckBox()) {
+
+            @Override
+            protected BooleanProperty getObservableValue() {
+                return getEditor().selectedProperty();
+            }
+
+            @Override
+            public void setValue(Boolean value) {
+                getEditor().setValue(value);
+            }
+        };
+
     }
 
     public static <T> PropertyEditor<ObservableSet<T>> createSelectableGridViewEditor(SelectableGridViewItem<T> selectableGridViewItem) {

@@ -4,6 +4,7 @@ import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.game.Building;
 import fr.osallek.eu4parser.model.game.Culture;
+import fr.osallek.eu4parser.model.game.ParliamentBribe;
 import fr.osallek.eu4parser.model.game.TradeGood;
 import fr.osallek.eu4parser.model.game.TradeNode;
 import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
@@ -26,6 +27,8 @@ import fr.osallek.eu4saveeditor.controller.converter.CountryStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.CountryStringConverter;
 import fr.osallek.eu4saveeditor.controller.converter.CultureStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.CultureStringConverter;
+import fr.osallek.eu4saveeditor.controller.converter.ParliamentBribeStringCellFactory;
+import fr.osallek.eu4saveeditor.controller.converter.ParliamentBribeStringConverter;
 import fr.osallek.eu4saveeditor.controller.converter.SaveReligionStringCellFactory;
 import fr.osallek.eu4saveeditor.controller.converter.SaveReligionStringConverter;
 import fr.osallek.eu4saveeditor.controller.converter.TradeGoodStringCellFactory;
@@ -39,6 +42,7 @@ import fr.osallek.eu4saveeditor.controller.pane.TableViewDialog;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.CustomPropertyEditorFactory;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ButtonItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.CheckBoxItem;
+import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableCheckBoxItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableCheckComboBoxItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableComboBoxItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderItem;
@@ -47,6 +51,19 @@ import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableTextItem
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.HBoxItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.SelectableGridViewItem;
 import fr.osallek.eu4saveeditor.controller.validator.CustomGraphicValidationDecoration;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -59,6 +76,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.controlsfx.control.SearchableComboBox;
 import org.controlsfx.validation.ValidationSupport;
 import org.controlsfx.validation.Validator;
@@ -66,19 +84,6 @@ import org.controlsfx.validation.decoration.CompoundValidationDecoration;
 import org.controlsfx.validation.decoration.StyleClassValidationDecoration;
 import org.springframework.context.MessageSource;
 import org.springframework.core.io.ClassPathResource;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class ProvincePropertySheet extends VBox {
 
@@ -106,7 +111,7 @@ public class ProvincePropertySheet extends VBox {
 
     private final ClearableCheckComboBoxItem<SaveCountry> claimsField;
 
-    private final CheckBoxItem hreField;
+    private final ClearableCheckBoxItem hreField;
 
     private final ClearableComboBoxItem<SaveCountry> colonizeForField;
 
@@ -149,6 +154,12 @@ public class ProvincePropertySheet extends VBox {
     private final ObservableList<Modifier> modifiers;
 
     private Map<SaveGreatProject, ClearableSpinnerItem<Integer>> greatProjectsField;
+
+    private final ClearableCheckBoxItem parliamentField;
+
+    private final ClearableCheckBoxItem parliamentBackingField;
+
+    private final ClearableComboBoxItem<ParliamentBribe> parliamentBribeField;
 
     private final ChangeListener<? super SaveCountry> ownerChangeListener;
 
@@ -222,9 +233,8 @@ public class ProvincePropertySheet extends VBox {
                                                             new ClearableCheckComboBox<>());
         this.claimsField.setConverter(CountryStringConverter.INSTANCE);
 
-        this.hreField = new CheckBoxItem(this.messageSource.getMessage("ose.category.political", null, Constants.LOCALE),
-                                         save.getGame().getLocalisationClean("IS_PART_OF_HRE", Eu4Language.getDefault()),
-                                         false);
+        this.hreField = new ClearableCheckBoxItem(this.messageSource.getMessage("ose.category.political", null, Constants.LOCALE),
+                                                  save.getGame().getLocalisationClean("IS_PART_OF_HRE", Eu4Language.getDefault()));
 
         this.colonizeForField = new ClearableComboBoxItem<>(this.messageSource.getMessage("ose.category.colony", null, Constants.LOCALE),
                                                             save.getGame().getLocalisationClean("COLONIZE_PROVINCE", Eu4Language.getDefault()),
@@ -336,6 +346,25 @@ public class ProvincePropertySheet extends VBox {
         //Great projects
         this.greatProjectsField = new LinkedHashMap<>();
 
+        //Parliament
+        this.parliamentField = new ClearableCheckBoxItem(messageSource.getMessage("ose.category.parliament", null, Constants.LOCALE),
+                                                         messageSource.getMessage("province.parliament.seat", null, Constants.LOCALE));
+        this.parliamentBackingField = new ClearableCheckBoxItem(messageSource.getMessage("ose.category.parliament", null, Constants.LOCALE),
+                                                                messageSource.getMessage("province.parliament.backing", null, Constants.LOCALE));
+        this.parliamentBackingField.visibleProperty().bind(this.parliamentField.selectedProperty());
+        this.parliamentBackingField.editableProperty().bind(this.parliamentField.editableProperty().and(this.parliamentField.selectedProperty()));
+        this.parliamentBribeField = new ClearableComboBoxItem<>(this.messageSource.getMessage("ose.category.parliament", null, Constants.LOCALE),
+                                                                this.messageSource.getMessage("province.parliament.bribe", null, Constants.LOCALE),
+                                                                FXCollections.observableList(save.getGame().getParliamentBribes())
+                                                                             .sorted(Comparator.comparing(ParliamentBribeStringConverter.INSTANCE::toString, Eu4Utils.COLLATOR)),
+                                                                new ClearableComboBox<>(new SearchableComboBox<>()));
+        this.parliamentBribeField.setConverter(ParliamentBribeStringConverter.INSTANCE);
+        this.parliamentBribeField.setCellFactory(ParliamentBribeStringCellFactory.INSTANCE);
+        this.parliamentBribeField.visibleProperty().bind(this.parliamentField.selectedProperty());
+        this.parliamentBribeField.editableProperty().bind(this.parliamentField.editableProperty().and(this.parliamentField.selectedProperty()));
+
+        //Todo bribes
+
         this.ownerChangeListener = (observable, oldValue, newValue) -> {
             this.controllerComboBox.select(newValue);
 
@@ -381,6 +410,7 @@ public class ProvincePropertySheet extends VBox {
         this.autonomyField.setEditable(false);
         this.devastationField.setEditable(false);
         this.tradeNodeField.setEditable(false);
+        this.parliamentField.setEditable(false);
 
         //GENERAL
         this.nameField.setValue(ClausewitzUtils.removeQuotes(this.province.getName()));
@@ -592,6 +622,31 @@ public class ProvincePropertySheet extends VBox {
                                                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         items.addAll(this.greatProjectsField.values());
 
+        //Parliament
+        if (province.getOwner() != null && province.getOwner().getParliament() != null) {
+            this.parliamentField.setEditable(true);
+            this.parliamentField.setValue(province.getSeatInParliament() != null);
+            this.parliamentField.setSupplier(() -> province.getSeatInParliament() != null);
+            items.add(this.parliamentField);
+
+            if (province.getSeatInParliament() != null) {
+                this.parliamentBackingField.setValue(BooleanUtils.toBoolean(province.getSeatInParliament().getBack()));
+                this.parliamentBackingField.setSupplier(() -> BooleanUtils.toBoolean(province.getSeatInParliament().getBack()));
+                this.parliamentBribeField.setValue(province.getSeatInParliament().getBribe());
+                this.parliamentBribeField.setSupplier(() -> province.getSeatInParliament().getBribe());
+            } else {
+                this.parliamentBackingField.setValue(false);
+                this.parliamentBackingField.setSupplier(() -> false);
+                this.parliamentBribeField.setValue(province.getSave().getGame().getParliamentBribes().get(0));
+                this.parliamentBribeField.setSupplier(() -> null);
+            }
+
+            this.parliamentBribeField.setFilter(bribe -> bribe.getTrigger() == null || bribe.getTrigger().apply(province.getOwner(), province));
+
+            items.add(this.parliamentBackingField);
+            items.add(this.parliamentBribeField);
+        }
+
         this.propertySheet.getItems().setAll(items);
 
         if (expandedPaneName != null) {
@@ -794,6 +849,26 @@ public class ProvincePropertySheet extends VBox {
                     p.setDevelopmentTier(item.getTrueValue());
                 }
             });
+        }
+
+        if (this.parliamentField.isEditable().get()) {
+            if (this.parliamentField.isSelected() && this.province.getSeatInParliament() == null) {
+                this.province.addSeatInParliament(this.parliamentBribeField.getSelectedValue());
+            } else if (!this.parliamentField.isSelected() && this.province.getSeatInParliament() != null) {
+                this.province.removeSeatInParliament();
+            }
+        }
+
+        if (this.parliamentBackingField.isEditable().get() && this.province.getSeatInParliament() != null) {
+            if (this.parliamentBackingField.isSelected() != BooleanUtils.toBoolean(this.province.getSeatInParliament().getBack())) {
+                this.province.getSeatInParliament().setBack(this.parliamentBackingField.isSelected());
+            }
+        }
+
+        if (this.parliamentBribeField.isEditable().get() && this.province.getSeatInParliament() != null) {
+            if (!Objects.deepEquals(this.province.getSeatInParliament().getBribe(), this.parliamentBribeField.getSelectedValue())) {
+                this.province.getSeatInParliament().setBribe(this.parliamentBribeField.getSelectedValue());
+            }
         }
     }
 
