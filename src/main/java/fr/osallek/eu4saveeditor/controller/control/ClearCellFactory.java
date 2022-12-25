@@ -6,6 +6,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.layout.HBox;
+import javafx.scene.text.TextAlignment;
 import javafx.util.Callback;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
@@ -24,12 +25,15 @@ public class ClearCellFactory<T> extends TableCell<T, Void> {
 
     private final HBox hBox = new HBox();
 
-    private final Button button = new Button("", new Glyph("FontAwesome", FontAwesome.Glyph.CLOSE));
+    private final Button button;
 
     public ClearCellFactory(Function<T, Boolean> disableSupplier) {
+        this.button = new Button(String.valueOf(FontAwesome.Glyph.REMOVE.getChar()));
+        this.button.setStyle("-fx-font-family: FontAwesome");
+        this.button.setTextAlignment(TextAlignment.CENTER);
+        this.button.setOnAction(event -> getTableView().getItems().remove(getIndex()));
         this.hBox.setAlignment(Pos.CENTER);
         this.hBox.getChildren().add(this.button);
-        this.button.setOnAction(event -> getTableView().getItems().remove(getIndex()));
         this.disableSupplier = disableSupplier;
     }
 

@@ -11,6 +11,7 @@ import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.text.TextAlignment;
 import org.apache.commons.lang3.BooleanUtils;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
@@ -51,8 +52,9 @@ public class ClearableDatePicker extends HBox {
 
         HBox.setHgrow(this.datePicker, Priority.ALWAYS);
 
-        this.button = new Button("", new Glyph("FontAwesome", FontAwesome.Glyph.CLOSE));
-        this.button.setAlignment(Pos.TOP_CENTER);
+        this.button = new Button(String.valueOf(FontAwesome.Glyph.REMOVE.getChar()));
+        this.button.setStyle("-fx-font-family: FontAwesome");
+        this.button.setTextAlignment(TextAlignment.CENTER);
 
         this.clearSupplier = clearSupplier;
         if (this.clearSupplier != null) {

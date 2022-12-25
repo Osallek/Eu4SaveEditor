@@ -13,6 +13,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.SingleSelectionModel;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.text.TextAlignment;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import org.controlsfx.control.CheckComboBox;
@@ -37,8 +38,9 @@ public class ClearableComboBox<U> extends HBox {
         this.comboBox.getProperties().put(CheckComboBox.COMBO_BOX_ROWS_TO_MEASURE_WIDTH_KEY, 10);
         HBox.setHgrow(this.comboBox, Priority.ALWAYS);
 
-        this.button = new Button("", new Glyph("FontAwesome", FontAwesome.Glyph.CLOSE));
-        this.button.setAlignment(Pos.TOP_CENTER);
+        this.button = new Button(String.valueOf(FontAwesome.Glyph.REMOVE.getChar()));
+        this.button.setStyle("-fx-font-family: FontAwesome");
+        this.button.setTextAlignment(TextAlignment.CENTER);
 
         this.clearSupplier = clearSupplier;
         if (this.clearSupplier != null) {

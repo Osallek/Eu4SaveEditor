@@ -12,6 +12,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
+import javafx.scene.text.TextAlignment;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
 
@@ -60,8 +61,9 @@ public abstract class ClearableSpinner<T> extends HBox {
 
     protected void fill(Supplier<T> clearSupplier, Node centerNode) {
         if (this.editable) {
-            this.button = new Button("", new Glyph("FontAwesome", FontAwesome.Glyph.CLOSE));
-            this.button.setAlignment(Pos.TOP_CENTER);
+            this.button = new Button(String.valueOf(FontAwesome.Glyph.REMOVE.getChar()));
+            this.button.setStyle("-fx-font-family: FontAwesome");
+            this.button.setTextAlignment(TextAlignment.CENTER);
             setSupplier(clearSupplier);
         }
 

@@ -10,6 +10,7 @@ import javafx.scene.control.ColorPicker;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.paint.Color;
+import javafx.scene.text.TextAlignment;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
 
@@ -30,8 +31,9 @@ public class ClearableColorPicker extends HBox {
         this.colorPicker.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(this.colorPicker, Priority.ALWAYS);
 
-        this.button = new Button("", new Glyph("FontAwesome", FontAwesome.Glyph.CLOSE));
-        this.button.setAlignment(Pos.TOP_CENTER);
+        this.button = new Button(String.valueOf(FontAwesome.Glyph.REMOVE.getChar()));
+        this.button.setStyle("-fx-font-family: FontAwesome");
+        this.button.setTextAlignment(TextAlignment.CENTER);
 
         this.clearSupplier = clearSupplier;
         if (this.clearSupplier != null) {

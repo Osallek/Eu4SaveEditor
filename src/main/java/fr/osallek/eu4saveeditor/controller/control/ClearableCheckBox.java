@@ -9,6 +9,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.text.Font;
+import javafx.scene.text.TextAlignment;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
 
@@ -27,8 +29,9 @@ public class ClearableCheckBox extends HBox {
         this.checkBox.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(this.checkBox, Priority.ALWAYS);
 
-        this.button = new Button("", new Glyph("FontAwesome", FontAwesome.Glyph.CLOSE));
-        this.button.setAlignment(Pos.TOP_CENTER);
+        this.button = new Button(String.valueOf(FontAwesome.Glyph.REMOVE.getChar()));
+        this.button.setStyle("-fx-font-family: FontAwesome");
+        this.button.setTextAlignment(TextAlignment.CENTER);
 
         if (clearSupplier != null) {
             this.button.setOnMouseReleased(e -> this.checkBox.setSelected(clearSupplier.get()));
