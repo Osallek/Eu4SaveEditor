@@ -6,11 +6,6 @@ import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.game.localisation.Localisation;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
-import javafx.scene.image.ImageView;
-import javafx.scene.image.PixelWriter;
-import javafx.scene.image.WritableImage;
-import javafx.scene.paint.Color;
-
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.nio.file.Files;
@@ -21,6 +16,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+import javafx.scene.image.ImageView;
+import javafx.scene.image.PixelWriter;
+import javafx.scene.image.WritableImage;
+import javafx.scene.paint.Color;
 
 public class Eu4SaveEditorUtils {
 

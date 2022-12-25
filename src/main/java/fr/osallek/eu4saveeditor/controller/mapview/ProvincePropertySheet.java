@@ -41,7 +41,6 @@ import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheetSkin;
 import fr.osallek.eu4saveeditor.controller.pane.TableViewDialog;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.CustomPropertyEditorFactory;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ButtonItem;
-import fr.osallek.eu4saveeditor.controller.propertyeditor.item.CheckBoxItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableCheckBoxItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableCheckComboBoxItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableComboBoxItem;
@@ -70,7 +69,6 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -169,7 +167,6 @@ public class ProvincePropertySheet extends VBox {
 
     public ProvincePropertySheet(MessageSource messageSource, Save save, ObservableList<SaveCountry> playableCountries, ObservableList<Culture> cultures,
                                  ObservableList<SaveReligion> religions, ObservableList<TradeGood> tradeGoods, ObservableList<TradeNode> tradeNodes) {
-        File defaultBuildingImage1;
         this.messageSource = messageSource;
         this.propertySheet = new CustomPropertySheet();
         this.propertySheet.setPropertyEditorFactory(new CustomPropertyEditorFactory());
@@ -315,6 +312,7 @@ public class ProvincePropertySheet extends VBox {
                                                                0, 100));
         }
 
+        File defaultBuildingImage1;
         this.buildingsFields = new ArrayList<>();
         try {
             defaultBuildingImage1 = new ClassPathResource("images/no_building.png").getFile();
@@ -362,8 +360,6 @@ public class ProvincePropertySheet extends VBox {
         this.parliamentBribeField.setCellFactory(ParliamentBribeStringCellFactory.INSTANCE);
         this.parliamentBribeField.isVisible().bind(this.parliamentField.selectedProperty());
         this.parliamentBribeField.editableProperty().bind(this.parliamentField.isEditable().and(this.parliamentField.selectedProperty()));
-
-        //Todo bribes
 
         this.ownerChangeListener = (observable, oldValue, newValue) -> {
             this.controllerComboBox.select(newValue);
@@ -661,7 +657,7 @@ public class ProvincePropertySheet extends VBox {
         this.ownerComboBox.valueProperty().addListener(this.ownerChangeListener);
     }
 
-    public void validate(ActionEvent actionEvent) {
+    public void validate() {
         if (!ClausewitzUtils.removeQuotes(this.province.getName()).equals(this.nameField.getText())) {
             this.province.setName(this.nameField.getText());
         }

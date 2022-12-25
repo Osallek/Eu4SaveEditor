@@ -17,7 +17,7 @@ public class CustomNationDifficultyStringCellFactory implements Callback<ListVie
 
     @Override
     public ListCell<CustomNationDifficulty> call(ListView<CustomNationDifficulty> param) {
-        return new ListCell<CustomNationDifficulty>() {
+        return new ListCell<>() {
 
             @Override
             protected void updateItem(CustomNationDifficulty value, boolean empty) {

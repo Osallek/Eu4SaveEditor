@@ -16,7 +16,7 @@ public class CheckBoxItem implements CustomItem<Void> {
 
     private boolean value;
 
-    private BooleanProperty editable;
+    private final BooleanProperty editable;
 
     public CheckBoxItem(String category, String name, boolean value) {
         this(category, name, value, null);
@@ -40,17 +40,17 @@ public class CheckBoxItem implements CustomItem<Void> {
     }
 
     @Override
-    public String getCategory() {
+    public String category() {
         return this.category;
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return this.name;
     }
 
     @Override
-    public String getDescription() {
+    public String description() {
         return this.description;
     }
 

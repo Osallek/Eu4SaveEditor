@@ -10,7 +10,7 @@ public class ProvinceStringCellFactory implements Callback<ListView<SaveProvince
 
     @Override
     public ListCell<SaveProvince> call(ListView<SaveProvince> param) {
-        return new ListCell<SaveProvince>() {
+        return new ListCell<>() {
 
             @Override
             protected void updateItem(SaveProvince value, boolean empty) {

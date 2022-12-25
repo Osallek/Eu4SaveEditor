@@ -11,7 +11,7 @@ public class Decree extends Copy<Decree> {
 
     private String name;
 
-    private Save save;
+    private final Save save;
 
     private boolean changed;
 
@@ -66,11 +66,10 @@ public class Decree extends Copy<Decree> {
             return true;
         }
 
-        if (!(o instanceof Decree)) {
+        if (!(o instanceof Decree that)) {
             return false;
         }
 
-        Decree that = (Decree) o;
         return Objects.equals(decree, that.decree);
     }
 

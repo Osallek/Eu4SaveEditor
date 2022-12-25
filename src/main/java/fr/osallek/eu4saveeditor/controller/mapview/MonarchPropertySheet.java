@@ -27,22 +27,20 @@ import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderIt
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSpinnerItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableTextItem;
 import fr.osallek.eu4saveeditor.controller.validator.CustomGraphicValidationDecoration;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.scene.layout.VBox;
-import org.apache.commons.collections4.CollectionUtils;
-import org.controlsfx.control.SearchableComboBox;
-import org.controlsfx.validation.ValidationSupport;
-import org.controlsfx.validation.decoration.CompoundValidationDecoration;
-import org.controlsfx.validation.decoration.StyleClassValidationDecoration;
-
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.layout.VBox;
+import org.apache.commons.collections4.CollectionUtils;
+import org.controlsfx.control.SearchableComboBox;
+import org.controlsfx.validation.ValidationSupport;
+import org.controlsfx.validation.decoration.CompoundValidationDecoration;
+import org.controlsfx.validation.decoration.StyleClassValidationDecoration;
 
 public class MonarchPropertySheet extends VBox {
 
@@ -214,7 +212,7 @@ public class MonarchPropertySheet extends VBox {
         this.propertySheet.getItems().setAll(items);
     }
 
-    public void validate(ActionEvent actionEvent) {
+    public void validate() {
         if (!ClausewitzUtils.removeQuotes(this.monarch.getName()).equals(this.nameField.getText())) {
             this.monarch.setName(ClausewitzUtils.addQuotes(this.nameField.getText()));
         }

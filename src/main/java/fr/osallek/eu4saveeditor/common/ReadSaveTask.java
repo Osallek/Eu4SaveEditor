@@ -3,12 +3,11 @@ package fr.osallek.eu4saveeditor.common;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.Eu4Parser;
 import fr.osallek.eu4parser.model.save.Save;
-import javafx.concurrent.Task;
-import org.springframework.context.MessageSource;
-
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import javafx.concurrent.Task;
+import org.springframework.context.MessageSource;
 
 public class ReadSaveTask extends Task<Save> {
 

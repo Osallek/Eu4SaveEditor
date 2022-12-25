@@ -11,7 +11,7 @@ public class GoldenBull extends Copy<GoldenBull> {
 
     private String name;
 
-    private Save save;
+    private final Save save;
 
     private boolean changed;
 

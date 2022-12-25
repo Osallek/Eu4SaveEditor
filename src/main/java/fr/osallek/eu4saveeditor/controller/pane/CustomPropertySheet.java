@@ -16,6 +16,8 @@
 package fr.osallek.eu4saveeditor.controller.pane;
 
 import fr.osallek.eu4saveeditor.Eu4SaveEditorApplication;
+import java.util.Comparator;
+import java.util.Optional;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -29,9 +31,6 @@ import org.controlsfx.property.BeanPropertyUtils;
 import org.controlsfx.property.editor.DefaultPropertyEditorFactory;
 import org.controlsfx.property.editor.Editors;
 import org.controlsfx.property.editor.PropertyEditor;
-
-import java.util.Comparator;
-import java.util.Optional;
 
 /**
  * The PropertySheet control is a powerful control designed to make it really easy for developers to present to end users a list of properties that the end user
@@ -86,7 +85,7 @@ public class CustomPropertySheet extends CustomControlsFXControl {
         NAME,
 
         /**
-         * Groups the properties in the {@link CustomPropertySheet#getItems() items list} based on their {@link Item#getCategory() category}.
+         * Groups the properties in the {@link CustomPropertySheet#getItems() items list} based on their {@link Item#category() category}.
          */
         CATEGORY
     }
@@ -109,20 +108,20 @@ public class CustomPropertySheet extends CustomControlsFXControl {
          * CustomPropertySheet#modeProperty() mode property} is set to {@link Mode#CATEGORY} - as then all properties with the same category will be grouped
          * together visually.
          */
-        String getCategory();
+        String category();
 
         /**
          * Returns the display name of the property, which should be short (i.e. less than two words). This is used to explain to the end user what the property
          * represents and is displayed beside the {@link PropertyEditor}. If you need to explain more detail to the user, consider placing it in the {@link
-         * #getDescription()}.
+         * #description()}.
          */
-        String getName();
+        String name();
 
         /**
-         * A String that will be shown to the user as a tooltip. This allows for a longer form of detail than what is possible with the {@link #getName()}
+         * A String that will be shown to the user as a tooltip. This allows for a longer form of detail than what is possible with the {@link #name()}
          * method.
          */
-        String getDescription();
+        String description();
 
         /**
          * Returns the current value of the property.
@@ -182,7 +181,7 @@ public class CustomPropertySheet extends CustomControlsFXControl {
     public CustomPropertySheet(ObservableList<Item> items) {
         getStyleClass().add(DEFAULT_STYLE_CLASS);
 
-        this.items = items == null ? FXCollections.<Item>observableArrayList() : items;
+        this.items = items == null ? FXCollections.observableArrayList() : items;
     }
 
 

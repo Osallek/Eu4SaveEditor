@@ -56,17 +56,17 @@ public class ClearableColorPickerItem implements CustomItem<Color> {
     }
 
     @Override
-    public String getCategory() {
+    public String category() {
         return this.category;
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return this.name;
     }
 
     @Override
-    public String getDescription() {
+    public String description() {
         return this.description;
     }
 

@@ -160,7 +160,7 @@ public class CustomPropertySheetSkin extends SkinBase<CustomPropertySheet> {
                 Map<String, List<Item>> categoryMap = getSkinnable().getCategoryComparator() == null ? new LinkedHashMap<>() :
                                                       new TreeMap<>(getSkinnable().getCategoryComparator());
                 for (Item p : getSkinnable().getItems()) {
-                    String category = p.getCategory();
+                    String category = p.category();
                     List<Item> list = categoryMap.computeIfAbsent(category, k -> new ArrayList<>());
                     list.add(p);
                 }
@@ -242,7 +242,7 @@ public class CustomPropertySheetSkin extends SkinBase<CustomPropertySheet> {
             for (Item item : properties) {
 
                 // filter properties
-                String title = item.getName();
+                String title = item.name();
 
                 if (!filter.isEmpty() && (title == null || !title.toLowerCase().contains(filter))) {
                     continue;
@@ -263,7 +263,7 @@ public class CustomPropertySheetSkin extends SkinBase<CustomPropertySheet> {
                     label.visibleProperty().bind(item.isVisible());
 
                     // show description as a tooltip
-                    String description = item.getDescription();
+                    String description = item.description();
                     if (description != null && !description.trim().isEmpty()) {
                         Tooltip tooltip = new Tooltip(description);
                         tooltip.setAnchorLocation(PopupWindow.AnchorLocation.WINDOW_TOP_RIGHT);

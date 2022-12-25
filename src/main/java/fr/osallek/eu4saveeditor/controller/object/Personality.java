@@ -52,11 +52,10 @@ public class Personality extends Copy<Personality> {
             return true;
         }
 
-        if (!(o instanceof Personality)) {
+        if (!(o instanceof Personality that)) {
             return false;
         }
 
-        Personality that = (Personality) o;
         return Objects.equals(rulerPersonality, that.rulerPersonality);
     }
 

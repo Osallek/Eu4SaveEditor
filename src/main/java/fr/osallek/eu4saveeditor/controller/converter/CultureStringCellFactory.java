@@ -1,8 +1,6 @@
 package fr.osallek.eu4saveeditor.controller.converter;
 
 import fr.osallek.eu4parser.model.game.Culture;
-import fr.osallek.eu4parser.model.game.Game;
-import fr.osallek.eu4saveeditor.common.Eu4SaveEditorUtils;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.util.Callback;
@@ -13,7 +11,7 @@ public class CultureStringCellFactory implements Callback<ListView<Culture>, Lis
 
     @Override
     public ListCell<Culture> call(ListView<Culture> param) {
-        return new ListCell<Culture>() {
+        return new ListCell<>() {
 
             @Override
             protected void updateItem(Culture value, boolean empty) {

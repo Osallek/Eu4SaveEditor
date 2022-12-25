@@ -12,7 +12,6 @@ import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderIn
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSpinnerItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableTextItem;
-import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ComboBoxItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.HBoxItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.PropertySheetItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.SelectableGridViewItem;
@@ -31,10 +30,6 @@ public class CustomPropertyEditorFactory extends CustomDefaultPropertyEditorFact
 
         if (type == ClearableTextItem.class) {
             return CustomEditors.createClearableLabeledTextEditor((ClearableTextItem) item);
-        }
-
-        if (type == ComboBoxItem.class) {
-            return CustomEditors.createCustomChoiceEditor((ComboBoxItem<?>) item);
         }
 
         if (type == ClearableDatePickerItem.class) {

@@ -5,6 +5,9 @@ import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4saveeditor.Eu4SaveEditorApplication;
 import fr.osallek.eu4saveeditor.common.Constants;
 import fr.osallek.eu4saveeditor.controller.control.CustomListSelectionView;
+import java.util.Collection;
+import java.util.List;
+import java.util.function.Supplier;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -14,10 +17,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.controlsfx.control.ListSelectionView;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.function.Supplier;
 
 public class ListSelectionViewDialog<S> extends Dialog<List<S>> {
 

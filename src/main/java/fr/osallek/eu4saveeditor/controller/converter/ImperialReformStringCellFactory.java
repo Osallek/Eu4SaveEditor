@@ -17,7 +17,7 @@ public class ImperialReformStringCellFactory implements Callback<ListView<Imperi
 
     @Override
     public ListCell<ImperialReform> call(ListView<ImperialReform> param) {
-        return new ListCell<ImperialReform>() {
+        return new ListCell<>() {
 
             @Override
             protected void updateItem(ImperialReform value, boolean empty) {

@@ -3,6 +3,12 @@ package fr.osallek.eu4saveeditor;
 import fr.osallek.eu4saveeditor.common.Config;
 import fr.osallek.eu4saveeditor.common.Constants;
 import fr.osallek.eu4saveeditor.config.StageReadyEvent;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Optional;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
@@ -11,13 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
-
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Optional;
 
 public class Eu4SaveEditorUiApplication extends Application {
 

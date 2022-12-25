@@ -17,7 +17,7 @@ public class TradeGoodStringCellFactory implements Callback<ListView<TradeGood>,
 
     @Override
     public ListCell<TradeGood> call(ListView<TradeGood> param) {
-        return new ListCell<TradeGood>() {
+        return new ListCell<>() {
 
             @Override
             protected void updateItem(TradeGood value, boolean empty) {

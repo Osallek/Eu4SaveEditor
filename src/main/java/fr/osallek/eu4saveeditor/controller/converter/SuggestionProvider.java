@@ -121,7 +121,7 @@ public abstract class SuggestionProvider<T> implements Callback<ISuggestionReque
                     }
                 }
             }
-            Collections.sort(suggestions, getComparator());
+            suggestions.sort(getComparator());
         } else {
             if (isShowAllIfEmpty()) {
                 synchronized (possibleSuggestionsLock) {
@@ -195,7 +195,7 @@ public abstract class SuggestionProvider<T> implements Callback<ISuggestionReque
 
         private Callback<T, String> stringConverter;
 
-        private final Comparator<T> stringComparator = new Comparator<T>() {
+        private final Comparator<T> stringComparator = new Comparator<>() {
             @Override
             public int compare(T o1, T o2) {
                 String o1str = stringConverter.call(o1);
@@ -213,11 +213,8 @@ public abstract class SuggestionProvider<T> implements Callback<ISuggestionReque
 
             // In case no stringConverter was provided, use the default strategy
             if(this.stringConverter == null){
-                this.stringConverter = new Callback<T, String>() {
-                    @Override
-                    public String call(T obj) {
-                        return obj != null ? obj.toString() : ""; //$NON-NLS-1$
-                    }
+                this.stringConverter = obj -> {
+                    return obj != null ? obj.toString() : ""; //$NON-NLS-1$
                 };
             }
         }

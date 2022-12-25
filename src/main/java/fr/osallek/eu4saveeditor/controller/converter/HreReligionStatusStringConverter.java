@@ -20,19 +20,11 @@ public class HreReligionStatusStringConverter extends StringConverter<HreReligio
         if (hreReligionStatus == null) {
             text = this.save.getGame().getLocalisationClean("HRE_RELIGIOUS_PEACE", Eu4Language.getDefault());
         } else {
-            switch (hreReligionStatus) {
-                case PROTESTANT:
-                    text = this.save.getGame().getLocalisationClean("protestant", Eu4Language.getDefault());
-                    break;
-
-                case CATHOLIC:
-                    text = this.save.getGame().getLocalisationClean("catholic", Eu4Language.getDefault());
-                    break;
-
-                case PEACE:
-                default:
-                    text = this.save.getGame().getLocalisationClean("HRE_RELIGIOUS_PEACE", Eu4Language.getDefault());
-            }
+            text = switch (hreReligionStatus) {
+                case PROTESTANT -> this.save.getGame().getLocalisationClean("protestant", Eu4Language.getDefault());
+                case CATHOLIC -> this.save.getGame().getLocalisationClean("catholic", Eu4Language.getDefault());
+                case PEACE -> this.save.getGame().getLocalisationClean("HRE_RELIGIOUS_PEACE", Eu4Language.getDefault());
+            };
         }
 
         return text.substring(0, 1).toUpperCase() + text.substring(1);

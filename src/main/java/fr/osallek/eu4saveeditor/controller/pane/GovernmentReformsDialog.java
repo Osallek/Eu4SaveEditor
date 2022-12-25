@@ -7,6 +7,8 @@ import fr.osallek.eu4saveeditor.Eu4SaveEditorApplication;
 import fr.osallek.eu4saveeditor.common.Constants;
 import fr.osallek.eu4saveeditor.common.Eu4SaveEditorUtils;
 import fr.osallek.eu4saveeditor.controller.control.SelectableGridView;
+import java.util.ArrayList;
+import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -19,9 +21,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class GovernmentReformsDialog extends Dialog<List<GovernmentReform>> {
 

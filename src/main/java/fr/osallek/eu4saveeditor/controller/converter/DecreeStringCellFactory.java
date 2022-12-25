@@ -9,7 +9,7 @@ public class DecreeStringCellFactory implements Callback<ListView<Decree>, ListC
 
     @Override
     public ListCell<Decree> call(ListView<Decree> param) {
-        return new ListCell<Decree>() {
+        return new ListCell<>() {
 
             @Override
             protected void updateItem(Decree value, boolean empty) {

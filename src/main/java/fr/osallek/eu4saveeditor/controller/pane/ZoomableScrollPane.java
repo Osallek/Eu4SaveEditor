@@ -17,8 +17,6 @@ public class ZoomableScrollPane extends ScrollPane {
 
     private double scaleValue = 1;
 
-    private final double zoomIntensity = 0.02;
-
     private final Node target;
 
     private final Node zoomNode;
@@ -69,7 +67,8 @@ public class ZoomableScrollPane extends ScrollPane {
     }
 
     private void onScroll(double wheelDelta, double x, double y) {
-        double zoomFactor = Math.exp(wheelDelta * this.zoomIntensity);
+        double zoomIntensity = 0.02;
+        double zoomFactor = Math.exp(wheelDelta * zoomIntensity);
         zoomFactor = Math.min(zoomFactor, MAX_ZOOM / this.scaleValue);
 
         Bounds innerBounds = this.zoomNode.getLayoutBounds();

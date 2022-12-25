@@ -163,7 +163,7 @@ public class CountriesMapView extends AbstractMapView {
         this.mapViewContainer.addSheets(Collections.singletonList(this.countrySheet.getPropertySheet()));
         this.mapViewContainer.updateTitle();
         this.mapViewContainer.setSubmitButtonOnAction(e -> {
-            this.countrySheet.validate(e);
+            this.countrySheet.validate();
             this.mapViewContainer.updateTitle();
         });
 
@@ -180,7 +180,7 @@ public class CountriesMapView extends AbstractMapView {
         this.mapViewContainer.addSheets(Collections.singletonList(this.provinceSheet.getPropertySheet()));
         this.mapViewContainer.updateTitle();
         this.mapViewContainer.setSubmitButtonOnAction(e -> {
-            this.provinceSheet.validate(e);
+            this.provinceSheet.validate();
             this.provinceSheet.update(this.provinceSheet.getProvince());
             this.mapViewContainer.updateTitle();
         });

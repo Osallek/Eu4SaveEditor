@@ -52,11 +52,23 @@ import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderIt
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.HBoxItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.PropertySheetItem;
 import fr.osallek.eu4saveeditor.controller.validator.CustomGraphicValidationDecoration;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
-import javafx.event.ActionEvent;
 import javafx.scene.control.ComboBox;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -73,23 +85,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 public class SavePropertySheet extends VBox {
-
-    //Todo Hegemon
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SavePropertySheet.class);
 
@@ -858,7 +854,7 @@ public class SavePropertySheet extends VBox {
         this.notFiredEvents.removeIf(this.firedEvents::contains);
     }
 
-    public void validate(ActionEvent actionEvent) {
+    public void validate() {
         //GAME OPTIONS
         if (!this.save.getGameplayOptions().getDifficulty().equals(this.difficultyField.getSelectedValue())) {
             this.save.getGameplayOptions().setDifficulty(this.difficultyField.getSelectedValue());
@@ -965,11 +961,11 @@ public class SavePropertySheet extends VBox {
 
         //GOODS
         if (!this.goodsChangePrices.isEmpty()) {
-            this.goodsChangePrices.forEach((name, changePrices) -> {
-                this.save.getChangePrices()
-                         .getGood(name)
-                         .setChangePrices(changePrices.stream().map(PriceChange::toChangePrice).collect(Collectors.toList()));
-            });
+            this.goodsChangePrices.forEach((name, changePrices) -> this.save.getChangePrices()
+                                                                            .getGood(name)
+                                                                            .setChangePrices(changePrices.stream()
+                                                                                                         .map(PriceChange::toChangePrice)
+                                                                                                         .collect(Collectors.toList())));
         }
 
         //HRE
@@ -1030,7 +1026,7 @@ public class SavePropertySheet extends VBox {
         }
 
         //RELIGIONS
-        this.religionPropertySheets.forEach(sheet -> sheet.validate(actionEvent));
+        this.religionPropertySheets.forEach(ReligionPropertySheet::validate);
 
         //EVENTS
 
@@ -1053,11 +1049,7 @@ public class SavePropertySheet extends VBox {
                                                     .mapToDouble(PriceChange::getValue)
                                                     .sum();
 
-        return "("
-               + good.getBasicPrice()
-               + (modifiersSum < 0 ? " " : " +")
-               + modifiersSum
-               + "%)";
+        return "(" + good.getBasicPrice() + (modifiersSum < 0 ? " " : " +") + modifiersSum + "%)";
     }
 
     private String goodToPrice(ChangePriceGood good) {

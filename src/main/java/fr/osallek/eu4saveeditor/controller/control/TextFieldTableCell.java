@@ -30,7 +30,7 @@ public class TextFieldTableCell<S, T> extends TableCell<S, T> {
         setConverter(converter);
     }
 
-    private ObjectProperty<StringConverter<T>> converter = new SimpleObjectProperty<>(this, "converter");
+    private final ObjectProperty<StringConverter<T>> converter = new SimpleObjectProperty<>(this, "converter");
 
     public final ObjectProperty<StringConverter<T>> converterProperty() {
         return converter;

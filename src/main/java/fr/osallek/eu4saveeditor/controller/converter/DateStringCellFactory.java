@@ -10,7 +10,7 @@ public class DateStringCellFactory implements Callback<ListView<LocalDate>, List
 
     @Override
     public ListCell<LocalDate> call(ListView<LocalDate> param) {
-        return new ListCell<LocalDate>() {
+        return new ListCell<>() {
 
             @Override
             protected void updateItem(LocalDate value, boolean empty) {

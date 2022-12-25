@@ -26,6 +26,16 @@ import fr.osallek.eu4saveeditor.controller.mapview.CountriesMapView;
 import fr.osallek.eu4saveeditor.controller.mapview.MapViewContainer;
 import fr.osallek.eu4saveeditor.controller.mapview.MapViewType;
 import fr.osallek.eu4saveeditor.controller.pane.ZoomableScrollPane;
+import java.awt.Polygon;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.Comparator;
+import java.util.Locale;
+import java.util.Map;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javafx.animation.PauseTransition;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -55,6 +65,7 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import javax.imageio.ImageIO;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.controlsfx.control.MaskerPane;
@@ -64,18 +75,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
-
-import javax.imageio.ImageIO;
-import java.awt.Polygon;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.util.Comparator;
-import java.util.Locale;
-import java.util.Map;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Component
 public class EditorController {
@@ -87,8 +86,6 @@ public class EditorController {
     private final FileChooser saveFileChooser = new FileChooser();
 
     private final MessageSource messageSource;
-
-    private File saveFile;
 
     private Save save;
 
@@ -276,9 +273,8 @@ public class EditorController {
         }
     }
 
-    public Pane load(Save save, File saveFile) throws IOException {
+    public Pane load(Save save) throws IOException {
         this.save = save;
-        this.saveFile = saveFile;
         int extIndex = FilenameUtils.indexOfExtension(this.save.getName());
         this.saveFileChooser.setInitialFileName(this.save.getName().substring(0, extIndex) + "_edit" + this.save.getName().substring(extIndex));
         Config.getSaveFolder().ifPresent(this.saveFileChooser::setInitialDirectory);

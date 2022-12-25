@@ -11,7 +11,7 @@ public class ParliamentBribeStringCellFactory implements Callback<ListView<Parli
 
     @Override
     public ListCell<ParliamentBribe> call(ListView<ParliamentBribe> param) {
-        return new ListCell<ParliamentBribe>() {
+        return new ListCell<>() {
 
             @Override
             protected void updateItem(ParliamentBribe value, boolean empty) {

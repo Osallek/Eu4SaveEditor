@@ -17,27 +17,18 @@ public class HreReligionStatusStringCellFactory implements Callback<ListView<Hre
 
     @Override
     public ListCell<HreReligionStatus> call(ListView<HreReligionStatus> param) {
-        return new ListCell<HreReligionStatus>() {
+        return new ListCell<>() {
 
             @Override
             protected void updateItem(HreReligionStatus value, boolean empty) {
                 super.updateItem(value, empty);
 
                 if (!empty) {
-                    String text;
-                    switch (value) {
-                        case PROTESTANT:
-                            text = save.getGame().getLocalisationClean("protestant", Eu4Language.getDefault());
-                            break;
-
-                        case CATHOLIC:
-                            text = save.getGame().getLocalisationClean("catholic", Eu4Language.getDefault());
-                            break;
-
-                        case PEACE:
-                        default:
-                            text = save.getGame().getLocalisationClean("HRE_RELIGIOUS_PEACE", Eu4Language.getDefault());
-                    }
+                    String text = switch (value) {
+                        case PROTESTANT -> save.getGame().getLocalisationClean("protestant", Eu4Language.getDefault());
+                        case CATHOLIC -> save.getGame().getLocalisationClean("catholic", Eu4Language.getDefault());
+                        case PEACE -> save.getGame().getLocalisationClean("HRE_RELIGIOUS_PEACE", Eu4Language.getDefault());
+                    };
 
                     setText(text.substring(0, 1).toUpperCase() + text.substring(1));
                 }

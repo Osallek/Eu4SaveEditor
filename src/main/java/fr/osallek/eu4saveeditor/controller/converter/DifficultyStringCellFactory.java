@@ -17,7 +17,7 @@ public class DifficultyStringCellFactory implements Callback<ListView<Difficulty
 
     @Override
     public ListCell<Difficulty> call(ListView<Difficulty> param) {
-        return new ListCell<Difficulty>() {
+        return new ListCell<>() {
 
             @Override
             protected void updateItem(Difficulty value, boolean empty) {

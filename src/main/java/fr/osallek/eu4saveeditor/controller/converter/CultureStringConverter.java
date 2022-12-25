@@ -1,7 +1,6 @@
 package fr.osallek.eu4saveeditor.controller.converter;
 
 import fr.osallek.eu4parser.model.game.Culture;
-import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4saveeditor.common.Eu4SaveEditorUtils;
 import javafx.util.StringConverter;
 import org.apache.commons.lang3.StringUtils;

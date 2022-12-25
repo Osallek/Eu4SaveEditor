@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
-import javafx.event.ActionEvent;
 import javafx.scene.layout.VBox;
 import org.apache.commons.collections4.CollectionUtils;
 import org.controlsfx.control.SearchableComboBox;
@@ -256,7 +255,7 @@ public class ReligionPropertySheet extends VBox {
         }
     }
 
-    public void validate(ActionEvent actionEvent) {
+    public void validate() {
         if (this.enableField != null) {
             if (this.enableField.isSelected()) {
                 this.religion.setEnable(this.save.getDate());

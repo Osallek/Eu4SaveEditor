@@ -34,17 +34,12 @@ public enum WriteSaveStep {
     }
 
     public String getText(Eu4Language eu4Language) {
-        switch (eu4Language) {
-            case FRENCH:
-                return this.french;
-            case GERMAN:
-                return this.german;
-            case SPANISH:
-                return this.spanish;
-            case ENGLISH:
-            default:
-                return this.english;
-        }
+        return switch (eu4Language) {
+            case FRENCH -> this.french;
+            case GERMAN -> this.german;
+            case SPANISH -> this.spanish;
+            case ENGLISH -> this.english;
+        };
     }
 
     WriteSaveStep(String itemName, int step, String english, String french, String german, String spanish) {

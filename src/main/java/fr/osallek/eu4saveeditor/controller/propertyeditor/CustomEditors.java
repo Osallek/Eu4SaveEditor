@@ -1,6 +1,5 @@
 package fr.osallek.eu4saveeditor.controller.propertyeditor;
 
-import fr.osallek.eu4saveeditor.controller.control.ClearableCheckBox;
 import fr.osallek.eu4saveeditor.controller.pane.AbstractObjectField;
 import fr.osallek.eu4saveeditor.controller.pane.AbstractPropertyEditor;
 import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
@@ -15,7 +14,6 @@ import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderIn
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSliderItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSpinnerItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableTextItem;
-import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ComboBoxItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.HBoxItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.PropertySheetItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.SelectableGridViewItem;
@@ -73,7 +71,7 @@ public class CustomEditors {
 
     public static PropertyEditor<String> createTextEditor(TextItem textItem) {
 
-        return new AbstractPropertyEditor<>(textItem, textItem.getText()) {
+        return new AbstractPropertyEditor<>(textItem, textItem.text()) {
 
             @Override
             protected StringProperty getObservableValue() {
@@ -142,7 +140,7 @@ public class CustomEditors {
 
     public static <T> PropertyEditor<?> createChoiceEditor(CustomPropertySheet.Item property, final Collection<T> choices) {
 
-        return new AbstractPropertyEditor<T, ComboBox<T>>(property, new ComboBox<T>()) {
+        return new AbstractPropertyEditor<T, ComboBox<T>>(property, new ComboBox<>()) {
 
             {
                 getEditor().setItems(FXCollections.observableArrayList(choices));
@@ -170,7 +168,7 @@ public class CustomEditors {
 
             @Override
             public void setValue(Color value) {
-                getEditor().setValue((Color) value);
+                getEditor().setValue(value);
             }
         };
     }
@@ -195,7 +193,7 @@ public class CustomEditors {
 
     public static PropertyEditor<?> createFontEditor(CustomPropertySheet.Item property) {
 
-        return new AbstractPropertyEditor<Font, AbstractObjectField<Font>>(property, new AbstractObjectField<Font>() {
+        return new AbstractPropertyEditor<Font, AbstractObjectField<Font>>(property, new AbstractObjectField<>() {
             @Override
             protected Class<Font> getType() {
                 return Font.class;
@@ -303,37 +301,6 @@ public class CustomEditors {
             @Override
             public void setValue(Integer value) {
                 getEditor().setValue(value);
-            }
-        };
-    }
-
-    public static <T> PropertyEditor<T> createCustomChoiceEditor(ComboBoxItem<T> comboBoxItem) {
-
-        return new AbstractPropertyEditor<>(comboBoxItem, comboBoxItem.getComboBox()) {
-            {
-                getEditor().setItems(comboBoxItem.getChoices());
-
-                if (comboBoxItem.getOnAction() != null) {
-                    getEditor().setOnAction(comboBoxItem.getOnAction());
-                }
-
-                if (comboBoxItem.getConverter() != null) {
-                    getEditor().setConverter(comboBoxItem.getConverter());
-                }
-
-                if (comboBoxItem.getCellFactory() != null) {
-                    getEditor().setCellFactory(comboBoxItem.getCellFactory());
-                }
-            }
-
-            @Override
-            protected ObservableValue<T> getObservableValue() {
-                return getEditor().getSelectionModel().selectedItemProperty();
-            }
-
-            @Override
-            public void setValue(T value) {
-                getEditor().getSelectionModel().select(value);
             }
         };
     }
@@ -492,11 +459,11 @@ public class CustomEditors {
 
     public static PropertyEditor<String> createPropertySheet(PropertySheetItem propertySheetItem) {
 
-        return new AbstractPropertyEditor<>(propertySheetItem, propertySheetItem.getPropertySheet()) {
+        return new AbstractPropertyEditor<>(propertySheetItem, propertySheetItem.propertySheet()) {
 
             @Override
             protected ObservableValue<String> getObservableValue() {
-                return new ReadOnlyObjectWrapper<>(propertySheetItem.getPropertySheet(), "value");
+                return new ReadOnlyObjectWrapper<>(propertySheetItem.propertySheet(), "value");
             }
 
             @Override

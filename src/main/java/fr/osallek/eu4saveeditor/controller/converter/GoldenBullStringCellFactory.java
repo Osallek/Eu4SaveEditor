@@ -9,7 +9,7 @@ public class GoldenBullStringCellFactory implements Callback<ListView<GoldenBull
 
     @Override
     public ListCell<GoldenBull> call(ListView<GoldenBull> param) {
-        return new ListCell<GoldenBull>() {
+        return new ListCell<>() {
 
             @Override
             protected void updateItem(GoldenBull value, boolean empty) {

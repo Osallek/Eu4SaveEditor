@@ -17,7 +17,7 @@ public class EventStringCellFactory implements Callback<ListView<Event>, ListCel
 
     @Override
     public ListCell<Event> call(ListView<Event> param) {
-        return new ListCell<Event>() {
+        return new ListCell<>() {
 
             @Override
             protected void updateItem(Event value, boolean empty) {

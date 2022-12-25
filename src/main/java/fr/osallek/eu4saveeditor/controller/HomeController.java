@@ -11,6 +11,11 @@ import fr.osallek.eu4saveeditor.controller.object.BootstrapColumn;
 import fr.osallek.eu4saveeditor.controller.object.BootstrapPane;
 import fr.osallek.eu4saveeditor.controller.object.BootstrapRow;
 import fr.osallek.eu4saveeditor.controller.object.LocalSaveListCell;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
@@ -41,12 +46,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
-
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 
 @Component
 public class HomeController {
@@ -232,15 +231,13 @@ public class HomeController {
         }
     }
 
-    private boolean chooseGameDirectory(File file) {
+    private void chooseGameDirectory(File file) {
         this.gameDirectory.set(file);
 
         if (this.gameDirectory.getValue() == null) {
             this.selectedGameDirectory.setText(null);
-            return false;
         } else {
             this.selectedGameDirectory.setText(this.gameDirectory.getValue().getPath());
-            return true;
         }
     }
 
@@ -262,9 +259,7 @@ public class HomeController {
             this.progressBar.setProgress(1);
 
             try {
-                this.startExtractButton.getScene()
-                                       .setRoot(this.editorController.load(task.getValue(),
-                                                                           this.localSavesCombo.getSelectionModel().getSelectedItem().toFile()));
+                this.startExtractButton.getScene().setRoot(this.editorController.load(task.getValue()));
                 this.editorController.maximize();
             } catch (Exception e) {
                 taskError(e);

@@ -4,16 +4,7 @@ import fr.osallek.eu4saveeditor.controller.pane.CustomPropertySheet;
 import java.util.Optional;
 import javafx.beans.value.ObservableValue;
 
-public class PropertySheetItem implements CustomPropertySheet.Item {
-
-    private final String category;
-
-    private final CustomPropertySheet propertySheet;
-
-    public PropertySheetItem(String category, CustomPropertySheet propertySheet) {
-        this.category = category;
-        this.propertySheet = propertySheet;
-    }
+public record PropertySheetItem(String category, CustomPropertySheet propertySheet) implements CustomPropertySheet.Item {
 
     @Override
     public Class<?> getType() {
@@ -21,17 +12,12 @@ public class PropertySheetItem implements CustomPropertySheet.Item {
     }
 
     @Override
-    public String getCategory() {
-        return this.category;
-    }
-
-    @Override
-    public String getName() {
+    public String name() {
         return null;
     }
 
     @Override
-    public String getDescription() {
+    public String description() {
         return null;
     }
 
@@ -47,9 +33,5 @@ public class PropertySheetItem implements CustomPropertySheet.Item {
     @Override
     public Optional<ObservableValue<? extends Object>> getObservableValue() {
         return Optional.empty();
-    }
-
-    public CustomPropertySheet getPropertySheet() {
-        return propertySheet;
     }
 }

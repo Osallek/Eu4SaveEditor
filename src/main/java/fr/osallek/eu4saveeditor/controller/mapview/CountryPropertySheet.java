@@ -77,12 +77,21 @@ import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSpinnerI
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableTextItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.PropertySheetItem;
 import fr.osallek.eu4saveeditor.controller.validator.CustomGraphicValidationDecoration;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
 import javafx.scene.layout.VBox;
@@ -99,17 +108,6 @@ import org.controlsfx.validation.decoration.StyleClassValidationDecoration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class CountryPropertySheet extends VBox {
 
@@ -1488,7 +1486,7 @@ public class CountryPropertySheet extends VBox {
         }
     }
 
-    public void validate(ActionEvent actionEvent) {
+    public void validate() {
         if (!Objects.equals(ClausewitzUtils.removeQuotes(this.country.getLocalizedName()), this.nameField.getText())) {
             this.country.setLocalizedName(this.nameField.getText());
         }
@@ -1818,7 +1816,7 @@ public class CountryPropertySheet extends VBox {
             this.rivals.forEach(rival -> this.country.addRival(rival.getTarget(), rival.getDate()));
         }
 
-        this.estatePropertySheets.forEach(sheet -> sheet.validate(actionEvent));
+        this.estatePropertySheets.forEach(EstatePropertySheet::validate);
 
         if (!Objects.equals(this.country.getTech().getAdm(), this.admTechField.getTrueValue())) {
             this.country.getTech().setAdm(this.admTechField.getTrueValue());
@@ -1854,15 +1852,15 @@ public class CountryPropertySheet extends VBox {
         }
 
         if (this.monarchPropertySheet != null) {
-            this.monarchPropertySheet.validate(actionEvent);
+            this.monarchPropertySheet.validate();
         }
 
         if (this.heirPropertySheet != null) {
-            this.heirPropertySheet.validate(actionEvent);
+            this.heirPropertySheet.validate();
         }
 
         if (this.queenPropertySheet != null) {
-            this.queenPropertySheet.validate(actionEvent);
+            this.queenPropertySheet.validate();
         }
 
         if (this.country.getModifiers().size() != this.modifiers.size() || this.modifiers.stream().anyMatch(Modifier::isChanged)) {

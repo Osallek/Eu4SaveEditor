@@ -16,7 +16,7 @@ public class SelectableGridViewItem<U> implements CustomItem<U> {
 
     private final ObservableList<U> values;
 
-    private ObservableSet<U> selectedValues;
+    private final ObservableSet<U> selectedValues;
 
     private final SelectableGridView<U> selectableGridView;
 
@@ -42,17 +42,17 @@ public class SelectableGridViewItem<U> implements CustomItem<U> {
     }
 
     @Override
-    public String getCategory() {
+    public String category() {
         return this.category;
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return null;
     }
 
     @Override
-    public String getDescription() {
+    public String description() {
         return null;
     }
 

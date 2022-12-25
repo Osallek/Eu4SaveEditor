@@ -22,7 +22,6 @@ import javafx.beans.binding.DoubleExpression;
 import javafx.beans.property.DoubleProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.scene.layout.VBox;
 import org.controlsfx.validation.ValidationSupport;
 import org.controlsfx.validation.decoration.CompoundValidationDecoration;
@@ -112,7 +111,7 @@ public class EstatePropertySheet extends VBox {
         this.propertySheet.getItems().setAll(items);
     }
 
-    public void validate(ActionEvent actionEvent) {
+    public void validate() {
         if (!Objects.equals(this.estate.getLoyalty(), this.loyaltyField.getDoubleValue())) {
             this.estate.setLoyalty(this.loyaltyField.getDoubleValue());
         }
