@@ -40,6 +40,8 @@ public class ClearableComboBoxItem<U> implements CustomItem<U> {
 
     private Predicate<U> filter;
 
+    private final BooleanProperty visible;
+
     public ClearableComboBoxItem(String category, String name, ObservableList<U> values, ClearableComboBox<U> comboBox) {
         this(category, name, values, null, null, comboBox);
     }
@@ -49,11 +51,11 @@ public class ClearableComboBoxItem<U> implements CustomItem<U> {
     }
 
     public ClearableComboBoxItem(String category, String name, ObservableList<U> values, U value, String description, ClearableComboBox<U> comboBox) {
-        this(category, name, values, value, description, comboBox, new SimpleBooleanProperty(true));
+        this(category, name, values, value, description, comboBox, new SimpleBooleanProperty(true), new SimpleBooleanProperty(true));
     }
 
     public ClearableComboBoxItem(String category, String name, ObservableList<U> values, U value, String description, ClearableComboBox<U> comboBox,
-                                 BooleanProperty editable) {
+                                 BooleanProperty editable, BooleanProperty visible) {
         this.category = category;
         this.name = name;
         this.description = description;
@@ -61,6 +63,7 @@ public class ClearableComboBoxItem<U> implements CustomItem<U> {
         this.value = value;
         this.comboBox = comboBox;
         this.editable = editable;
+        this.visible = visible;
     }
 
     @Override
@@ -110,6 +113,11 @@ public class ClearableComboBoxItem<U> implements CustomItem<U> {
     @Override
     public BooleanProperty isEditable() {
         return this.editable;
+    }
+
+    @Override
+    public BooleanProperty isVisible() {
+        return this.visible;
     }
 
     public void setValues(ObservableList<U> values) {
@@ -164,14 +172,6 @@ public class ClearableComboBoxItem<U> implements CustomItem<U> {
 
     public Callback<ListView<U>, ListCell<U>> getCellFactory() {
         return this.cellFactory;
-    }
-
-    public BooleanProperty visibleProperty() {
-        return this.comboBox.visibleProperty();
-    }
-
-    public void setVisible(boolean visible) {
-        visibleProperty().set(visible);
     }
 
     public BooleanProperty editableProperty() {

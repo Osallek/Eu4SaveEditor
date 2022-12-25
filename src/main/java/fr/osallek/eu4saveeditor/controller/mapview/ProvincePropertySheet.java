@@ -351,8 +351,8 @@ public class ProvincePropertySheet extends VBox {
                                                          messageSource.getMessage("province.parliament.seat", null, Constants.LOCALE));
         this.parliamentBackingField = new ClearableCheckBoxItem(messageSource.getMessage("ose.category.parliament", null, Constants.LOCALE),
                                                                 messageSource.getMessage("province.parliament.backing", null, Constants.LOCALE));
-        this.parliamentBackingField.visibleProperty().bind(this.parliamentField.selectedProperty());
-        this.parliamentBackingField.editableProperty().bind(this.parliamentField.editableProperty().and(this.parliamentField.selectedProperty()));
+        this.parliamentBackingField.isVisible().bind(this.parliamentField.selectedProperty());
+        this.parliamentBackingField.isEditable().bind(this.parliamentField.isEditable().and(this.parliamentField.selectedProperty()));
         this.parliamentBribeField = new ClearableComboBoxItem<>(this.messageSource.getMessage("ose.category.parliament", null, Constants.LOCALE),
                                                                 this.messageSource.getMessage("province.parliament.bribe", null, Constants.LOCALE),
                                                                 FXCollections.observableList(save.getGame().getParliamentBribes())
@@ -360,8 +360,8 @@ public class ProvincePropertySheet extends VBox {
                                                                 new ClearableComboBox<>(new SearchableComboBox<>()));
         this.parliamentBribeField.setConverter(ParliamentBribeStringConverter.INSTANCE);
         this.parliamentBribeField.setCellFactory(ParliamentBribeStringCellFactory.INSTANCE);
-        this.parliamentBribeField.visibleProperty().bind(this.parliamentField.selectedProperty());
-        this.parliamentBribeField.editableProperty().bind(this.parliamentField.editableProperty().and(this.parliamentField.selectedProperty()));
+        this.parliamentBribeField.isVisible().bind(this.parliamentField.selectedProperty());
+        this.parliamentBribeField.editableProperty().bind(this.parliamentField.isEditable().and(this.parliamentField.selectedProperty()));
 
         //Todo bribes
 

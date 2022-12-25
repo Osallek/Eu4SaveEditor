@@ -145,6 +145,10 @@ public class CustomPropertySheet extends CustomControlsFXControl {
         default BooleanProperty isEditable() {
             return new SimpleBooleanProperty(true);
         }
+
+        default BooleanProperty isVisible() {
+            return new SimpleBooleanProperty(true);
+        }
     }
 
 

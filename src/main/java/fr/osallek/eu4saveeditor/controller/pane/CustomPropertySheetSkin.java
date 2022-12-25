@@ -249,6 +249,7 @@ public class CustomPropertySheetSkin extends SkinBase<CustomPropertySheet> {
                 }
 
                 Node editor = getEditor(item);
+                editor.visibleProperty().bind(item.isVisible());
 
                 if (editor instanceof Region) {
                     ((Region) editor).setMinWidth(MIN_COLUMN_WIDTH);
@@ -259,6 +260,7 @@ public class CustomPropertySheetSkin extends SkinBase<CustomPropertySheet> {
                 if (title != null && !title.isEmpty()) {
                     Label label = new Label(title);
                     label.setMinWidth(MIN_COLUMN_WIDTH);
+                    label.visibleProperty().bind(item.isVisible());
 
                     // show description as a tooltip
                     String description = item.getDescription();

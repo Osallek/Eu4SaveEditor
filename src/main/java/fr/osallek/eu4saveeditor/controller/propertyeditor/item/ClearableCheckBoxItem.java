@@ -20,16 +20,19 @@ public class ClearableCheckBoxItem implements CustomItem<Void> {
 
     private final BooleanProperty editable;
 
+    private final BooleanProperty visible;
+
     public ClearableCheckBoxItem(String category, String name) {
-        this(category, name, null, null, new SimpleBooleanProperty(true));
+        this(category, name, null, null, new SimpleBooleanProperty(true), new SimpleBooleanProperty(true));
     }
 
-    public ClearableCheckBoxItem(String category, String name, String description, Supplier<Boolean> clearSupplier, BooleanProperty editable) {
+    public ClearableCheckBoxItem(String category, String name, String description, Supplier<Boolean> clearSupplier, BooleanProperty editable, BooleanProperty visible) {
         this.category = category;
         this.name = name;
         this.description = description;
         this.checkBox = new ClearableCheckBox(clearSupplier);
         this.editable = editable;
+        this.visible = visible;
     }
 
     @Override
@@ -77,6 +80,11 @@ public class ClearableCheckBoxItem implements CustomItem<Void> {
         return this.editable;
     }
 
+    @Override
+    public BooleanProperty isVisible() {
+        return this.visible;
+    }
+
     public ClearableCheckBox getCheckBox() {
         return checkBox;
     }
@@ -95,19 +103,7 @@ public class ClearableCheckBoxItem implements CustomItem<Void> {
         }
     }
 
-    public BooleanProperty visibleProperty() {
-        return this.checkBox.visibleProperty();
-    }
-
-    public void setVisible(boolean visible) {
-        visibleProperty().set(visible);
-    }
-
     public BooleanProperty selectedProperty() {
         return this.checkBox.selectedProperty();
-    }
-
-    public BooleanProperty editableProperty() {
-        return this.editable;
     }
 }
