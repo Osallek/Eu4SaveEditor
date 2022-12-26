@@ -77,16 +77,6 @@ import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableSpinnerI
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableTextItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.PropertySheetItem;
 import fr.osallek.eu4saveeditor.controller.validator.CustomGraphicValidationDecoration;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -108,6 +98,17 @@ import org.controlsfx.validation.decoration.StyleClassValidationDecoration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CountryPropertySheet extends VBox {
 
@@ -694,10 +695,11 @@ public class CountryPropertySheet extends VBox {
                     items.add(this.absolutismField);
                 }
 
-                this.capitalField.getChoices().setAll(this.country.getOwnedProvinces()
-                                                                  .stream()
-                                                                  .sorted(Comparator.comparing(SaveProvince::getName, Eu4Utils.COLLATOR))
-                                                                  .collect(Collectors.toList()));
+                this.capitalField.setValues(FXCollections.observableArrayList(this.country.getOwnedProvinces()
+                                                                                          .stream()
+                                                                                          .sorted(Comparator.comparing(SaveProvince::getName,
+                                                                                                                       Eu4Utils.COLLATOR))
+                                                                                          .toList()));
                 this.capitalField.setValue(this.country.getCapital());
                 this.capitalField.setSupplier(this.country::getCapital);
                 items.add(this.capitalField);
@@ -1001,14 +1003,15 @@ public class CountryPropertySheet extends VBox {
                 items.addAll(this.institutionsEmbracedFields);
 
                 //Government
-                this.governmentRankField.getChoices()
-                                        .setAll(this.country.getGovernmentName()
-                                                            .getRanks()
-                                                            .entrySet()
-                                                            .stream()
-                                                            .map(e -> Pair.of(e.getKey(), Eu4SaveEditorUtils.localize(e.getValue(),
-                                                                                                                      this.country.getSave().getGame())))
-                                                            .toList());
+                this.governmentRankField.setValues(FXCollections.observableArrayList(this.country.getGovernmentName()
+                                                                                                 .getRanks()
+                                                                                                 .entrySet()
+                                                                                                 .stream()
+                                                                                                 .map(e -> Pair.of(e.getKey(),
+                                                                                                                   Eu4SaveEditorUtils.localize(e.getValue(),
+                                                                                                                                               this.country.getSave()
+                                                                                                                                                           .getGame())))
+                                                                                                 .toList()));
                 this.governmentRankField.setValue(Pair.of(this.country.getGovernmentLevel(),
                                                           Eu4SaveEditorUtils.localize(this.country.getGovernmentName()
                                                                                                   .getRank(this.country.getGovernmentLevel()),
@@ -1086,7 +1089,7 @@ public class CountryPropertySheet extends VBox {
                 }
 
                 //Diplomacy
-                this.overlordField.getChoices().setAll(this.country.getOverlord());
+                this.overlordField.setValues(FXCollections.observableArrayList(this.country.getOverlord()));
                 this.overlordField.setValue(this.country.getOverlord());
                 items.add(this.overlordField);
 

@@ -625,6 +625,8 @@ public class ProvincePropertySheet extends VBox {
             this.parliamentField.setSupplier(() -> province.getSeatInParliament() != null);
             items.add(this.parliamentField);
 
+            this.parliamentBribeField.setFilter(bribe -> bribe.getTrigger() == null || bribe.getTrigger().apply(province.getOwner(), province));
+
             if (province.getSeatInParliament() != null) {
                 this.parliamentBackingField.setValue(BooleanUtils.toBoolean(province.getSeatInParliament().getBack()));
                 this.parliamentBackingField.setSupplier(() -> BooleanUtils.toBoolean(province.getSeatInParliament().getBack()));
@@ -633,11 +635,9 @@ public class ProvincePropertySheet extends VBox {
             } else {
                 this.parliamentBackingField.setValue(false);
                 this.parliamentBackingField.setSupplier(() -> false);
-                this.parliamentBribeField.setValue(province.getSave().getGame().getParliamentBribes().get(0));
-                this.parliamentBribeField.setSupplier(() -> null);
+                this.parliamentBribeField.setValue(this.parliamentBribeField.getChoices().get(0));
+                this.parliamentBribeField.setSupplier(() -> this.parliamentBribeField.getChoices().get(0));
             }
-
-            this.parliamentBribeField.setFilter(bribe -> bribe.getTrigger() == null || bribe.getTrigger().apply(province.getOwner(), province));
 
             items.add(this.parliamentBackingField);
             items.add(this.parliamentBribeField);

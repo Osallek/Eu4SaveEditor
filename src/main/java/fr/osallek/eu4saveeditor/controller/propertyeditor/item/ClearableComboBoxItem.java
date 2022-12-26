@@ -1,20 +1,22 @@
 package fr.osallek.eu4saveeditor.controller.propertyeditor.item;
 
 import fr.osallek.eu4saveeditor.controller.control.ClearableComboBox;
-import java.util.Optional;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
+
+import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public class ClearableComboBoxItem<U> implements CustomItem<U> {
 
@@ -24,7 +26,7 @@ public class ClearableComboBoxItem<U> implements CustomItem<U> {
 
     private final String description;
 
-    private ObservableList<U> values;
+    private FilteredList<U> values;
 
     private U value;
 
@@ -59,7 +61,7 @@ public class ClearableComboBoxItem<U> implements CustomItem<U> {
         this.category = category;
         this.name = name;
         this.description = description;
-        this.values = values;
+        this.values = values.filtered(null);
         this.value = value;
         this.comboBox = comboBox;
         this.editable = editable;
@@ -98,11 +100,7 @@ public class ClearableComboBoxItem<U> implements CustomItem<U> {
 
     @Override
     public ObservableList<U> getChoices() {
-        if (this.filter == null) {
-            return this.values;
-        } else {
-            return this.values.filtered(this.filter);
-        }
+        return this.values;
     }
 
     @Override
@@ -121,7 +119,7 @@ public class ClearableComboBoxItem<U> implements CustomItem<U> {
     }
 
     public void setValues(ObservableList<U> values) {
-        this.values = values;
+        this.values = values.filtered(this.filter);
     }
 
     public void setEditable(boolean editable) {
@@ -184,5 +182,6 @@ public class ClearableComboBoxItem<U> implements CustomItem<U> {
 
     public void setFilter(Predicate<U> filter) {
         this.filter = filter;
+        this.values.setPredicate(this.filter);
     }
 }
