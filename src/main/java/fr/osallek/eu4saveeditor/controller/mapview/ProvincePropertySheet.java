@@ -50,19 +50,6 @@ import fr.osallek.eu4saveeditor.controller.propertyeditor.item.ClearableTextItem
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.HBoxItem;
 import fr.osallek.eu4saveeditor.controller.propertyeditor.item.SelectableGridViewItem;
 import fr.osallek.eu4saveeditor.controller.validator.CustomGraphicValidationDecoration;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -82,6 +69,20 @@ import org.controlsfx.validation.decoration.CompoundValidationDecoration;
 import org.controlsfx.validation.decoration.StyleClassValidationDecoration;
 import org.springframework.context.MessageSource;
 import org.springframework.core.io.ClassPathResource;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ProvincePropertySheet extends VBox {
 
@@ -142,6 +143,8 @@ public class ProvincePropertySheet extends VBox {
     private final ClearableSliderItem devastationField;
 
     private final ClearableComboBoxItem<TradeNode> tradeNodeField;
+
+    private final ClearableCheckBoxItem tradeCompanyField;
 
     private final List<SelectableGridViewItem<Building>> buildingsFields;
 
@@ -280,6 +283,8 @@ public class ProvincePropertySheet extends VBox {
                                                           new ClearableComboBox<>(new SearchableComboBox<>()));
         this.tradeNodeField.setConverter(TradeNodeStringConverter.INSTANCE);
         this.tradeNodeField.setCellFactory(new TradeNodeStringCellFactory(save.getGame()));
+        this.tradeCompanyField = new ClearableCheckBoxItem(messageSource.getMessage("ose.category.economy", null, Constants.LOCALE),
+                                                           messageSource.getMessage("province.trade-company", null, Constants.LOCALE));
 
         this.latentTradeGoodField = new ClearableComboBoxItem<>(this.messageSource.getMessage("ose.category.economy", null, Constants.LOCALE),
                                                                 save.getGame()
@@ -354,7 +359,8 @@ public class ProvincePropertySheet extends VBox {
         this.parliamentBribeField = new ClearableComboBoxItem<>(this.messageSource.getMessage("ose.category.parliament", null, Constants.LOCALE),
                                                                 this.messageSource.getMessage("province.parliament.bribe", null, Constants.LOCALE),
                                                                 FXCollections.observableList(save.getGame().getParliamentBribes())
-                                                                             .sorted(Comparator.comparing(ParliamentBribeStringConverter.INSTANCE::toString, Eu4Utils.COLLATOR)),
+                                                                             .sorted(Comparator.comparing(ParliamentBribeStringConverter.INSTANCE::toString,
+                                                                                                          Eu4Utils.COLLATOR)),
                                                                 new ClearableComboBox<>(new SearchableComboBox<>()));
         this.parliamentBribeField.setConverter(ParliamentBribeStringConverter.INSTANCE);
         this.parliamentBribeField.setCellFactory(ParliamentBribeStringCellFactory.INSTANCE);
@@ -407,6 +413,7 @@ public class ProvincePropertySheet extends VBox {
         this.devastationField.setEditable(false);
         this.tradeNodeField.setEditable(false);
         this.parliamentField.setEditable(false);
+        this.tradeCompanyField.setEditable(false);
 
         //GENERAL
         this.nameField.setValue(ClausewitzUtils.removeQuotes(this.province.getName()));
@@ -539,6 +546,17 @@ public class ProvincePropertySheet extends VBox {
             this.tradeNodeField.setSupplier(this.province::getTradeNode);
             this.tradeNodeField.setEditable(true);
             items.add(this.tradeNodeField);
+
+            if (this.province.getOwner() != null && !this.province.inHre()
+                && (this.province.getSaveArea() == null || this.province.getSaveArea().getCountryState(this.province.getOwner()) == null)
+                && this.province.getSave().getGame().getTradeCompanies().stream().anyMatch(c -> c.getProvinces().contains(province.getId()))
+                && !this.province.getArea().getRegion().getSuperRegion()
+                                 .equals(this.province.getOwner().getCapital().getArea().getRegion().getSuperRegion())) {
+                this.tradeCompanyField.setEditable(true);
+                this.tradeCompanyField.setValue(BooleanUtils.toBoolean(province.activeTradeCompany()));
+                this.tradeCompanyField.setSupplier(() -> BooleanUtils.toBoolean(province.activeTradeCompany()));
+                items.add(this.tradeCompanyField);
+            }
 
             //INSTITUTIONS
             if (!this.province.getInstitutionsProgress().isEmpty()) {
@@ -796,6 +814,12 @@ public class ProvincePropertySheet extends VBox {
         if (this.tradeNodeField.isEditable().get()) {
             if (!Objects.deepEquals(this.province.getTradeNode(), this.tradeNodeField.getSelectedValue())) {
                 this.province.setTradeNode(this.tradeNodeField.getSelectedValue());
+            }
+        }
+
+        if (this.tradeCompanyField.isEditable().get()) {
+            if (!Objects.deepEquals(BooleanUtils.toBoolean(this.province.activeTradeCompany()), this.tradeCompanyField.isSelected())) {
+                this.province.setActiveTradeCompany(this.tradeCompanyField.isSelected(), Eu4Language.getDefault());
             }
         }
 
