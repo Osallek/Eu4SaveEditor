@@ -2,6 +2,7 @@ package fr.osallek.eu4saveeditor.controller.mapview;
 
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.eu4parser.common.Eu4Utils;
+import fr.osallek.eu4parser.common.NumbersUtils;
 import fr.osallek.eu4parser.model.game.Building;
 import fr.osallek.eu4parser.model.game.Culture;
 import fr.osallek.eu4parser.model.game.ParliamentBribe;
@@ -110,7 +111,11 @@ public class ProvincePropertySheet extends VBox {
 
     private final ClearableCheckComboBoxItem<SaveCountry> claimsField;
 
+    private final ClearableCheckComboBoxItem<SaveCountry> discoveredField;
+
     private final ClearableCheckBoxItem hreField;
+
+    private final ClearableSpinnerItem<Integer> nationalismField;
 
     private final ClearableComboBoxItem<SaveCountry> colonizeForField;
 
@@ -233,8 +238,18 @@ public class ProvincePropertySheet extends VBox {
                                                             new ClearableCheckComboBox<>());
         this.claimsField.setConverter(CountryStringConverter.INSTANCE);
 
+        this.discoveredField = new ClearableCheckComboBoxItem<>(this.messageSource.getMessage("ose.category.political", null, Constants.LOCALE),
+                                                                this.messageSource.getMessage("province.discoveredBy", null, Constants.LOCALE),
+                                                                playableCountries,
+                                                                new ClearableCheckComboBox<>());
+        this.discoveredField.setConverter(CountryStringConverter.INSTANCE);
+
         this.hreField = new ClearableCheckBoxItem(this.messageSource.getMessage("ose.category.political", null, Constants.LOCALE),
                                                   save.getGame().getLocalisationClean("IS_PART_OF_HRE", Eu4Language.getDefault()));
+
+        this.nationalismField = new ClearableSpinnerItem<>(this.messageSource.getMessage("ose.category.political", null, Constants.LOCALE),
+                                                           this.messageSource.getMessage("province.nationalism", null, Constants.LOCALE),
+                                                           new ClearableSpinnerInt(0, 100, 1));
 
         this.colonizeForField = new ClearableComboBoxItem<>(this.messageSource.getMessage("ose.category.colony", null, Constants.LOCALE),
                                                             save.getGame().getLocalisationClean("COLONIZE_PROVINCE", Eu4Language.getDefault()),
@@ -394,7 +409,9 @@ public class ProvincePropertySheet extends VBox {
         this.controllerComboBox.setEditable(false);
         this.coresField.setEditable(false);
         this.claimsField.setEditable(false);
+        this.discoveredField.setEditable(false);
         this.hreField.setEditable(false);
+        this.nationalismField.setEditable(false);
         this.colonizeForField.setEditable(false);
         this.colonizeForField.setValue(null);
         this.colonySizeField.setEditable(false);
@@ -465,6 +482,16 @@ public class ProvincePropertySheet extends VBox {
                 this.hreField.setEditable(true);
                 items.add(this.hreField);
             }
+
+            this.discoveredField.setValue(FXCollections.observableList(this.province.getDiscoveredBy()));
+            this.discoveredField.setSupplier(this.province::getDiscoveredBy);
+            this.discoveredField.setEditable(true);
+            items.add(this.discoveredField);
+
+            this.nationalismField.setValue(this.province.getNationalism());
+            this.nationalismField.setSupplier(this.province::getNationalism);
+            this.nationalismField.setEditable(true);
+            items.add(this.nationalismField);
 
             //COLONY
             if (!this.province.isCity()) {
@@ -711,9 +738,21 @@ public class ProvincePropertySheet extends VBox {
             }
         }
 
+        if (this.discoveredField.isEditable().get()) {
+            if (!Objects.deepEquals(this.province.getDiscoveredBy(), this.discoveredField.getSelectedValues())) {
+                this.province.setDiscoveredBy(new ArrayList<>(this.discoveredField.getSelectedValues()));
+            }
+        }
+
         if (this.hreField.isEditable().get()) {
             if (this.province.inHre() != this.hreField.isSelected()) {
                 this.province.setInHre(this.hreField.isSelected());
+            }
+        }
+
+        if (this.nationalismField.isEditable().get()) {
+            if (!Objects.deepEquals(this.province.getNationalism(), this.nationalismField.getTrueValue())) {
+                this.province.setNationalism(NumbersUtils.intOrDefault(this.nationalismField.getTrueValue()));
             }
         }
 
